@@ -473,7 +473,7 @@
         padding: 0 6px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 2px;
       }
       .bubble-meta i {
         font-size: 8px;
@@ -2491,6 +2491,389 @@
         opacity: 0.5;
         cursor: not-allowed;
       }
+
+      /* ══ offline stage card ══ */
+      .offline-stage {
+        display: flex;
+        flex-direction: column;
+        width: 220px;
+        background: var(--card);
+        border-radius: 18px;
+        box-shadow: 0 2px 12px -3px rgba(10,10,10,0.10), 0 1px 0 rgba(255,255,255,0.7) inset;
+        align-self: center;
+        margin: 4px auto;
+        overflow: visible;
+      }
+      .offline-stage-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 12px 7px;
+        border-bottom: 1px solid var(--line);
+      }
+      .offline-stage-head-label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--mute);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .offline-stage-head-label i {
+        font-size: 7px;
+        color: var(--accent-coral);
+      }
+      .offline-stage-head-num {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--mute);
+      }
+      .offline-stage-body {
+        padding: 10px 12px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .offline-stage-title {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 15px;
+        line-height: 1.2;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .offline-stage-avatars {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .offline-stage-av {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid var(--card);
+        background: linear-gradient(135deg, #1a1a1a, #3a3a3c);
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        color: rgba(255,255,255,0.6);
+        margin-left: -5px;
+        flex-shrink: 0;
+      }
+      .offline-stage-av:first-child { margin-left: 0; }
+      .offline-stage-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px 9px;
+        border-top: 1px solid var(--line);
+      }
+      .offline-stage-range {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--mute);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .offline-stage-range span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .offline-stage-range i {
+        font-size: 7px;
+        width: 10px;
+        text-align: center;
+        color: var(--accent-blue);
+        opacity: 0.7;
+      }
+      .offline-stage-count {
+        font-family: 'Geist Mono', monospace;
+        font-size: 9px;
+        color: var(--ink-3);
+        background: var(--paper-2);
+        border-radius: 8px;
+        padding: 3px 7px;
+      }
+
+      /* ══ gacha pull card ══ */
+      .gacha-card {
+        display: flex;
+        flex-direction: column;
+        width: 230px;
+        min-width: 230px;
+        flex-shrink: 0;
+        background: var(--card);
+        border-radius: 18px;
+        box-shadow: 0 2px 16px -4px rgba(10,10,10,0.13), 0 1px 0 rgba(255,255,255,0.8) inset;
+        align-self: center;
+        margin: 4px auto;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+      .gacha-card:active { transform: scale(0.97); }
+      .gacha-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 12px 7px;
+        border-bottom: 1px solid var(--line);
+      }
+      .gacha-card-head-label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--mute);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .gacha-card-head-label i { font-size: 7px; }
+      .gacha-card-rarity {
+        font-family: 'Geist Mono', monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        padding: 2px 7px;
+        border-radius: 6px;
+      }
+      .gacha-card-rarity.R  { color: #8a8a8e; background: rgba(138,138,142,0.1); }
+      .gacha-card-rarity.SR { color: var(--accent-blue); background: rgba(91,124,250,0.12); }
+      .gacha-card-rarity.SSR{ color: var(--accent-amber); background: rgba(255,159,67,0.13); }
+      .gacha-card-rarity.UR { color: var(--accent-pink); background: rgba(250,91,213,0.13); }
+      .gacha-card-rarity.SSS{ color: var(--accent-lime); background: rgba(212,255,77,0.15); }
+      .gacha-card-img {
+        width: 100%;
+        flex-shrink: 0;
+        height: 110px;
+        object-fit: cover;
+        display: block;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2e 100%);
+      }
+      .gacha-card-img-placeholder {
+        width: 100%;
+        flex-shrink: 0;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2e2e35 100%);
+        font-size: 28px;
+        opacity: 0.35;
+      }
+      .gacha-card-body {
+        padding: 10px 12px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .gacha-card-identity {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 15px;
+        line-height: 1.25;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .gacha-card-world {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--mute);
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .gacha-card-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px 9px;
+        border-top: 1px solid var(--line);
+      }
+      .gacha-card-tap-hint {
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        color: var(--mute);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        letter-spacing: 0.06em;
+      }
+      .gacha-card-tap-hint i { font-size: 7px; color: var(--accent-blue); }
+      .gacha-card-who {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--ink-3);
+        background: var(--paper-2);
+        border-radius: 7px;
+        padding: 2px 7px;
+      }
+
+      /* ── gacha detail modal ── */
+      .gacha-detail-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10,10,10,0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 9800;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease;
+      }
+      .gacha-detail-overlay.on {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .gacha-detail-sheet {
+        width: 100%;
+        max-width: 420px;
+        background: var(--paper);
+        border-radius: 24px 24px 0 0;
+        padding: 0 0 env(safe-area-inset-bottom, 16px);
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.34,1.26,0.64,1);
+        display: flex;
+        flex-direction: column;
+        max-height: 88vh;
+        overflow: hidden;
+      }
+      .gacha-detail-overlay.on .gacha-detail-sheet {
+        transform: translateY(0);
+      }
+      .gacha-detail-drag {
+        width: 36px; height: 4px;
+        border-radius: 2px;
+        background: var(--line);
+        margin: 10px auto 0;
+        flex-shrink: 0;
+      }
+      .gacha-detail-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        display: block;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2e2e35 100%);
+      }
+      .gacha-detail-img-ph {
+        width: 100%;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2e2e35 100%);
+        flex-shrink: 0;
+      }
+      .gacha-detail-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .gacha-detail-scroll::-webkit-scrollbar { display: none; }
+      .gacha-detail-hd {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .gacha-detail-title {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.2;
+        color: var(--ink);
+        flex: 1;
+      }
+      .gacha-detail-rarity {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        padding: 3px 9px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+      .gacha-detail-rarity.R  { color: #8a8a8e; background: rgba(138,138,142,0.12); }
+      .gacha-detail-rarity.SR { color: var(--accent-blue); background: rgba(91,124,250,0.13); }
+      .gacha-detail-rarity.SSR{ color: var(--accent-amber); background: rgba(255,159,67,0.14); }
+      .gacha-detail-rarity.UR { color: var(--accent-pink); background: rgba(250,91,213,0.14); }
+      .gacha-detail-rarity.SSS{ color: var(--accent-lime); background: rgba(212,255,77,0.17); }
+      .gacha-detail-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .gacha-detail-label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--mute);
+      }
+      .gacha-detail-val {
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--ink-2);
+      }
+      /* typewriter story */
+      .gacha-detail-story-wrap {
+        background: var(--paper-2);
+        border-radius: 12px;
+        padding: 12px 14px;
+        position: relative;
+        overflow: hidden;
+      }
+      .gacha-detail-story-label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--mute);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .gacha-detail-story-label i { font-size: 7px; color: var(--accent-coral); }
+      .gacha-detail-story-text {
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--ink-2);
+        white-space: pre-wrap;
+        font-family: inherit;
+      }
+      .gacha-detail-story-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 14px;
+        background: var(--accent-lime);
+        vertical-align: middle;
+        margin-left: 1px;
+        border-radius: 1px;
+        animation: blink-cur 0.8s step-end infinite;
+      }
+      @keyframes blink-cur {
+        0%,100% { opacity: 1; } 50% { opacity: 0; }
+      }
+
       /* ④ location hint text */
       .location-hint {
         font-family: 'Geist Mono', monospace;
@@ -3637,6 +4020,45 @@
       .setting-tab-content {
         animation: fadeIn 0.25s ease;
       }
+      /* --- Toggle 开关样式 --- */
+      .ts-toggle {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+      .ts-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+      .ts-toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: var(--line);
+        border-radius: 22px;
+        transition: 0.25s;
+      }
+      .ts-toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        top: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.25s;
+      }
+      .ts-toggle input:checked + .ts-toggle-slider {
+        background: var(--accent, #7c6af7);
+      }
+      .ts-toggle input:checked + .ts-toggle-slider::before {
+        transform: translateX(18px);
+      }
       .bg-preview-box {
         width: 100%;
         height: 160px;
@@ -3690,6 +4112,536 @@
         background-size: cover;
         background-repeat: no-repeat;
         transition: background-image 0.3s ease;
+      }
+
+      /* ══════════════════════════════════════════════
+         日记气泡样式 — 与 diary.html 同风格
+      ══════════════════════════════════════════════ */
+
+      /* ─── 转发卡片：书页风格 ─── */
+      .bubble.diary-card {
+        padding: 0;
+        overflow: hidden;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        max-width: 240px;
+        min-width: 180px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px -2px rgba(10,10,10,0.08);
+        transition: transform 0.16s, box-shadow 0.16s;
+        position: relative;
+      }
+      .bubble.diary-card:active {
+        transform: scale(0.97);
+        box-shadow: 0 1px 4px -2px rgba(10,10,10,0.1);
+      }
+      /* char 侧保持 white 底；user 侧也用纸白（不跟随深色气泡）*/
+      .msg-row.user .bubble.diary-card {
+        background: white;
+        border-color: var(--line);
+      }
+
+      /* 顶部窄装饰条（模仿书签标签） */
+      .diary-card-ribbon {
+        height: 3px;
+        background: var(--ink);
+        width: 100%;
+      }
+      .diary-card-inner {
+        padding: 11px 13px 10px;
+      }
+
+      /* 来源标签行 */
+      .diary-card-source {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 8px;
+      }
+      .diary-card-source-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        color: var(--mute);
+        flex-shrink: 0;
+      }
+      .diary-card-source-label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--mute);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* 日记标题 */
+      .diary-card-title {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 15px;
+        font-weight: 400;
+        color: var(--ink);
+        line-height: 1.3;
+        margin-bottom: 5px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      /* 摘要 */
+      .diary-card-excerpt {
+        font-size: 11px;
+        color: var(--mute);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 10px;
+      }
+
+      /* 底部 footer */
+      .diary-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        margin-top: 2px;
+      }
+      .diary-card-ann-count {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--mute);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+      .diary-card-tap {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--mute);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        opacity: 0.7;
+      }
+
+      /* ─── 新增批注气泡：newspaper clipping 风格 ─── */
+      .bubble.diary-ann-bubble {
+        padding: 0;
+        overflow: hidden;
+        max-width: 240px;
+        min-width: 160px;
+        /* 不继承 .msg-row.user .bubble 的深色背景 */
+        background: white !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 12px !important;
+        color: var(--ink) !important;
+        box-shadow: 0 2px 8px -2px rgba(10,10,10,0.07);
+      }
+
+      /* 新增批注 — 顶部：牛皮纸色横条 */
+      .diary-ann-header.type-direct {
+        padding: 8px 11px 8px;
+        background: #fffef4;
+        border-bottom: 1px solid #e4dfc8;
+        position: relative;
+      }
+      .diary-ann-header.type-direct::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: repeating-linear-gradient(90deg, #c8b88a 0, #c8b88a 6px, transparent 6px, transparent 10px);
+      }
+
+      /* 引用回复 — 顶部：便利贴黄色横条 */
+      .diary-ann-header.type-reply {
+        padding: 8px 11px 8px;
+        background: #fffde8;
+        border-bottom: 1px solid #ede8a0;
+        position: relative;
+      }
+      .diary-ann-header.type-reply::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: #e8d840;
+      }
+
+      .diary-ann-label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .diary-ann-label.type-direct { color: #9a7a40; }
+      .diary-ann-label.type-reply  { color: #7a6800; }
+
+      /* 引用来源块 */
+      .diary-ann-ref-block {
+        border-radius: 4px;
+        padding: 5px 8px;
+        border-left: 2.5px solid;
+      }
+      .diary-ann-ref-block.type-direct {
+        background: rgba(200,160,80,0.08);
+        border-color: #c8a060;
+      }
+      .diary-ann-ref-block.type-reply {
+        background: rgba(200,180,0,0.08);
+        border-color: #c8b000;
+      }
+
+      .diary-ann-ref-diary-title {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--ink);
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .diary-ann-ref-excerpt {
+        font-size: 10px;
+        color: var(--mute);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.45;
+      }
+      .diary-ann-ref-quoted {
+        font-size: 10px;
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        color: #6a5800;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.45;
+      }
+
+      /* 查看日记按钮 */
+      .diary-ann-view-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 6px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        cursor: pointer;
+        letter-spacing: 0.07em;
+        padding: 2px 8px;
+        border-radius: 100px;
+        border: 1px solid;
+        transition: background 0.14s;
+      }
+      .diary-ann-view-btn.type-direct {
+        color: #9a7a40;
+        border-color: rgba(200,160,80,0.3);
+        background: rgba(200,160,80,0.06);
+      }
+      .diary-ann-view-btn.type-reply {
+        color: #7a6800;
+        border-color: rgba(200,180,0,0.3);
+        background: rgba(200,180,0,0.06);
+      }
+      .diary-ann-view-btn:active {
+        opacity: 0.7;
+      }
+
+      /* 正文内容区 */
+      .diary-ann-body {
+        padding: 9px 12px 10px;
+        font-size: 12.5px;
+        line-height: 1.6;
+        color: var(--ink);
+        /* 新增批注正文：Fraunces 斜体，报纸剪报感 */
+      }
+      .diary-ann-header.type-direct ~ .diary-ann-body {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        background: #fffef4;
+        color: #2a1a00;
+      }
+      /* 引用回复正文：普通字体，便签感 */
+      .diary-ann-header.type-reply ~ .diary-ann-body {
+        font-family: 'Geist', sans-serif;
+        background: #fffde8;
+        color: #3a3000;
+      }
+
+      /* ─── 日记全文面板 ─── */
+      .diary-panel-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(10, 10, 10, 0.45);
+        backdrop-filter: blur(4px);
+        z-index: 9500;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      .diary-panel-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .diary-panel {
+        width: 100%;
+        max-height: 88%;
+        background: #fdfcf8;
+        border-radius: 24px 24px 0 0;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(24px);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        overflow: hidden;
+      }
+      .diary-panel-overlay.open .diary-panel {
+        transform: translateY(0);
+      }
+
+      .diary-panel-handle {
+        width: 38px;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(10, 10, 10, 0.1);
+        margin: 12px auto 0;
+        flex-shrink: 0;
+      }
+
+      .diary-panel-head {
+        padding: 14px 18px 12px;
+        border-bottom: 1px solid rgba(10, 10, 10, 0.07);
+        flex-shrink: 0;
+      }
+      .diary-panel-head-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .diary-panel-tag {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8.5px;
+        letter-spacing: 0.12em;
+        color: #a78bfa;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .diary-panel-close {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(10, 10, 10, 0.06);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #5a5a5e;
+        transition: 0.15s;
+      }
+      .diary-panel-close:active { background: rgba(10, 10, 10, 0.12); }
+
+      .diary-panel-title {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 20px;
+        font-weight: 600;
+        color: #0a0a0a;
+        line-height: 1.25;
+      }
+      .diary-panel-author {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #8a8a8e;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .diary-panel-author i { font-size: 9px; color: #a78bfa; }
+
+      .diary-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        scrollbar-width: none;
+        padding: 16px 18px 0;
+      }
+      .diary-panel-body::-webkit-scrollbar { display: none; }
+
+      .diary-panel-content {
+        font-size: 13.5px;
+        line-height: 1.75;
+        color: #2a2a2e;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      /* 批注区 */
+      .diary-panel-ann-section {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(10, 10, 10, 0.07);
+        padding-bottom: 24px;
+      }
+      .diary-panel-ann-title {
+        font-family: 'Geist Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        color: #a78bfa;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .diary-panel-ann-empty {
+        font-size: 11.5px;
+        color: #b0b0b4;
+        font-style: italic;
+        text-align: center;
+        padding: 16px 0;
+        font-family: 'Geist Mono', monospace;
+      }
+      .diary-panel-ann-item {
+        display: flex;
+        gap: 9px;
+        margin-bottom: 12px;
+      }
+      .diary-panel-ann-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: white;
+        font-weight: 600;
+        overflow: hidden;
+      }
+      .diary-panel-ann-bubble {
+        flex: 1;
+        background: white;
+        border-radius: 4px 12px 12px 12px;
+        padding: 8px 11px;
+        border: 1px solid rgba(10, 10, 10, 0.07);
+      }
+      .diary-panel-ann-meta {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8.5px;
+        color: #a78bfa;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .diary-panel-ann-text {
+        font-size: 12px;
+        color: #2a2a2e;
+        line-height: 1.55;
+      }
+      .diary-panel-ann-quote {
+        background: rgba(167, 139, 250, 0.08);
+        border-left: 2px solid #a78bfa;
+        border-radius: 0 6px 6px 0;
+        padding: 4px 8px;
+        margin-bottom: 6px;
+        font-size: 10.5px;
+        color: #6d28d9;
+        font-style: italic;
+      }
+
+      /* 批注回复计数徽章 */
+      .diary-panel-reply-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 8px;
+        background: rgba(167, 139, 250, 0.12);
+        color: #7c3aed;
+        padding: 1px 5px;
+        border-radius: 4px;
+        margin-left: 5px;
+        font-family: 'Geist Mono', monospace;
+      }
+
+      /* 二层回复 */
+      .diary-panel-replies {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(10, 10, 10, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .diary-panel-reply-item {
+        display: flex;
+        gap: 7px;
+        align-items: flex-start;
+      }
+      .diary-panel-reply-av {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #5b7cfa, #3b5bdb);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        color: white;
+        font-weight: 600;
+        overflow: hidden;
+      }
+      .diary-panel-reply-bubble {
+        flex: 1;
+        background: rgba(91, 124, 250, 0.06);
+        border-radius: 3px 8px 8px 8px;
+        padding: 5px 8px;
+        border: 1px solid rgba(91, 124, 250, 0.12);
+      }
+      .diary-panel-reply-meta {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: #3b5bdb;
+        margin-bottom: 3px;
+      }
+      .diary-panel-reply-text {
+        font-size: 11.5px;
+        color: #2a2a2e;
+        line-height: 1.5;
       }
     </style>
     <style id="tsuki-dynamic-style"></style>
@@ -4504,6 +5456,30 @@
           </div>
 
           <div style="margin-top: 10px">
+            <div class="si-sec-label"><i class="fa-solid fa-clock"></i> 时间感知</div>
+            <div
+              class="si-fmt-row"
+              style="
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px;
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+              "
+            >
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 11px; font-weight: 600; color: var(--ink)">历史消息携带时间戳</span>
+                <span style="font-size: 10px; color: var(--ink-3)">关闭后提示词中不附带消息时间</span>
+              </div>
+              <label class="ts-toggle" style="flex-shrink: 0">
+                <input type="checkbox" id="settingTimestampEnabled" checked />
+                <span class="ts-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px">
             <div class="si-sec-label"><i class="fa-solid fa-eye"></i> 视图渲染</div>
             <div
               class="si-fmt-row"
@@ -4578,6 +5554,65 @@
         </div>
 
         <div class="setting-tab-content" id="settingTabTheme" style="display: none">
+          <div class="si-sec-label"><i class="fa-solid fa-tag"></i> 自定义聊天名称</div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              padding: 10px 12px;
+              background: var(--card);
+              border: 1px solid var(--line);
+              border-radius: 12px;
+              margin-bottom: 14px;
+            "
+          >
+            <input
+              type="text"
+              id="customChatNameInput"
+              placeholder="留空则使用默认名称"
+              style="
+                flex: 1;
+                height: 28px;
+                border: none;
+                background: transparent;
+                font-size: 12px;
+                font-family: 'Geist', sans-serif;
+                color: var(--ink);
+                outline: none;
+              "
+            />
+            <button
+              id="saveChatNameBtn"
+              style="
+                height: 28px;
+                padding: 0 12px;
+                border-radius: 8px;
+                border: none;
+                background: var(--ink);
+                color: white;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                flex-shrink: 0;
+                font-family: 'Geist Mono', monospace;
+                letter-spacing: 0.05em;
+              "
+            >保存</button>
+          </div>
+          <div
+            id="customChatNameHint"
+            style="
+              font-family: 'Geist Mono', monospace;
+              font-size: 9px;
+              color: var(--mute);
+              margin-top: -10px;
+              margin-bottom: 14px;
+              padding: 0 2px;
+              letter-spacing: 0.08em;
+            "
+          ></div>
+
           <div class="si-sec-label"><i class="fa-solid fa-image"></i> 聊天背景图</div>
 
           <div class="bg-preview-box" id="bgPreviewBox">
@@ -4641,6 +5676,29 @@
         </div>
       </div>
     </div>
+
+    <!-- ══ 日记全文面板 ══ -->
+    <div class="diary-panel-overlay" id="diaryPanelOverlay">
+      <div class="diary-panel" id="diaryPanel">
+        <div class="diary-panel-handle"></div>
+        <div class="diary-panel-head">
+          <div class="diary-panel-head-meta">
+            <div class="diary-panel-tag"><i class="fa-solid fa-book-open"></i> DIARY</div>
+            <button class="diary-panel-close" id="diaryPanelClose"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="diary-panel-title" id="diaryPanelTitle">日记标题</div>
+          <div class="diary-panel-author" id="diaryPanelAuthor"><i class="fa-solid fa-feather-pointed"></i> <span>作者</span></div>
+        </div>
+        <div class="diary-panel-body">
+          <div class="diary-panel-content" id="diaryPanelContent"></div>
+          <div class="diary-panel-ann-section">
+            <div class="diary-panel-ann-title"><i class="fa-solid fa-comments"></i> 批注</div>
+            <div id="diaryPanelAnns"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="db-schema.js"></script>
     <script>
       /* =========================================================
          全局绑定函数（必须放在最顶部，防止 undefined 报错）
@@ -4980,6 +6038,9 @@
       const IDB_NAME = 'tsukiphonepromax';
 
       // 新增了 chats 和 messages 两个 store
+      // ⚙️ SCHEMA 格式说明：
+      //   每个 store 值为 null（无 keyPath）或对象：
+      //   { keyPath, indexes?: [{ name, keyPath, unique? }] }
       const SCHEMA = {
         config: { keyPath: 'id' },
         chars: { keyPath: 'id' },
@@ -4988,6 +6049,23 @@
         chats: { keyPath: 'id' },
         // 👉 核心修改：使用数组作为复合主键，[聊天ID, 楼层]
         messages: { keyPath: ['chatId', 'floor'] },
+        // 🎭 线下剧场相关三张表（与 TsukiSummary.js 保持一致）
+        theaters: {
+          keyPath: 'id',
+          indexes: [{ name: 'by_created', keyPath: 'createdAt' }],
+        },
+        theater_messages: {
+          keyPath: ['theaterId', 'floor'],
+          indexes: [{ name: 'by_theater', keyPath: 'theaterId' }],
+        },
+        theater_summaries: {
+          keyPath: 'id',
+          indexes: [{ name: 'by_theater', keyPath: 'theaterId' }],
+        },
+        // 📓 日记相关
+        diaries: {
+          keyPath: 'id',
+        },
       };
 
       let _idb = null;
@@ -5018,15 +6096,29 @@
 
               upgradeReq.onupgradeneeded = event => {
                 const upgradeDb = event.target.result;
-                // 遍历 SCHEMA 自动建表
+                // 遍历 SCHEMA 自动建表（含索引）
                 for (const [storeName, options] of Object.entries(SCHEMA)) {
+                  let store;
                   if (!upgradeDb.objectStoreNames.contains(storeName)) {
                     if (options) {
-                      upgradeDb.createObjectStore(storeName, options);
+                      // 只把 keyPath 传给 createObjectStore，其余选项另行处理
+                      store = upgradeDb.createObjectStore(storeName, { keyPath: options.keyPath });
                     } else {
-                      upgradeDb.createObjectStore(storeName);
+                      store = upgradeDb.createObjectStore(storeName);
                     }
                     console.log(`[DB] 成功创建数据表: ${storeName}`);
+                  } else {
+                    // 表已存在，通过事务拿到 store 以便补建缺失的索引
+                    store = event.target.transaction.objectStore(storeName);
+                  }
+                  // 建索引（幂等：已存在则跳过）
+                  if (options && options.indexes) {
+                    for (const idx of options.indexes) {
+                      if (!store.indexNames.contains(idx.name)) {
+                        store.createIndex(idx.name, idx.keyPath, { unique: idx.unique || false });
+                        console.log(`[DB]   └─ 索引: ${storeName}.${idx.name}`);
+                      }
+                    }
                   }
                 }
               };
@@ -5042,6 +6134,8 @@
           probeReq.onerror = e => reject(e.target.error);
         });
       }
+      // 🌟 暴露到 window，供 PromptHelper.js 等外部脚本复用完整 SCHEMA 连接
+      window.openDb = openDb;
 
       // 封装简单的数据库操作辅助函数
       async function dbGetAll(storeName) {
@@ -5169,7 +6263,7 @@
                     ${avInner}
                     <div class="chat-item-body">
                       <div class="chat-item-top">
-                        <div class="chat-item-name">${typeTag}${chat.name}</div>
+                        <div class="chat-item-name">${typeTag}${chat.customName || chat.name}</div>
                         <div class="chat-item-time">${timeStr}</div>
                       </div>
                       <div class="chat-item-msg">${chat.lastMessage || '还没有消息...'}</div>
@@ -5338,14 +6432,16 @@
 
           let charData = null;
           let displayAvatar = chatData.avatar;
-          let displayName = chatData.name;
+          // 优先使用自定义聊天名称，没有则使用默认 name
+          let displayName = chatData.customName || chatData.name;
 
           // 获取并存入 Char 数据 (处理私聊)
           // 如果是私聊，从 chars 商店获取完整的角色对象（包含 status 和 id）
           if (chatData.type === 'private' && chatData.charIds?.length > 0) {
             charData = await dbGet('chars', chatData.charIds[0]);
             if (charData) {
-              displayName = charData.name || displayName;
+              // 有自定义名称时不被 charData.name 覆盖
+              if (!chatData.customName) displayName = charData.name || displayName;
               displayAvatar = charData.avatar || displayAvatar;
             }
           }
@@ -5397,42 +6493,32 @@
           }
         }
 
-        // 2. 【核心优化】获取渲染限制条数
+        // 2. 只渲染气泡（复用 reloadBubbles）
+        await reloadBubbles(chatId, db);
+      }
+
+      // 只重渲染气泡区，不动头部 UI —— 供时间感知开关刷新使用
+      async function reloadBubbles(chatId, db) {
+        if (!chatId) return;
+        if (!db) db = await openDb();
+        const chatArea = document.getElementById('chatArea');
+        chatArea.innerHTML = '';
         const settings = await dbGet('config', 'chat_settings');
-        // 【关键修复】：必须用 !== undefined 来判断，防止 0 被当作 false 从而变成 44
         const renderLimit = settings && settings.renderCount !== undefined ? parseInt(settings.renderCount) : 44;
-        // 2. 路径查找：只获取主键以当前 chatId 开头的消息
         const tx = db.transaction('messages', 'readonly');
         const store = tx.objectStore('messages');
-
-        // 使用 KeyRange 锁定“路径”：从 [chatId, 0] 到 [chatId, 无穷大]
         const range = IDBKeyRange.bound([chatId, 0], [chatId, Infinity]);
-
-        // 3. 使用 'prev' 方向，从最新的一条消息开始回溯
         const request = store.openCursor(range, 'prev');
         const messagesToRender = [];
-
         request.onsuccess = event => {
           const cursor = event.target.result;
-
-          // 【关键修复】：如果游标存在，且 (渲染限制为0(无限制) 或者 还没凑够 renderLimit 条)
           if (cursor && (renderLimit === 0 || messagesToRender.length < renderLimit)) {
             messagesToRender.push(cursor.value);
-            cursor.continue(); // 继续找上一条
+            cursor.continue();
           } else {
-            // 4. 渲染阶段：
-            // 因为我们是倒序找的，渲染时需要 .reverse() 回正序
-            messagesToRender.reverse().forEach(msg => {
-              renderHistoryBubble(msg);
-            });
-
-            // 渲染完成后置底
+            messagesToRender.reverse().forEach(msg => renderHistoryBubble(msg));
             scrollChatToBottom();
-
-            // 【关键修复】：更新控制台的打印日志，让你清楚看到 0 生效了
-            console.log(
-              `[Performance] 渲染了 ${messagesToRender.length} 条消息 (限制设置: ${renderLimit === 0 ? '全部渲染 (0)' : renderLimit})`,
-            );
+            console.log(`[Performance] 渲染了 ${messagesToRender.length} 条消息 (限制设置: ${renderLimit === 0 ? '全部渲染 (0)' : renderLimit})`);
           }
         };
       }
@@ -5537,14 +6623,136 @@
         const role = msg.senderRole;
         const c = msg.content; // 原始数据内容
 
+        // 读取时间感知开关（同步读缓存，避免异步阻塞渲染）
+        const _tsEnabled = window.__timestampEnabled !== false;
+        const _defaultMeta = _tsEnabled
+          ? `<i class="fa-regular fa-clock"></i> ${timeStr}`
+          : `<i class="fa-solid fa-check-double" style="color:var(--accent-mint)"></i> 已读`;
+
         let bubble = document.createElement('div');
-        let metaHtml = `<i class="fa-regular fa-clock"></i> ${timeStr}`;
+        let metaHtml = _defaultMeta;
 
         // 统一选项
         const options = {
-          meta: `<i class="fa-regular fa-clock"></i> ${timeStr}`,
+          meta: _defaultMeta,
           floor: msg.floor, // 将楼层号传入渲染引擎
         };
+
+        // 0-0. 线下剧场插入记录 (offline)
+        if (msg.type === 'offline') {
+          const b = document.createElement('div');
+          b.className = 'offline-stage';
+
+          // 头像堆叠：user + char（从全局取，最多2个）
+          const avatarDefs = [
+            { data: window.currentChatChar, icon: 'fa-user-astronaut' },
+            { data: window.currentChatUser, icon: 'fa-feather' },
+          ];
+          const avatarsHtml = avatarDefs.map(({ data, icon }) => {
+            if (data?.avatar) {
+              return `<div class="offline-stage-av" style="background-image:url('${data.avatar}')"></div>`;
+            }
+            return `<div class="offline-stage-av"><i class="fa-solid ${icon}"></i></div>`;
+          }).join('');
+
+          // 起止楼层：优先用 content 里的结构化数据
+          const chatFloorStart = c.insertedChatFloors?.[0] ?? '?';
+          const chatFloorEnd   = c.insertedChatFloors?.[1] ?? '?';
+          const stageStart     = Array.isArray(c.stageFloorRange) ? c.stageFloorRange[0] : '?';
+          const stageEnd       = Array.isArray(c.stageFloorRange) ? c.stageFloorRange[1] : null;
+          const stageStartLabel = stageStart === 'prologue' ? '开场白' : `F·${stageStart}`;
+          const stageEndLabel   = stageEnd == null ? '∞' : `F·${stageEnd}`;
+
+          b.innerHTML = `
+            <div class="offline-stage-head">
+              <div class="offline-stage-head-label">
+                <i class="fa-solid fa-film"></i> OFFLINE STAGE
+              </div>
+              <div class="offline-stage-head-num">#${msg.floor ?? ''}</div>
+            </div>
+            <div class="offline-stage-body">
+              <div class="offline-stage-title">${c.stageTitle || c.displayTitle || '线下剧场'}</div>
+              <div class="offline-stage-avatars">${avatarsHtml}</div>
+            </div>
+            <div class="offline-stage-foot">
+              <div class="offline-stage-range">
+                <span><i class="fa-solid fa-comments"></i> 聊天 F·${chatFloorStart} → F·${chatFloorEnd}</span>
+                <span data-stage-range><i class="fa-solid fa-film"></i> 剧场 ${stageStartLabel} → <span class="stage-end-val">${stageEndLabel}</span></span>
+              </div>
+              <div class="offline-stage-count">${c.insertCount ?? '?'} 条</div>
+            </div>`;
+
+          const chatArea = document.getElementById('chatArea');
+          if (options.floor) b.dataset.floor = options.floor;
+          chatArea.appendChild(b);
+          if (window.bindLongPress) window.bindLongPress(b, 'offline');
+          chatArea.scrollTop = chatArea.scrollHeight;
+          return;
+        }
+
+        // 0-1. 祈月台抽卡记录 (gacha_pull)
+        if (msg.type === 'gacha_pull') {
+          const gc = (typeof c === 'object' && c !== null) ? c : {};
+          const rarity   = gc.cardRarity    || '?';
+          const identity = gc.cardIdentity  || '命轨未知';
+          const outfit   = gc.cardOutfit    || '';
+          const prop     = gc.cardProp      || '';
+          const world    = gc.cardWorld     || '';
+          const story    = gc.cardStory     || '';
+          const imgUrl   = gc.cardImg       || '';
+          const whoDrawn = gc.charName      || '溯源者';
+
+          // rarity safe class name
+          const rarityClass = ['R','SR','SSR','UR','SSS'].includes(rarity) ? rarity : 'R';
+
+          const b = document.createElement('div');
+          b.className = 'gacha-card';
+
+          const imgHtml = imgUrl
+            ? `<img class="gacha-card-img" src="${imgUrl}" alt="${identity}" loading="lazy" />`
+            : `<div class="gacha-card-img-placeholder">☾</div>`;
+
+          b.innerHTML = `
+            <div class="gacha-card-head">
+              <div class="gacha-card-head-label">
+                <i class="fa-solid fa-moon" style="color:var(--accent-amber)"></i> LUNAR PULL
+              </div>
+              <div class="gacha-card-rarity ${rarityClass}">${rarity}</div>
+            </div>
+            ${imgHtml}
+            <div class="gacha-card-body">
+              <div class="gacha-card-identity">${identity}</div>
+              ${world ? `<div class="gacha-card-world"><i class="fa-solid fa-earth-asia" style="margin-right:3px;font-size:7px"></i>${world}</div>` : ''}
+            </div>
+            <div class="gacha-card-foot">
+              <div class="gacha-card-tap-hint"><i class="fa-solid fa-expand"></i> 点击查看卡面详情</div>
+              <div class="gacha-card-who">${whoDrawn}</div>
+            </div>`;
+
+          // click → open detail modal with typewriter
+          b.addEventListener('click', () => {
+            openGachaDetail({ rarity, rarityClass, identity, outfit, prop, world, story, imgUrl, whoDrawn });
+          });
+
+          const chatArea = document.getElementById('chatArea');
+          if (options.floor) b.dataset.floor = options.floor;
+          chatArea.appendChild(b);
+          if (window.bindLongPress) window.bindLongPress(b, 'system');
+          chatArea.scrollTop = chatArea.scrollHeight;
+          return;
+        }
+
+
+        if (msg.type === 'diary') {
+          window.renderDiaryBubble(msg, options);
+          return;
+        }
+
+        // 0-B. 日记批注 / 引用回复 (diary_annotation)
+        if (msg.type === 'diary_annotation') {
+          window.renderDiaryAnnotationBubble(msg, options);
+          return;
+        }
 
         // 1. 系统通知
         if (msg.type === 'system') {
@@ -6547,7 +7755,7 @@
 
               // 渲染时交给 renderHistoryBubble 处理解析
               const textEl = window.renderMessage(window.currentSender, finalTxt, {
-                meta: window.currentSender === 'system' ? '' : `<i class="fa-regular fa-clock"></i> ${timeStr}`,
+                meta: window.currentSender === 'system' ? '' : (window.__timestampEnabled !== false ? `<i class="fa-regular fa-clock"></i> ${timeStr}` : `<i class="fa-solid fa-check-double" style="color:var(--accent-mint)"></i> 已读`),
               });
 
               // 存入数据库的是带引用格式的字符串
@@ -7349,6 +8557,10 @@
               { icon: 'fa-flag', label: '举报', action: 'report' },
               { icon: 'fa-trash', label: '删除', action: 'delete-blocked', danger: true },
             ];
+          } else if (type === 'offline') {
+            items = [
+              { icon: 'fa-trash', label: '删除线下剧场卡片', action: 'delete-offline', danger: true },
+            ];
           }
 
           items.forEach(item => {
@@ -7404,6 +8616,9 @@
                     } else if (bubble.classList.contains('gift')) {
                       typePrefix = '[礼物]';
                       extractText = bubble.dataset.giftItem || '礼物';
+                    } else if (bubble.classList.contains('diary-card')) {
+                      typePrefix = '[日记]';
+                      extractText = bubble.querySelector('.diary-card-title')?.innerText || '日记';
                     } else {
                       typePrefix = '[文字]';
                       const cleanText = bubble.innerText.split('\n').pop();
@@ -7413,6 +8628,17 @@
 
                   // 把带 [类型] 前缀的文字发给 quoteBar
                   window.setQuote(name || '未知', `${typePrefix} ${extractText}`);
+                }
+              } else if (a === 'delete-offline') {
+                const card = targetEl.closest('.offline-stage');
+                if (card && card.dataset.floor && currentChatId) {
+                  const floor = parseInt(card.dataset.floor);
+                  window.deleteMessageFromDB(currentChatId, floor).then(() => {
+                    card.style.transition = 'opacity .25s, transform .25s';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scaleY(0.85)';
+                    setTimeout(() => card.remove(), 250);
+                  });
                 }
               } else if (a === 'delete' || a === 'delete-sys' || a === 'delete-recalled' || a === 'delete-blocked') {
                 const row =
@@ -7625,6 +8851,10 @@
                 bindLongPress(n, 'system');
               }
               if (n.classList?.contains('msg-recalled')) bindLongPress(n, 'recalled');
+              if (n.classList?.contains('offline-stage')) {
+                n.style.cursor = 'context-menu';
+                if (!n._ctxBound) { n._ctxBound = true; bindLongPress(n, 'offline'); }
+              }
               // newly created blocked rows (e.g. from future features)
               n.querySelectorAll?.('.bubble-blocked-badge').forEach(badge => {
                 const row = badge.closest('.msg-row') || badge.closest('.bubble-wrap');
@@ -7791,6 +9021,349 @@
         return row;
       }
 
+      /* ══════════════════════════════════════════════════════════
+         日记气泡渲染工具集
+      ══════════════════════════════════════════════════════════ */
+
+      /**
+       * 从日记原文里提取一个短标题（取第一行或前 20 字）
+       */
+      function _diaryTitle(text) {
+        if (!text) return '无标题日记';
+        const firstLine = text.split(/\n/)[0].trim();
+        return firstLine.length > 0
+          ? firstLine.substring(0, 28) + (firstLine.length > 28 ? '…' : '')
+          : text.substring(0, 28) + (text.length > 28 ? '…' : '');
+      }
+
+      /**
+       * 从 diaryText 提取正文摘要（跳过第一行标题，取后续 60 字）
+       */
+      function _diaryExcerpt(text) {
+        if (!text) return '';
+        const lines = text.split(/\n/).filter(l => l.trim());
+        const body = lines.length > 1 ? lines.slice(1).join(' ') : lines[0] || '';
+        return body.substring(0, 72) + (body.length > 72 ? '…' : '');
+      }
+
+      /**
+       * 从 IDB 实时拉取日记的作者名 + 批注列表
+       * 返回 { authorName, annotations: [{authorName, text, quotedAnn}] }
+       */
+      async function _fetchDiaryDetail(diaryText) {
+        // 使用原生 indexedDB.open（不指定版本）打开，避免 tsukiphone 的 openDb 升级逻辑
+        // 误删 diary.html 创建的 stores（两者共享同一个 IDB 数据库）
+        const db = await new Promise((resolve, reject) => {
+          const req = indexedDB.open(IDB_NAME); // IDB_NAME = 'tsukiphonepromax'
+          req.onsuccess = e => resolve(e.target.result);
+          req.onerror  = () => reject(req.error);
+          // onupgradeneeded 不注册 → 只读取，不修改结构
+        });
+
+        try {
+          // 检查 diaries store 是否存在（diary.html 负责创建）
+          if (!db.objectStoreNames.contains('diaries')) {
+            console.warn('[DiaryPanel] diaries store 不存在，请先在 diary.html 中创建日记');
+            return { authorName: '', annotations: [], diaryTitle: '' };
+          }
+
+          // ① 查匹配日记条目
+          const entry = await new Promise(resolve => {
+            try {
+              const tx = db.transaction('diaries', 'readonly');
+              const req = tx.objectStore('diaries').getAll();
+              req.onsuccess = () => {
+                const kw = diaryText.substring(0, 30);
+                resolve((req.result || []).find(d => (d.content || '').includes(kw)) || null);
+              };
+              req.onerror = () => resolve(null);
+            } catch (e) { resolve(null); }
+          });
+          if (!entry) return { authorName: '', annotations: [], diaryTitle: '' };
+
+          // ② 作者名（chars store 在两边都有）
+          let authorName = '';
+          if (entry.charId && db.objectStoreNames.contains('chars')) {
+            const char = await new Promise(r => {
+              try {
+                const tx = db.transaction('chars', 'readonly');
+                const req = tx.objectStore('chars').get(entry.charId);
+                req.onsuccess = () => r(req.result);
+                req.onerror = () => r(null);
+              } catch (e) { r(null); }
+            });
+            if (char) authorName = char.name || '';
+          }
+
+          // ③ 批注列表（存在 config store，key = annotations_<diaryId>）
+          const annRecord = await new Promise(r => {
+            try {
+              const tx = db.transaction('config', 'readonly');
+              const req = tx.objectStore('config').get('annotations_' + entry.id);
+              req.onsuccess = () => r(req.result);
+              req.onerror = () => r(null);
+            } catch (e) { r(null); }
+          });
+
+          const annotations = (annRecord?.items || []).filter(a => {
+            const t = (a.text || '').trim();
+            return t && t !== '（点击编辑写入批注内容）';
+          });
+
+          console.log(`[DiaryPanel] 找到日记: ${entry.id}, 批注数: ${annotations.length}`);
+          return { authorName, annotations, diaryTitle: entry.title || '' };
+
+        } catch (e) {
+          console.warn('[DiaryPanel] _fetchDiaryDetail 读取失败:', e);
+          return { authorName: '', annotations: [], diaryTitle: '' };
+        } finally {
+          db.close();
+        }
+      }
+
+      /**
+       * 打开日记全文面板
+       */
+      window.openDiaryPanel = async function(diaryText) {
+        const overlay = document.getElementById('diaryPanelOverlay');
+        const titleEl = document.getElementById('diaryPanelTitle');
+        const authorEl = document.getElementById('diaryPanelAuthor');
+        const contentEl = document.getElementById('diaryPanelContent');
+        const annsEl = document.getElementById('diaryPanelAnns');
+
+        // 标题先用 _diaryTitle 占位，正文完整显示不截断
+        titleEl.textContent = _diaryTitle(diaryText);
+        contentEl.textContent = diaryText;
+
+        // 先展示面板，异步加载细节
+        authorEl.innerHTML = '<i class="fa-solid fa-feather-pointed"></i> <span>加载中…</span>';
+        annsEl.innerHTML = '<div class="diary-panel-ann-empty">加载批注中…</div>';
+        overlay.classList.add('open');
+
+        // 点遮罩关闭
+        overlay.onclick = e => { if (e.target === overlay) overlay.classList.remove('open'); };
+
+        // 异步补全：用 IDB 里的真实标题替换占位标题，补全作者 + 批注
+        const { authorName, annotations, diaryTitle } = await _fetchDiaryDetail(diaryText);
+        // 有真实标题就用真实标题，否则保留 _diaryTitle 的截取值
+        if (diaryTitle) titleEl.textContent = diaryTitle;
+        authorEl.innerHTML = `<i class="fa-solid fa-feather-pointed"></i> <span>${authorName || '未知作者'}</span>`;
+
+        if (!annotations.length) {
+          annsEl.innerHTML = '<div class="diary-panel-ann-empty">暂无批注</div>';
+        } else {
+          annsEl.innerHTML = '';
+          annotations.forEach((ann, i) => {
+            const item = document.createElement('div');
+            item.className = 'diary-panel-ann-item';
+            const initials = (ann.authorName || '?').charAt(0).toUpperCase();
+            const avHtml = ann.avatar
+              ? `<img src="${ann.avatar}" style="width:100%;height:100%;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">`
+              : initials;
+
+            // quoteRef 块（批注本身引用了日记的某段话）
+            const quoteBlock = ann.quoteRef
+              ? `<div class="diary-panel-ann-quote"><i class="fa-solid fa-quote-left" style="font-size:7px;margin-right:3px"></i>${ann.quoteRef.substring(0, 60)}${ann.quoteRef.length > 60 ? '…' : ''}</div>`
+              : '';
+
+            // 二层回复列表
+            const replies = (ann.replies || []).filter(r => r.text && r.text.trim());
+            const repliesHtml = replies.map((r, ri) => {
+              const rav = r.avatar
+                ? `<img src="${r.avatar}" style="width:100%;height:100%;border-radius:6px;object-fit:cover;" onerror="this.style.display='none'">`
+                : (r.authorName || '?').charAt(0).toUpperCase();
+              const rTime = r.createdAt
+                ? new Date(r.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '';
+              return `<div class="diary-panel-reply-item">
+                <div class="diary-panel-reply-av">${rav}</div>
+                <div class="diary-panel-reply-bubble">
+                  <div class="diary-panel-reply-meta">${r.authorName || '?'}${rTime ? ' · ' + rTime : ''}</div>
+                  <div class="diary-panel-reply-text">${r.text || ''}</div>
+                </div>
+              </div>`;
+            }).join('');
+
+            const annTime = ann.createdAt
+              ? new Date(ann.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+              : '';
+
+            item.innerHTML = `
+              <div class="diary-panel-ann-avatar">${avHtml}</div>
+              <div class="diary-panel-ann-bubble">
+                <div class="diary-panel-ann-meta">
+                  <i class="fa-solid fa-pen-nib" style="font-size:7px"></i>
+                  ${ann.authorName || '匿名'}${annTime ? ' · ' + annTime : ''}
+                  ${replies.length ? `<span class="diary-panel-reply-count"><i class="fa-solid fa-reply" style="font-size:7px"></i> ${replies.length}</span>` : ''}
+                </div>
+                ${quoteBlock}
+                <div class="diary-panel-ann-text">${ann.text || ''}</div>
+                ${replies.length ? `<div class="diary-panel-replies">${repliesHtml}</div>` : ''}
+              </div>`;
+            annsEl.appendChild(item);
+          });
+        }
+      };
+
+      // 关闭按钮绑定（延迟确保 DOM ready）
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('diaryPanelClose')?.addEventListener('click', () => {
+          document.getElementById('diaryPanelOverlay')?.classList.remove('open');
+        });
+      });
+
+      /**
+       * ① 渲染纯日记转发卡片 (type === 'diary')
+       */
+      window.renderDiaryBubble = function(msg, options) {
+        // 解析内容（使用全局工具函数，但这里是 tsukiphone，需内联解析）
+        const raw = typeof msg.content === 'string' ? msg.content : '';
+        let diaryText = raw, annotationText = '';
+        const m = raw.match(/^<diary=([\s\S]*?)>$/);
+        if (m) {
+          const inner = m[1];
+          const pi = inner.indexOf('|');
+          if (pi !== -1) {
+            diaryText = inner.substring(0, pi).trim();
+            annotationText = inner.substring(pi + 1).trim();
+          } else {
+            diaryText = inner;
+          }
+        }
+
+        const title   = _diaryTitle(diaryText);
+        const excerpt = _diaryExcerpt(diaryText);
+        const annCount = annotationText ? 1 : 0; // 简单判断
+
+        const b = document.createElement('div');
+        b.className = 'bubble diary-card';
+        b.dataset.diaryText = diaryText;
+        b.innerHTML = `
+          <div class="diary-card-ribbon"></div>
+          <div class="diary-card-inner">
+            <div class="diary-card-source">
+              <div class="diary-card-source-icon"><i class="fa-solid fa-book-open"></i></div>
+              <div class="diary-card-source-label" id="dca_${msg.floor}">加载中…</div>
+            </div>
+            <div class="diary-card-title">${title}</div>
+            ${excerpt ? `<div class="diary-card-excerpt">${excerpt}</div>` : ''}
+            <div class="diary-card-footer">
+              <div class="diary-card-ann-count"><i class="fa-solid fa-comments" style="font-size:7px"></i> <span id="dcac_${msg.floor}">…</span></div>
+              <div class="diary-card-tap"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:7px"></i> 查看</div>
+            </div>
+          </div>`;
+
+        // 点击打开面板
+        b.addEventListener('click', () => window.openDiaryPanel(diaryText));
+
+        // 异步补全作者名 + 批注数
+        _fetchDiaryDetail(diaryText).then(({ authorName, annotations, diaryTitle }) => {
+          const nameEl = document.getElementById('dca_' + msg.floor);
+          if (nameEl) nameEl.textContent = authorName ? `DIARY · ${authorName}` : 'DIARY · 转发';
+          const countEl = document.getElementById('dcac_' + msg.floor);
+          if (countEl) countEl.textContent = annotations.length
+            ? `${annotations.length} 条批注`
+            : '暂无批注';
+          // 如果有真实标题，更新卡片上的标题显示
+          if (diaryTitle) {
+            const titleEl = b.querySelector('.diary-card-title');
+            if (titleEl) titleEl.textContent = diaryTitle;
+          }
+        });
+
+        const row = window.renderMessage(msg.senderRole, b, {
+          meta: options.meta,
+          floor: msg.floor,
+        });
+        if (row) row.dataset.floor = msg.floor;
+      };
+
+      /**
+       * ② 渲染日记批注气泡 (type === 'diary_annotation')
+       * isDirect: 顶部显示「新增批注」块
+       * !isDirect: 顶部显示「引用回复」块（含被引用批注原文）
+       */
+      window.renderDiaryAnnotationBubble = function(msg, options) {
+        const raw = typeof msg.content === 'string' ? msg.content : '';
+
+        // 解析
+        let diaryText = raw, annotationText = '';
+        const m = raw.match(/^<diary=([\s\S]*?)>$/);
+        if (m) {
+          const inner = m[1];
+          const pi = inner.indexOf('|');
+          if (pi !== -1) {
+            diaryText = inner.substring(0, pi).trim();
+            annotationText = inner.substring(pi + 1).trim();
+          } else {
+            diaryText = inner;
+          }
+        }
+
+        // 区分直接批注 vs 引用回复（全角竖线）
+        const ffPipe = annotationText.indexOf('\uFF5C');
+        const isDirect = ffPipe === -1;
+        const quotedAnn  = isDirect ? '' : annotationText.substring(0, ffPipe).trim();
+        const replyText  = isDirect ? annotationText : annotationText.substring(ffPipe + 1).trim();
+
+        const diaryTitle = _diaryTitle(diaryText);
+
+        // 组装顶部「来源」装饰块
+        let headerHtml = '';
+        if (isDirect) {
+          // 新增批注：显示日记摘要
+          headerHtml = `
+            <div class="diary-ann-header type-direct">
+              <div class="diary-ann-label type-direct"><i class="fa-solid fa-pen-nib" style="font-size:8px"></i> 新增批注</div>
+              <div class="diary-ann-ref-block type-direct">
+                <div class="diary-ann-ref-diary-title"><i class="fa-solid fa-book-open" style="font-size:9px;margin-right:3px;opacity:.6"></i>${diaryTitle}</div>
+                ${_diaryExcerpt(diaryText) ? `<div class="diary-ann-ref-excerpt">${_diaryExcerpt(diaryText)}</div>` : ''}
+              </div>
+              <div class="diary-ann-view-btn type-direct" data-diary-text="${encodeURIComponent(diaryText)}">
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:7px"></i> 查看日记原文与批注
+              </div>
+            </div>`;
+        } else {
+          // 引用回复：显示被引用批注原文
+          headerHtml = `
+            <div class="diary-ann-header type-reply">
+              <div class="diary-ann-label type-reply"><i class="fa-solid fa-reply" style="font-size:8px"></i> 回复批注</div>
+              <div class="diary-ann-ref-block type-reply">
+                <div class="diary-ann-ref-diary-title"><i class="fa-solid fa-book-open" style="font-size:9px;margin-right:3px;opacity:.6"></i>${diaryTitle}</div>
+                <div class="diary-ann-ref-quoted">
+                  <i class="fa-solid fa-quote-left" style="font-size:8px;margin-right:2px;opacity:.6"></i>${quotedAnn || '（被回复批注）'}
+                </div>
+              </div>
+              <div class="diary-ann-view-btn type-reply" data-diary-text="${encodeURIComponent(diaryText)}">
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:7px"></i> 查看日记原文与批注
+              </div>
+            </div>`;
+        }
+
+        const b = document.createElement('div');
+        // 核心：不继承普通 bubble 的黑底，改用专属 class
+        b.className = 'bubble diary-ann-bubble ' + (isDirect ? 'style-direct' : 'style-reply');
+
+        // 正文内容（批注/回复文字）
+        const bodyText = replyText || '（暂无内容）';
+        b.innerHTML = headerHtml + `<div class="diary-ann-body">${bodyText}</div>`;
+
+        // 绑定「查看日记」按钮
+        b.querySelectorAll('.diary-ann-view-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const dt = decodeURIComponent(btn.dataset.diaryText || '');
+            if (dt) window.openDiaryPanel(dt);
+          });
+        });
+
+        const row = window.renderMessage(msg.senderRole, b, {
+          meta: options.meta,
+          floor: msg.floor,
+        });
+        if (row) row.dataset.floor = msg.floor;
+      };
+
       // (function () {
       //   const homeBar = document.querySelector('.home-bar');
       //   const phone = document.querySelector('.app-container');
@@ -7931,6 +9504,18 @@
       const tsukiChannel = new BroadcastChannel('tsuki_channel');
       tsukiChannel.onmessage = e => {
         if (e.data === 'update_theme') applyGlobalTheme();
+
+        // 更新屏幕上已渲染的 offline 卡片终止楼层
+        if (e.data?.type === 'offline_range_update') {
+          const { chatId, onlineFloor, newEnd } = e.data;
+          // 只有当前打开的聊天匹配才更新
+          if (chatId !== window.currentChatId) return;
+          const card = document.querySelector(`.offline-stage[data-floor="${onlineFloor}"]`);
+          if (card) {
+            const endVal = card.querySelector('.stage-end-val');
+            if (endVal) endVal.textContent = `F·${newEnd}`;
+          }
+        }
       };
 
       // 初始化执行
@@ -8003,8 +9588,23 @@
 
         // --- 面板开关逻辑 ---
         if (settingsBtn) {
-          settingsBtn.addEventListener('click', () => {
+          settingsBtn.addEventListener('click', async () => {
             settingsPanel.classList.add('open');
+            // 打开面板时回显自定义名称
+            if (window.currentChatId) {
+              try {
+                const chatData = await dbGet('chats', window.currentChatId);
+                const nameInput = document.getElementById('customChatNameInput');
+                const hint = document.getElementById('customChatNameHint');
+                if (nameInput && chatData) {
+                  nameInput.value = chatData.customName || '';
+                  if (hint) {
+                    const defaultName = chatData.name || '';
+                    hint.textContent = defaultName ? `默认名称：${defaultName}` : '';
+                  }
+                }
+              } catch (e) { /* ignore */ }
+            }
           });
         }
         if (closeSettingsBtn) {
@@ -8014,11 +9614,55 @@
         }
 
         // ==========================================
+        // 功能 0：自定义聊天名称
+        // ==========================================
+        const saveChatNameBtn = document.getElementById('saveChatNameBtn');
+        if (saveChatNameBtn) {
+          saveChatNameBtn.addEventListener('click', async () => {
+            if (!window.currentChatId) return;
+            const nameInput = document.getElementById('customChatNameInput');
+            const hint = document.getElementById('customChatNameHint');
+            const newName = nameInput ? nameInput.value.trim() : '';
+
+            try {
+              const chatData = await dbGet('chats', window.currentChatId);
+              if (!chatData) return;
+
+              if (newName) {
+                chatData.customName = newName;
+              } else {
+                delete chatData.customName; // 留空则清除，恢复默认
+              }
+              await dbPut('chats', chatData);
+
+              // 实时更新顶部角色名显示
+              const finalDisplay = newName || chatData.name;
+              const charNameEl = document.querySelector('.char-name');
+              if (charNameEl) {
+                charNameEl.innerHTML = `${finalDisplay}<span class="dot"></span>`;
+              }
+
+              // 更新 hint 提示
+              if (hint) hint.textContent = `已保存 · 默认名称：${chatData.name}`;
+
+              // 刷新联系人列表（如果已显示）
+              if (typeof loadChatList === 'function') loadChatList();
+
+              console.log(`[Settings] 自定义聊天名称已保存: "${newName || '(已清除)'}"`);
+            } catch (e) {
+              console.error('[Settings] 保存自定义名称失败', e);
+            }
+          });
+        }
+
+        // ==========================================
         // 功能 1：记忆条数 & 渲染条数 同步存入 Config 商店
         // ==========================================
         const historyInput = document.getElementById('settingHistoryCount');
         // 【新增】：获取渲染条数输入框
         const renderInput = document.getElementById('settingRenderCount');
+        // 【新增】：获取时间戳开关
+        const timestampToggle = document.getElementById('settingTimestampEnabled');
 
         // 初始化：打开页面时从数据库读取当前设置
         async function loadChatSettings() {
@@ -8033,6 +9677,12 @@
             if (renderInput) {
               renderInput.value = settings.renderCount !== undefined ? settings.renderCount : 44;
             }
+            // 【新增】：读取时间戳开关（默认 true）
+            if (timestampToggle) {
+              timestampToggle.checked = settings.timestampEnabled !== false;
+            }
+            // 同步写入全局缓存，供气泡渲染同步读取
+            window.__timestampEnabled = settings.timestampEnabled !== false;
           } catch (e) {
             console.error('[Settings] 读取设置失败', e);
           }
@@ -8054,6 +9704,10 @@
             const existingConfig = (await dbGet('config', 'chat_settings')) || { id: 'chat_settings' };
             existingConfig.historyCount = hVal;
             existingConfig.renderCount = rVal; // 把渲染条数一起存进去
+            // 【新增】：保存时间戳开关
+            existingConfig.timestampEnabled = timestampToggle ? timestampToggle.checked : true;
+            // 同步更新全局缓存
+            window.__timestampEnabled = existingConfig.timestampEnabled;
             await dbPut('config', existingConfig);
             console.log('[Settings] 聊天设置已保存:', existingConfig);
           } catch (err) {
@@ -8067,6 +9721,15 @@
         }
         if (renderInput) {
           renderInput.addEventListener('blur', saveSettings);
+        }
+        // 【新增】：时间戳开关 change 时立即保存，并刷新当前聊天气泡
+        if (timestampToggle) {
+          timestampToggle.addEventListener('change', async () => {
+            await saveSettings();
+            if (typeof currentChatId !== 'undefined' && currentChatId) {
+              reloadBubbles(currentChatId);
+            }
+          });
         }
 
         // ==========================================
@@ -8768,9 +10431,134 @@
           console.error('[Theme] 聊天背景应用失败', e);
         }
       };
+      
+      window.parent.postMessage({ type:'DIARY_STATUS_BANNER', msg:'訴月記·诉说月亮心事❅·°', level:'success' }, '*');
     </script>
+    <!-- ══ Gacha Detail Modal ══ -->
+    <div class="gacha-detail-overlay" id="gachaDetailOverlay" onclick="closeGachaDetail(event)">
+      <div class="gacha-detail-sheet" id="gachaDetailSheet">
+        <div class="gacha-detail-drag"></div>
+        <div id="gachaDetailImgWrap"></div>
+        <div class="gacha-detail-scroll" id="gachaDetailScroll">
+          <div class="gacha-detail-hd">
+            <div class="gacha-detail-title" id="gachaDetailTitle"></div>
+            <div class="gacha-detail-rarity" id="gachaDetailRarity"></div>
+          </div>
+          <div id="gachaDetailRows"></div>
+          <div class="gacha-detail-story-wrap" id="gachaDetailStoryWrap" style="display:none">
+            <div class="gacha-detail-story-label"><i class="fa-solid fa-scroll"></i> STORY FRAGMENT</div>
+            <div class="gacha-detail-story-text" id="gachaDetailStoryText"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ── Gacha Detail Modal ── */
+      let _gachaTypeTimer = null;
+
+      function openGachaDetail(card) {
+        const overlay = document.getElementById('gachaDetailOverlay');
+        const imgWrap = document.getElementById('gachaDetailImgWrap');
+        const title   = document.getElementById('gachaDetailTitle');
+        const rarEl   = document.getElementById('gachaDetailRarity');
+        const rows    = document.getElementById('gachaDetailRows');
+        const storyWrap = document.getElementById('gachaDetailStoryWrap');
+        const storyText = document.getElementById('gachaDetailStoryText');
+
+        // reset typewriter timer
+        if (_gachaTypeTimer) { clearTimeout(_gachaTypeTimer); _gachaTypeTimer = null; }
+
+        // image
+        imgWrap.innerHTML = card.imgUrl
+          ? `<img class="gacha-detail-img" src="${card.imgUrl}" alt="${card.identity}" />`
+          : `<div class="gacha-detail-img-ph">☾</div>`;
+
+        // title + rarity
+        title.textContent = card.identity;
+        rarEl.textContent = card.rarity;
+        rarEl.className = `gacha-detail-rarity ${card.rarityClass}`;
+
+        // detail rows
+        const fieldDefs = [
+          { label: 'OUTFIT · 服装状态', val: card.outfit },
+          { label: 'PROP · 持有道具',   val: card.prop   },
+          { label: 'WORLD · 世界背景',  val: card.world  },
+        ];
+        rows.innerHTML = fieldDefs
+          .filter(f => f.val && f.val.trim())
+          .map(f => `
+            <div class="gacha-detail-row">
+              <div class="gacha-detail-label">${f.label}</div>
+              <div class="gacha-detail-val">${f.val}</div>
+            </div>`)
+          .join('');
+
+        // story typewriter
+        if (card.story && card.story.trim()) {
+          storyWrap.style.display = '';
+          storyText.innerHTML = '';
+          const cursor = document.createElement('span');
+          cursor.className = 'gacha-detail-story-cursor';
+          storyText.appendChild(cursor);
+          _typewriterPlay(storyText, cursor, card.story.trim(), 0);
+        } else {
+          storyWrap.style.display = 'none';
+          storyText.innerHTML = '';
+        }
+
+        overlay.classList.add('on');
+      }
+
+      function _typewriterPlay(container, cursor, text, idx) {
+        if (idx >= text.length) {
+          // done — remove cursor after brief pause
+          _gachaTypeTimer = setTimeout(() => {
+            cursor.style.animation = 'none';
+            cursor.style.opacity   = '0';
+          }, 1200);
+          return;
+        }
+        // insert text node before cursor
+        const chunk = text[idx];
+        const tn = document.createTextNode(chunk);
+        container.insertBefore(tn, cursor);
+        // scroll sheet to bottom as text grows
+        const scroll = document.getElementById('gachaDetailScroll');
+        if (scroll) scroll.scrollTop = scroll.scrollHeight;
+
+        // speed: punctuation pauses longer, normal chars fast
+        const isPunct = /[，。！？、…：；\n]/.test(chunk);
+        const delay   = isPunct ? 120 : 28;
+        _gachaTypeTimer = setTimeout(() => _typewriterPlay(container, cursor, text, idx + 1), delay);
+      }
+
+      function closeGachaDetail(e) {
+        // only close if clicking the overlay backdrop itself
+        if (e && e.target !== document.getElementById('gachaDetailOverlay')) return;
+        _doCloseGachaDetail();
+      }
+
+      function _doCloseGachaDetail() {
+        if (_gachaTypeTimer) { clearTimeout(_gachaTypeTimer); _gachaTypeTimer = null; }
+        document.getElementById('gachaDetailOverlay').classList.remove('on');
+      }
+
+      // swipe down to close
+      (function() {
+        const sheet = document.getElementById('gachaDetailSheet');
+        let startY = 0;
+        sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+        sheet.addEventListener('touchend', e => {
+          const dy = e.changedTouches[0].clientY - startY;
+          if (dy > 60) _doCloseGachaDetail();
+        }, { passive: true });
+      })();
+    </script>
+
     <script src="PromptHelper.js"></script>
     <script src="TsukiSend.js"></script>
     <script src="TsukiBridge.js"></script>
+    <script src="GalleryPicker.js"></script>
   </body>
 </html>
