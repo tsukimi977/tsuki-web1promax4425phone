@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TsukiMoonsuy</title>
+    <title>Home · 江眠月</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-<link rel="shortcut icon" href="./favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="./favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="./favicon/favicon.svg" />
+<link rel="shortcut icon" href="./favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png" />
 <meta name="apple-mobile-web-app-title" content="TsukiMoonsuy" />
-<link rel="manifest" href="./site.webmanifest" />
+<link rel="manifest" href="./favicon/site.webmanifest" />
     <meta name="theme-color" content="#ffffff">
     <link
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
@@ -857,8 +857,13 @@
       .ai-game i {
         color: #84cc16;
       }
+      .ai-weather {
+        background: linear-gradient(135deg, #1a1e35, #13162a) !important;
+        border-color: rgba(155, 143, 255, 0.25) !important;
+        box-shadow: 0 2px 8px -3px rgba(155, 143, 255, 0.2), 0 0 0 1px rgba(155, 143, 255, 0.1) !important;
+      }
       .ai-weather i {
-        color: #22d3ee;
+        color: #9b8fff;
       }
 
       /* ── Deco banner (row 3) ── */
@@ -1827,6 +1832,58 @@
         font-size: 10px;
         font-family: 'Geist Mono', monospace;
       }
+      
+      /* ─────────────────────────────────────────────────────────
+   gallery-overlap-fix.css
+   粘贴到 index.html 任意 <style> 块的最底部，或单独 <link> 引入
+   修复：图片多时卡片互相重叠
+   原理：用 padding-top:100% hack 替代 aspect-ratio，
+         彻底解决移动端 grid 行高塌陷导致的重叠问题
+───────────────────────────────────────────────────────── */
+
+.gallery-content {
+  grid-auto-rows: auto !important;
+}
+
+.gallery-item {
+  /* 不再依赖 aspect-ratio，用 padding-top 锁死正方形 */
+  aspect-ratio: unset !important;
+  position: relative !important;
+  width: 100% !important;
+  padding-top: 100% !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+.gallery-item img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.gallery-item .del-img {
+  z-index: 2 !important;
+}
+
+.gallery-upload-card {
+  aspect-ratio: unset !important;
+  position: relative !important;
+  width: 100% !important;
+  padding-top: 100% !important;
+  height: 0 !important;
+}
+
+/* upload card 的内容要 absolute 居中 */
+.gallery-upload-card > * {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
     </style>
 
     <style>
@@ -2029,15 +2086,15 @@
               <div class="string-row">
                 <div class="string-line"></div>
                 <div class="pendants-row">
-                  <div class="pendant" style="--dly: 0.2s; --dur: 3s; --amp: 4.5; --tlen: 26px">
+                  <div class="pendant" style="--dly: 0.2s; --dur: 3s; --amp: 4.5; --tlen: 26px" onclick="openApp('calendar.html')">
                     <div class="pend-thread"></div>
                     <div class="pend-icon ai-cal"><i class="fa-solid fa-calendar-days"></i></div>
                     <div class="pend-label">Calendar</div>
                   </div>
-                  <div class="pendant" style="--dly: 0.55s; --dur: 3.3s; --amp: 3; --tlen: 32px">
+                  <div class="pendant" style="--dly: 0.55s; --dur: 3.3s; --amp: 3; --tlen: 32px" onclick="openApp('char-lookup.html')">
                     <div class="pend-thread"></div>
-                    <div class="pend-icon ai-maps"><i class="fa-solid fa-map-location-dot"></i></div>
-                    <div class="pend-label">Maps</div>
+                    <div class="pend-icon ai-maps"><i class="fa-solid fa-lock"></i></div>
+                    <div class="pend-label">CharPhone</div>
                   </div>
                   <div class="pendant" style="--dly: 0.9s; --dur: 2.7s; --amp: 4; --tlen: 22px" onclick="openApp('diary.html')">
                     <div class="pend-thread"></div>
@@ -2049,10 +2106,10 @@
                     <div class="pend-icon ai-game"><i class="fa-solid fa-gamepad"></i></div>
                     <div class="pend-label">Gacha</div>
                   </div>
-                  <div class="pendant" style="--dly: 1.6s; --dur: 2.9s; --amp: 5; --tlen: 24px">
+                  <div class="pendant" style="--dly: 1.6s; --dur: 2.9s; --amp: 5; --tlen: 24px" onclick="openApp('agent.html')">
                     <div class="pend-thread"></div>
-                    <div class="pend-icon ai-weather"><i class="fa-solid fa-cloud-sun"></i></div>
-                    <div class="pend-label">Weather</div>
+                    <div class="pend-icon ai-weather"><i class="fa-solid fa-brain"></i></div>
+                    <div class="pend-label">Agent</div>
                   </div>
                 </div>
               </div>
@@ -2064,9 +2121,9 @@
                 <div class="dock-icon di-settings"><i class="fa-solid fa-gear"></i></div>
                 <div class="dock-label">Settings</div>
               </div>
-              <div class="dock-item">
+              <div class="dock-item" onclick="openApp('tsuki-call-hub.html')">
                 <div class="dock-icon di-phone"><i class="fa-solid fa-phone"></i></div>
-                <div class="dock-label">Phone</div>
+                <div class="dock-label">Call</div>
               </div>
               <div class="dock-item">
                 <div class="dock-icon di-browse"><i class="fa-solid fa-globe"></i></div>
@@ -2232,6 +2289,9 @@
         title="diary-background"
       ></iframe>
     </div>
+    
+    <script src="db-schema.js"></script>
+    
 
     <script>
       /* CLOCK */
@@ -2566,6 +2626,9 @@
           return iframe;
         }
 
+        // 不使用 iframe 缓存、每次打开都强制重新加载的页面白名单
+        const NO_CACHE_APPS = new Set(['tsuki-call-hub.html']);
+
         // 核心：通用打开 App 函数
         window.openApp = function (url) {
           // 隐藏当前显示的 iframe
@@ -2577,6 +2640,13 @@
           }
 
           const frame = frameCache.get(url);
+
+          // ★ 方案一：白名单内的页面每次打开都重置 src，强制重新加载最新数据
+          if (NO_CACHE_APPS.has(url)) {
+            frame.src = url;
+            console.log('%c[AppOverlay] 🔄 强制重载(no-cache): ' + url, 'color:#f9c784;font-weight:600');
+          }
+
           frame.style.display = 'block';
           activeFrame = frame;
 
@@ -2616,6 +2686,17 @@
         chats: { keyPath: 'id' },
         // 👉 核心修改：使用数组作为复合主键，[聊天ID, 楼层]
         messages: { keyPath: ['chatId', 'floor'] },
+        // 线下剧场相关（统一在此声明，避免各页面独立升级 DB 版本导致阻塞）
+        theaters: { keyPath: 'id' },
+        theater_messages: { keyPath: ['theaterId', 'floor'] },
+        theater_summaries: { keyPath: 'id' },
+      };
+
+      // 各 store 需要创建的索引（名称 → keyPath）
+      const SCHEMA_INDEXES = {
+        theaters:          [{ name: 'by_created',  keyPath: 'createdAt' }],
+        theater_messages:  [{ name: 'by_theater',  keyPath: 'theaterId' }],
+        theater_summaries: [{ name: 'by_theater',  keyPath: 'theaterId' }],
       };
 
       function initTsukiDB() {
@@ -2632,6 +2713,11 @@
 
             if (missingStores.length === 0) {
               // 结构完整，直接返回可用连接
+              // 监听 versionchange：当其他页面（如 tsukistage.html）需要升级时，自动释放连接
+              db.onversionchange = () => {
+                console.log('[DB] 收到 versionchange，主动关闭连接以允许升级');
+                db.close();
+              };
               resolve(db);
             } else {
               // 第三步：发现缺表！自动关掉当前连接，用 "当前版本 + 1" 触发系统升级
@@ -2647,12 +2733,15 @@
                 // 遍历 SCHEMA 自动建表
                 for (const [storeName, options] of Object.entries(SCHEMA)) {
                   if (!upgradeDb.objectStoreNames.contains(storeName)) {
-                    if (options) {
-                      upgradeDb.createObjectStore(storeName, options);
-                    } else {
-                      upgradeDb.createObjectStore(storeName);
-                    }
+                    const store = options
+                      ? upgradeDb.createObjectStore(storeName, options)
+                      : upgradeDb.createObjectStore(storeName);
                     console.log(`[DB] 成功创建数据表: ${storeName}`);
+                    // 顺带建索引（如有定义）
+                    const indexes = SCHEMA_INDEXES[storeName] || [];
+                    indexes.forEach(idx => {
+                      store.createIndex(idx.name, idx.keyPath);
+                    });
                   }
                 }
               };
@@ -3023,12 +3112,23 @@
   });
 })();
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vConsole/3.15.1/vconsole.min.js"></script>
+    <!-- 视觉引擎：data-listen="true" 表示同时开启 BroadcastChannel/storage 监听 -->
     <script src="TsukiTheme.js" data-listen="true"></script>
     <script src="GalleryPicker.js"></script>
-        <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
+    
+    <script>
+(async () => {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const swReg = await navigator.serviceWorker.register('./sw.js');
+    await navigator.serviceWorker.ready;
+    console.log('[SW] 根页面注册成功, scope:', swReg.scope);
+  } catch(e) {
+    console.error('[SW] 注册失败:', e);
   }
-        </script>
+})();
+</script>
+<script src="TsukiOfflineBridge.js"></script>
   </body>
 </html>
