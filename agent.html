@@ -691,7 +691,7 @@
     <!-- 页头 -->
     <div class="page-header">
       <div class="page-header-top">
-        <div class="page-title">Agent <span>·</span> 离线报时</div>
+        <div class="page-title">Agent <span>·</span> 离线消息</div>
         <span class="page-subtitle">cloud push · offline inbox · char random tick</span>
       </div>
       <div class="page-header-btns">
@@ -715,8 +715,8 @@
       <div class="master-row">
         <div class="master-icon">📡</div>
         <div class="master-info">
-          <div class="master-label">离线报时</div>
-          <div class="master-desc" id="masterDesc">关闭中 · 选择聊天后开启云端报时</div>
+          <div class="master-label">离线消息</div>
+          <div class="master-desc" id="masterDesc">关闭中 · 选择聊天后开启云端离线消息</div>
         </div>
         <div class="toggle" id="masterToggle" onclick="toggleMaster()"><div class="toggle-knob"></div></div>
       </div>
@@ -802,7 +802,7 @@
   <script src="db-schema.js" onerror="console.warn('[TSUKI] db-schema.js 未找到，使用内置 IDB')"></script>
   <script>
   /* ══════════════════════════════════════════════════════════════
-     TSUKIMI Agent v3 · 离线报时架构
+     TSUKIMI Agent v3 · 离线消息架构
      ─ 删除：API 调用、主动消息生成、Edge Function Secrets VAPID
      ─ 保留：char/chat 渲染、定时器UI（占位）、收件箱、SW push
      ─ 新增：VAPID 存数据库、随机 char 报时（云端 cron）、清理按钮
@@ -955,7 +955,7 @@
     if(masterOn){
       document.getElementById('masterToggle').classList.add('on');
       document.getElementById('masterCard').classList.add('active');
-      document.getElementById('masterDesc').textContent='运行中 · 云端每分钟随机报时';
+      document.getElementById('masterDesc').textContent='运行中 · 云端定时离线消息';
       document.getElementById('masterDesc').className='master-desc on';
     }
     updateMasterChips();
@@ -1326,7 +1326,7 @@ select cron.schedule(
     masterOn=false;
     document.getElementById('masterToggle').classList.remove('on');
     document.getElementById('masterCard').classList.remove('active');
-    document.getElementById('masterDesc').textContent='关闭中 · 选择聊天后开启云端报时';
+    document.getElementById('masterDesc').textContent='关闭中 · 选择聊天后开启云端离线消息';
     document.getElementById('masterDesc').className='master-desc';
     updateMasterChips();
     updateTimersSection();
@@ -2088,12 +2088,12 @@ select cron.schedule(
     document.getElementById('masterCard').classList.toggle('active',masterOn);
     const desc=document.getElementById('masterDesc');
     if(masterOn){
-      desc.textContent='运行中 · 云端每分钟随机报时';
+      desc.textContent='运行中 · 云端定时离线消息';
       desc.className='master-desc on';
       // ── 调试台：开关 ON ──────────────────────────────────────────
       const chatNames=[...selectedChats].map(id=>getChatName(id)).join('、')||'（无）';
       const charNames=[...selectedChars].map(id=>getCharName(id)).join('、')||'（无）';
-      log(`┌─ 🟢 [TOGGLE] 离线报时 → ON ──────────────────────────────`,'success');
+      log(`┌─ 🟢 [TOGGLE] 离线消息 → ON ──────────────────────────────`,'success');
       log(`│  已选聊天 (${selectedChats.size}): ${chatNames}`,'success');
       log(`│  已选角色 (${selectedChars.size}): ${charNames}`,'success');
       log(`│  云端配置: ${cloudCfg.supabaseUrl?'✓ Supabase 已配置':'✗ Supabase 未配置'}`,'success');
@@ -2102,10 +2102,10 @@ select cron.schedule(
       // 开启时立刻拉一次收件箱
       checkInbox();
     }else{
-      desc.textContent='关闭中 · 选择聊天后开启云端报时';
+      desc.textContent='关闭中 · 选择聊天后开启云端离线消息';
       desc.className='master-desc';
       // ── 调试台：开关 OFF ─────────────────────────────────────────
-      log(`┌─ ⭕ [TOGGLE] 离线报时 → OFF ─────────────────────────────`,'warn');
+      log(`┌─ ⭕ [TOGGLE] 离线消息 → OFF ─────────────────────────────`,'warn');
       log(`│  当前已选聊天: ${selectedChats.size} 个 · 已选角色: ${selectedChars.size} 个`,'warn');
       log(`└─ Agent 暂停（数据保留，点 CLEAN 可同时清理订阅）`,'warn');
       showToast('Agent 已暂停','warn');
@@ -2118,7 +2118,7 @@ select cron.schedule(
   function updateMasterChips(){
     const s=document.getElementById('chipSelected'),st=document.getElementById('chipStatus');
     s.textContent=`${selectedChats.size} 个聊天已选`;s.className=selectedChats.size>0?'master-chip acc':'master-chip';
-    st.textContent=masterOn?'报时运行中':'Agent 待机中';st.className=masterOn?'master-chip acc':'master-chip';
+    st.textContent=masterOn?'云端离线中':'Agent 待机中';st.className=masterOn?'master-chip acc':'master-chip';
   }
 
   // ─── 把选中聊天同步到云端（只传 chatId + 展示用 name/avatar）───
@@ -2612,7 +2612,7 @@ select cron.schedule(
 
   // ─── 初始化 ───
   async function init(){
-    log('[INIT] TSUKIMI Agent v3 · 离线报时架构','sys');
+    log('[INIT] TSUKIMI Agent v3 · 离线消息架构','sys');
     isDayMode=localStorage.getItem('tsukimi_agent_daymode')==='1';
     applyDayNight();
     await loadCloudCfg();
