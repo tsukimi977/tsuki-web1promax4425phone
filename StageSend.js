@@ -413,7 +413,7 @@ Example:
     const payload = {
       model: cfg.model || 'gpt-4o',
       temperature: parseFloat(cfg.temp) || 0.7,
-      max_tokens: parseInt(cfg.maxTokens) || 4000,
+      max_tokens: parseInt(cfg.maxTokens) || 40000,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
