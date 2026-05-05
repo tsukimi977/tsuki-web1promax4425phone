@@ -1,0 +1,2207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>訴月記 · CSS 美化工坊</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════
+   EDITOR SHELL — 工坊整体框架
+═══════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0e0e10;
+  --bg2: #141416;
+  --bg3: #1c1c1f;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e8e6;
+  --text2: #9a9a9e;
+  --text3: #5a5a5e;
+  --lime: #d4ff4d;
+  --blue: #5b7cfa;
+  --coral: #ff6b6b;
+  --mint: #43d9a0;
+  --pink: #fa5bd5;
+  --amber: #ff9f43;
+  --purple: #a78bfa;
+  --section-w: 780px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── Page Header ── */
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(14,14,16,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.page-title-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+  display: inline-block;
+}
+.page-title-sub {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-style: normal;
+  margin-top: 2px;
+}
+.page-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.hdr-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.18s;
+  white-space: nowrap;
+}
+.hdr-btn:hover { border-color: var(--lime); color: var(--lime); }
+.hdr-btn.primary { background: var(--lime); color: #0a0a0a; border-color: var(--lime); }
+.hdr-btn.primary:hover { opacity: 0.85; }
+.hdr-btn i { font-size: 10px; }
+
+/* ── Page Body ── */
+.page-body {
+  max-width: var(--section-w);
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ── Big Group (Section) ── */
+.big-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.big-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.big-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.big-group-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.18em;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+.big-group-name {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.big-group-actions { display: flex; gap: 6px; }
+
+/* ── Small Group (Item) ── */
+.small-group {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.small-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.small-group-title {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.small-group-title i { font-size: 9px; opacity: 0.7; }
+.small-group-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.sg-btn {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text3);
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: 0.15s;
+  white-space: nowrap;
+}
+.sg-btn:hover { border-color: var(--border2); color: var(--text); }
+.sg-btn.copy-default:hover { border-color: var(--blue); color: var(--blue); }
+.sg-btn.copy-current:hover { border-color: var(--lime); color: var(--lime); }
+.sg-btn i { font-size: 8px; }
+
+/* CSS Editor */
+.css-editor-wrap {
+  position: relative;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.css-editor-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 7px 14px 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.css-editor-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--coral);
+  box-shadow: 10px 0 0 var(--amber), 20px 0 0 var(--mint);
+}
+.css-textarea {
+  width: 100%;
+  min-height: 130px;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 6px 14px 14px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11.5px;
+  color: #c9d1d9;
+  line-height: 1.7;
+  resize: vertical;
+  tab-size: 2;
+  white-space: pre;
+  overflow-x: auto;
+}
+.css-textarea::placeholder { color: var(--text3); }
+.css-textarea::-webkit-scrollbar { height: 3px; }
+
+/* Preview Area */
+.preview-wrap {
+  background: var(--bg3);
+  border-top: 1px solid var(--border);
+}
+.preview-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 8px 14px 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.preview-label i { font-size: 8px; color: var(--mint); }
+
+/* ── Phone Preview Shell ── */
+.phone-shell {
+  margin: 0 14px 14px;
+  background: #fafaf7;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px -8px rgba(0,0,0,0.5);
+}
+
+/* ── Chat preview inside phone ── */
+.chat-preview {
+  padding: 10px 12px 14px;
+  background: #fafaf7;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.preview-row-both {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: flex-start;
+}
+.preview-col-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a8a8e;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+/* ── TOAST notification ── */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1c1c1f;
+  border: 1px solid var(--border2);
+  color: var(--lime);
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─────────────────────────────
+   TSUKIPHONE CSS VARIABLES
+   injected into previews
+───────────────────────────── */
+.tsuki-scope {
+  --ink: #0a0a0a;
+  --ink-2: #1f1f20;
+  --ink-3: #4a4a4d;
+  --mute: #8a8a8e;
+  --line: rgba(10,10,10,0.06);
+  --paper: #fafaf7;
+  --paper-2: #f1f0ea;
+  --card: #ffffff;
+  --accent-lime: #d4ff4d;
+  --accent-blue: #5b7cfa;
+  --accent-pink: #fa5bd5;
+  --accent-coral: #ff6b6b;
+  --accent-amber: #ff9f43;
+  --accent-mint: #43d9a0;
+  font-family: 'Geist', sans-serif;
+}
+
+/* ── divider between small groups ── */
+.sg-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 0 14px;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     PAGE HEADER
+════════════════════════════ -->
+<div class="page-header">
+  <div class="page-title">
+    <div>
+      <div>訴月記 CSS 美化工坊<span class="page-title-dot" style="margin-left:8px"></span></div>
+      <div class="page-title-sub">Real-time Style Editor</div>
+    </div>
+  </div>
+  <div class="page-header-actions">
+    <button class="hdr-btn" onclick="exportAll('default')">
+      <i class="fa-solid fa-file-export"></i> 导出默认 CSS
+    </button>
+    <button class="hdr-btn primary" onclick="exportAll('current')">
+      <i class="fa-solid fa-file-arrow-down"></i> 导出当前 CSS
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     PAGE BODY
+════════════════════════════ -->
+<div class="page-body" id="pageBody"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fa-solid fa-check"></i> <span id="toastMsg">已复制</span></div>
+
+<!-- ════════════════════════════
+     FONT AWESOME (previews need it too)
+════════════════════════════ -->
+
+<script>
+/* ══════════════════════════════════════════════════
+   DATA — 所有小组的定义
+══════════════════════════════════════════════════ */
+
+// 每个 group 定义：{ id, label, icon, defaultCSS, previewHTML }
+// previewHTML 里用 {SCOPE} 代替 scoped class name
+
+const SECTIONS = [
+
+/* ══════════════════════════════
+   大组1：顶部栏
+══════════════════════════════ */
+{
+  id: 'top-card',
+  num: '01',
+  title: '顶部栏',
+  groups: [
+    {
+      id: 'tc-card',
+      label: 'Top Card · 整体卡片',
+      icon: 'fa-solid fa-rectangle-ad',
+      defaultCSS:
+`/* 整体卡片容器 */
+.top-card {
+  margin: 1px 11px 0px;
+  background: var(--card);
+  border-radius: 30px 30px 34px 34px;
+  padding: 20px 20px 18px;
+  position: relative;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    -2px 4px 4px 0px rgba(0, 0, 0, 0.08);
+  overflow: visible !important;
+}
+
+/* 装饰性光晕（右上角） */
+.top-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, var(--accent-lime) 0%, transparent 60%);
+  opacity: 0.35;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 底部分割线装饰 */
+.top-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  width: 1px;
+  height: 16px;
+  background: var(--line);
+}
+
+/* 左上角 CHAT 编号标签 */
+.top-index {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--mute);
+  letter-spacing: 0.15em;
+}
+.top-index span {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 右上角菜单按钮组 */
+.top-menu {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+  z-index: 3;
+}
+.menu-btn {
+  width: 34px;
+  height: 34px;
+  background: var(--paper-2);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: 0.2s;
+}
+.menu-btn:hover {
+  background: var(--ink);
+  color: white;
+}
+.menu-btn.pill {
+  width: auto;
+  padding: 0 10px;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}`,
+      previewFn: 'topCardPreview',
+    },
+    {
+      id: 'tc-avatar',
+      label: 'Top Card · 角色头像区',
+      icon: 'fa-solid fa-user-circle',
+      defaultCSS:
+`/* 角色信息整体行 */
+.char-block {
+  margin-top: 28px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  position: relative;
+  z-index: 2;
+}
+
+/* 角色头像 */
+.char-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3c 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  flex-shrink: 0;
+  box-shadow: -4px 4px 5px -1px rgba(0, 0, 0, 0.1);
+  transform: rotate(-4deg);
+}
+.char-avatar i {
+  transform: rotate(4deg);
+}
+
+/* 在线状态圆点 */
+.char-avatar .status-ring {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  background: var(--accent-mint);
+  border-radius: 50%;
+  border: 4px solid var(--card);
+  transform: rotate(4deg);
+}
+.char-avatar .status-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-mint);
+  opacity: 0.4;
+  animation: pulse 2.2s infinite;
+}
+@keyframes pulse {
+  0%   { transform: scale(1);   opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* 角色名称 + 状态信息区 */
+.char-info {
+  flex: 1;
+  padding-bottom: 2px;
+}
+.char-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--mute);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.char-label::before {
+  content: '';
+  width: 14px;
+  height: 1px;
+  background: var(--ink);
+}
+.char-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--ink);
+  margin-top: 6px;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.char-name .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-coral);
+  display: inline-block;
+  transform: translateY(-8px);
+}
+.char-status {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink-3);
+  max-width: 107px;
+}
+.char-status-text {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9.5px;
+  color: var(--mute);
+  line-height: 1.45;
+  word-break: break-all;
+  max-width: 135px;
+}
+
+/* ONLINE 标签 */
+.char-status .live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--ink);
+  color: white;
+  padding: 3px 8px 3px 7px;
+  border-radius: 7px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.char-status .live i {
+  font-size: 6px;
+  color: var(--accent-mint);
+}`,
+      previewFn: 'topCardPreview',
+    },
+    {
+      id: 'tc-user',
+      label: 'Top Card · 用户信息卡片',
+      icon: 'fa-solid fa-id-badge',
+      defaultCSS:
+`/* 用户卡片整体容器（右下角绝对定位） */
+.user-chip {
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 100;
+}
+
+/* 头像 + 名字横向排列行 */
+.user-chip-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  order: 1;
+}
+
+/* 用户头像 */
+.user-chip-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: conic-gradient(from 180deg, #ffb8d1, #ff9a5a, #c7b8ff, #ffb8d1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  position: relative;
+  border: 2px solid var(--card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+.user-chip-avatar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  background: var(--accent-mint);
+  border-radius: 50%;
+  border: 2px solid var(--paper-2);
+}
+
+/* 用户名 */
+.user-chip-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  position: relative;
+}
+
+/* 悬浮心情气泡（em 标签） */
+.user-chip-name em {
+  position: absolute;
+  bottom: 27px;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-style: normal;
+  font-size: 10px;
+  color: var(--mute);
+  white-space: nowrap;
+  box-shadow: 0 6px 1px -4px rgba(0, 0, 0, 0.1);
+  animation: bubbleFloat 3s ease-in-out infinite;
+  z-index: 5;
+}
+/* 气泡尾巴圆圈 */
+.user-chip-name em::after,
+.user-chip-name em::before {
+  content: '';
+  position: absolute;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  right: 15px;
+}
+.user-chip-name em::after {
+  width: 8px;
+  height: 8px;
+  bottom: -7px;
+}
+.user-chip-name em::before {
+  width: 5px;
+  height: 5px;
+  bottom: -13px;
+  right: 11px;
+}
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+
+/* TSUKIMI 标签 */
+.user-chip-meta {
+  order: 2;
+  margin-top: 4px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  color: var(--accent-pink);
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+  padding-right: 2px;
+}`,
+      previewFn: 'topCardPreview',
+    },
+  ],
+  sharedPreview: true,
+  previewFn: 'topCardPreview',
+},
+
+/* ══════════════════════════════
+   大组2：聊天气泡
+══════════════════════════════ */
+{
+  id: 'bubbles',
+  num: '02',
+  title: '聊天气泡',
+  groups: [
+    {
+      id: 'bub-text',
+      label: '文本气泡',
+      icon: 'fa-solid fa-message',
+      defaultCSS:
+`/* ── 气泡基础（角色侧） ── */
+.bubble {
+  padding: 7px 10px;
+  background: var(--card);
+  border-radius: 20px 20px 20px 6px;
+  font-size: 12.5px;
+  color: var(--ink);
+  line-height: 1.55;
+  box-shadow:
+    0 1px 2px rgba(10, 10, 10, 0.04),
+    0 4px 16px -4px rgba(10, 10, 10, 0.05);
+  position: relative;
+  word-wrap: break-word;
+}
+
+/* ── 用户侧气泡（深色背景，右圆角缺口） ── */
+.msg-row.user .bubble {
+  background: var(--ink);
+  color: #f5f5f0;
+  border-radius: 20px 20px 6px 20px;
+}
+
+/* 圆角变体 r3（更圆） */
+.bubble.r3 {
+  border-radius: 18px 18px 18px 18px;
+}
+
+/* ── 气泡内高亮 mark 标签 ── */
+.bubble mark {
+  background: var(--accent-lime);
+  color: var(--ink);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+/* 用户侧 mark（与角色侧相同，可自定义） */
+.msg-row.user .bubble mark {
+  background: var(--accent-lime);
+  color: var(--ink);
+}
+
+/* ── 气泡下方时间/备注行 ── */
+.bubble-meta {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8.5px;
+  color: var(--mute);
+  letter-spacing: 0.08em;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.bubble-meta i {
+  font-size: 8px;
+}
+
+/* ── 气泡容器（控制最大宽度和对齐） ── */
+.bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 240px;
+}
+.msg-row:not(.user) .bubble-wrap {
+  align-items: flex-start;
+}
+.msg-row.user .bubble-wrap {
+  align-items: flex-end;
+}
+
+/* ── 消息行布局 ── */
+.msg-row {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+  max-width: 100%;
+}
+/* 用户侧：反向排列使头像在右边 */
+.msg-row.user {
+  flex-direction: row-reverse;
+}
+
+/* ── 头像 ── */
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 13px;
+  position: relative;
+}
+/* 角色头像背景色 */
+.msg-avatar.char {
+  background: linear-gradient(135deg, #1a1a1a, #3a3a3c);
+}
+/* 用户头像背景色 */
+.msg-avatar.user {
+  background: conic-gradient(from 180deg, #ffb8d1, #ff9a5a, #c7b8ff, #ffb8d1);
+}
+.msg-avatar.hidden {
+  visibility: hidden;
+}`,
+      previewFn: 'bubbleTextPreview',
+    },
+    {
+      id: 'bub-voice',
+      label: '语音气泡',
+      icon: 'fa-solid fa-microphone',
+      defaultCSS:
+`/* ── 语音气泡外壳（角色/用户共用） ── */
+.bubble.voice {
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
+  max-width: 100%;
+}
+
+/* 播放按钮 + 波形 + 时长 横向排列 */
+.voice-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 9px 7px 9px;
+}
+
+/* ── 播放按钮（角色侧：深色底+青绿图标） ── */
+.voice-play {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--accent-lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  transition: 0.25s;
+}
+/* ── 播放按钮（用户侧：青绿底+深色图标） ── */
+.msg-row.user .voice-play {
+  background: var(--accent-lime);
+  color: var(--ink);
+}
+
+/* 播放中切换为暂停图标 */
+.bubble.voice.playing .voice-play i::before {
+  content: '\f04c';
+}
+
+/* ── 波形条 ── */
+.voice-waves {
+  display: flex;
+  gap: 2.5px;
+  align-items: center;
+  flex: 1;
+  height: 17px;
+}
+.voice-waves span {
+  width: 2.5px;
+  background: currentColor;
+  border-radius: 2px;
+  opacity: 0.35;
+  transition: 0.2s;
+}
+/* 播放中：波形动画 */
+.bubble.voice.playing .voice-waves span {
+  animation: wave 0.9s ease-in-out infinite;
+  opacity: 1;
+}
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(1); }
+}
+
+/* 时长文字 */
+.voice-duration {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+/* ── 展开的转写文字区 ── */
+.voice-transcript {
+  max-height: 0;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.55;
+  transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  /* 角色侧分割线：深色虚线 */
+  border-top: 1px dashed rgba(10, 10, 10, 0.1);
+  margin: 0 12px;
+}
+/* 用户侧分割线：浅色虚线 */
+.msg-row.user .voice-transcript {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+/* 展开态 */
+.bubble.voice.expanded .voice-transcript {
+  max-height: 2000px;
+}
+
+/* 转写内容内边距 */
+.voice-transcript-inner {
+  padding: 4px 2px 7px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* 转写标题行 */
+.voice-transcript-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.voice-transcript-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.2;
+}`,
+      previewFn: 'bubbleVoicePreview',
+    },
+    {
+      id: 'bub-imgtext',
+      label: '图文卡片气泡',
+      icon: 'fa-solid fa-image',
+      defaultCSS:
+`/* ── 图文卡片外壳（角色/用户共用，覆盖默认气泡背景） ── */
+.bubble.img-text-card {
+  padding: 6px;
+  overflow: hidden;
+  min-width: 180px;
+  max-width: 230px;
+  background: var(--paper-2) !important;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 14px -6px rgba(10, 10, 10, 0.08) !important;
+  border-radius: 18px;
+}
+
+/* 内层白色卡片区域 */
+.img-text-card-inner {
+  border-radius: 12px;
+  position: relative;
+  background: var(--card);
+  padding: 16px 14px 14px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px dashed rgba(10, 10, 10, 0.12);
+}
+
+/* 顶部小标签 */
+.img-text-card-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8.5px;
+  color: var(--mute);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 主文本（斜体衬线字体） */
+.img-text-card-text {
+  font-family: 'Fraunces', 'PingFang SC', serif;
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  position: relative;
+  word-break: break-word;
+}
+
+/* 右下角装饰图标 */
+.img-text-card-deco {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 16px;
+  color: var(--accent-lime);
+  opacity: 0.8;
+}`,
+      previewFn: 'bubbleImgTextPreview',
+    },
+    {
+      id: 'bub-camera',
+      label: '相机/图片气泡',
+      icon: 'fa-solid fa-camera-retro',
+      defaultCSS:
+`/* ── 图片气泡外壳（透明，无阴影，角色/用户共用） ── */
+.bubble.img-grid-bub {
+  padding: 2px;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* 网格容器 */
+.bub-img-grid {
+  display: grid;
+  gap: 2px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 每张图片格子 */
+.bub-img-cell {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}`,
+      previewFn: 'bubbleCameraPreview',
+    },
+    {
+      id: 'bub-file',
+      label: '文件气泡',
+      icon: 'fa-solid fa-folder-open',
+      defaultCSS:
+`/* ── 文件气泡外壳（继承气泡默认样式） ── */
+/* 注意：角色侧继承 .bubble 白色背景；用户侧继承 .msg-row.user .bubble 深色背景 */
+.bubble.file-bub {
+  padding: 7px 13px 7px 11px;
+}
+
+/* 每行文件条目 */
+.file-bub-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+/* 多文件间分割线（浅白色，适配深色气泡） */
+.file-bub-item + .file-bub-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 文件类型图标 */
+.file-bub-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.file-bub-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 文件名（浅色，适配深色气泡背景） */
+.file-bub-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: #f5f5f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 文件大小 */
+.file-bub-size {
+  font-size: 8px;
+  font-family: 'Geist Mono', monospace;
+  opacity: 0.5;
+  margin-top: 1px;
+  color: #f5f5f0;
+}`,
+      previewFn: 'bubbleFilePreview',
+    },
+    {
+      id: 'bub-location',
+      label: '位置气泡',
+      icon: 'fa-solid fa-location-dot',
+      defaultCSS:
+`/* ── 位置气泡（角色/用户共用，继承基础气泡背景） ── */
+.bubble.location-bub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* 定位图标颜色 */
+.bubble.location-bub > i {
+  color: var(--accent-coral);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* 位置对齐修正 */
+.msg-row:not(.user) .bubble.location-bub {
+  align-self: flex-start;
+}
+.msg-row.user .bubble.location-bub {
+  align-self: flex-end;
+}
+
+/* 气泡下方的地址提示小字 */
+.location-hint {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8.5px;
+  color: var(--mute);
+  letter-spacing: 0.05em;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: normal;
+  word-break: break-all;
+  max-width: 100%;
+  line-height: 1.4;
+}
+.location-hint i {
+  font-size: 8px;
+  color: var(--accent-coral);
+}`,
+      previewFn: 'bubbleLocationPreview',
+    },
+    {
+      id: 'bub-sticker',
+      label: '表情包气泡',
+      icon: 'fa-solid fa-face-smile-wink',
+      defaultCSS:
+`/* ── 表情包气泡 ──
+   源文件中表情包没有专属 CSS class。
+   气泡本体就是普通的 .bubble，
+   通过 3 条 inline style 把气泡外壳清除，
+   只保留图片本体，做到"裸图"效果：
+
+   <div class="bubble"
+        style="padding: 4px;
+               background: transparent;
+               box-shadow: none">
+     <img style="width: 70px;
+                 height: 70px;
+                 border-radius: 10px;
+                 display: block;
+                 object-fit: cover" />
+   </div>
+
+   如需通过 CSS 统一控制，可以在源文件中
+   给这个 div 加一个自定义 class，然后在此处编写样式。
+   目前可修改的是图片的圆角、尺寸等 inline style 部分。 ── */
+
+/* 示例：若你在 HTML 中添加了 class="bubble sticker"，可用以下规则 */
+.bubble.sticker {
+  padding: 4px;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+.bubble.sticker img {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+}`,
+      previewFn: 'bubbleStickerPreview',
+    },
+    {
+      id: 'bub-transfer',
+      label: '转账气泡',
+      icon: 'fa-solid fa-wallet',
+      defaultCSS:
+`/* ── 转账气泡外壳（角色/用户共用，渐变暖色背景） ── */
+.bubble.transfer {
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ff9f43 0%, #ff6b6b 100%);
+  color: white;
+  min-width: 189px;
+  box-shadow:
+    0 1px 2px rgba(10, 10, 10, 0.04),
+    0 4px 16px -4px rgba(10, 10, 10, 0.05);
+}
+
+/* 顶部 TRANSFER 标题行 */
+.transfer-head {
+  padding: 12px 14px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+}
+
+/* 中部内容行（图标 + 金额 + 备注） */
+.transfer-body {
+  padding: 9px 14px 9px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.transfer-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px 14px 11px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.transfer-info .transfer-amount {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.transfer-info .transfer-amount sup {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-right: 2px;
+  vertical-align: top;
+}
+.transfer-info .transfer-note {
+  font-size: 11px;
+  margin-top: 5px;
+  opacity: 0.85;
+}
+
+/* 底部操作栏 */
+.transfer-foot {
+  padding: 7px 14px;
+  background: rgba(0, 0, 0, 0.15);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.transfer-foot .tap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+.transfer-foot i {
+  font-size: 10px;
+}`,
+      previewFn: 'bubbleTransferPreview',
+    },
+    {
+      id: 'bub-gift',
+      label: '礼物气泡',
+      icon: 'fa-solid fa-gift',
+      defaultCSS:
+`/* ── 礼物气泡外壳（角色/用户共用，紫色渐变） ──
+   注意：源文件只有一条 .bubble.gift 规则，
+   border-radius: 20px 20px 6px 20px（右下直角）
+   角色侧与用户侧圆角方向靠继承基础 .bubble 的
+   border-radius 区分（角色 左下直角 / 用户 右下直角）
+   gift 本身不单独区分，统一使用下方值。 ── */
+.bubble.gift {
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%) !important;
+  color: white;
+  min-width: 200px;
+  box-shadow:
+    0 1px 2px rgba(10, 10, 10, 0.04),
+    0 4px 16px -4px rgba(10, 10, 10, 0.05);
+  border-radius: 20px 20px 6px 20px;
+}
+
+/* 顶部 GIFT 标题行 */
+.gift-head {
+  padding: 9px 13px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.22);
+}
+
+/* 中部神秘礼物区 */
+.gift-mystery {
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.gift-mystery-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  animation: giftWiggle 2s ease-in-out infinite;
+}
+@keyframes giftWiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50%       { transform: rotate(3deg); }
+}
+.gift-mystery-text .gift-mystery-label {
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+.gift-mystery-text .gift-mystery-sub {
+  font-size: 9.5px;
+  opacity: 0.7;
+  margin-top: 2px;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* 底部操作栏 */
+.gift-foot {
+  padding: 7px 13px;
+  background: rgba(0, 0, 0, 0.15);
+  font-size: 9.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.gift-foot .tap {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+.gift-foot .tap:hover {
+  opacity: 0.75;
+}`,
+      previewFn: 'bubbleGiftPreview',
+    },
+    {
+      id: 'bub-call',
+      label: '通话邀请气泡',
+      icon: 'fa-solid fa-phone',
+      defaultCSS:
+`/* ── 通话气泡外壳（继承基础气泡背景） ── */
+/* 角色侧：白色背景 | 用户侧：深色背景 */
+.bubble.call-invite {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 13px;
+  min-width: 200px;
+  transition: background 0.25s;
+}
+
+/* ── 图标圆圈 ── */
+.call-invite-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  position: relative;
+  transition: background 0.3s, color 0.3s;
+}
+/* 角色侧·视频通话图标（蓝色） */
+.call-invite-icon.video.ringing {
+  background: rgba(91, 124, 250, 0.15);
+  color: var(--accent-blue);
+}
+/* 角色侧·语音通话图标（绿色） */
+.call-invite-icon.voice.ringing {
+  background: rgba(67, 217, 160, 0.15);
+  color: var(--accent-mint);
+}
+/* 铃响脉冲光环 */
+.call-invite-icon.ringing::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: callRingPulse 1.6s ease-out infinite;
+}
+@keyframes callRingPulse {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+/* 已结束状态图标（灰色） */
+.call-invite-icon.ended {
+  background: rgba(138, 138, 142, 0.12);
+  color: var(--mute);
+}
+/* 用户侧图标（半透明白，覆盖彩色状态） */
+.msg-row.user .call-invite-icon:not(.ended) {
+  background: rgba(255, 255, 255, 0.22);
+  color: white;
+}
+
+/* ── 文字区 ── */
+.call-invite-info {
+  flex: 1;
+  min-width: 0;
+}
+.call-invite-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.call-invite-sub {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  opacity: 0.55;
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+/* 通话计时器 */
+.call-invite-timer {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+  margin-top: 3px;
+  color: var(--accent-mint);
+  letter-spacing: 0.06em;
+}
+.call-invite-timer.ended {
+  color: var(--mute);
+  opacity: 0.7;
+}
+
+/* ── 接听/挂断按钮 ── */
+.call-invite-btn {
+  flex-shrink: 0;
+  height: 28px;
+  padding: 0 13px;
+  border-radius: 100px;
+  border: none;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Geist', sans-serif;
+  letter-spacing: 0.04em;
+  transition: background 0.18s, transform 0.12s;
+  white-space: nowrap;
+}
+.call-invite-btn:active { transform: scale(0.93); }
+/* 角色侧接听按钮（深色） */
+.msg-row:not(.user) .call-invite-btn {
+  background: var(--ink);
+  color: white;
+}
+.msg-row:not(.user) .call-invite-btn:hover {
+  background: #222;
+}
+/* 挂断按钮（红色，角色/用户通用） */
+.call-invite-btn.hangup {
+  background: var(--accent-coral) !important;
+  color: white !important;
+}
+.call-invite-btn.hangup:hover {
+  background: #e85555 !important;
+}
+/* 用户侧按钮（半透明白） */
+.msg-row.user .call-invite-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+/* 用户侧取消按钮 */
+.msg-row.user .call-invite-btn.cancel-call {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 200, 200, 0.9) !important;
+  border: 1px solid rgba(255, 200, 200, 0.25) !important;
+}`,
+      previewFn: 'bubbleCallPreview',
+    },
+    {
+      id: 'bub-system',
+      label: '系统通知气泡',
+      icon: 'fa-solid fa-bell',
+      defaultCSS:
+`/* ── 系统通知（居中，无方向性） ── */
+.msg-system {
+  align-self: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  color: var(--mute);
+  letter-spacing: 0.06em;
+  background: rgba(10, 10, 10, 0.05);
+  padding: 3px 12px;
+  border-radius: 11px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── 撤回通知条 ── */
+.msg-recalled {
+  align-self: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9.5px;
+  color: var(--mute);
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 9px;
+  border: 1px dashed var(--line);
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+.msg-recalled i {
+  font-size: 9px;
+}
+.msg-recalled .redo {
+  color: var(--accent-blue);
+  font-weight: 600;
+  cursor: pointer;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+  margin-left: 4px;
+}
+.msg-recalled:active {
+  opacity: 0.7;
+}
+
+/* ── 撤回内容展示气泡 ── */
+.recalled-reveal {
+  align-self: center;
+  max-width: 240px;
+  background: rgba(91, 124, 250, 0.07);
+  border: 1px dashed rgba(91, 124, 250, 0.28);
+  border-radius: 14px;
+  padding: 4px 11px;
+  font-size: 10px;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+.recalled-reveal-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8.5px;
+  color: var(--accent-blue);
+  letter-spacing: 0.1em;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.85;
+}
+.recalled-reveal-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--accent-blue);
+  opacity: 0.2;
+}
+
+/* ── 屏蔽气泡 ── */
+.bubble.blocked {
+  opacity: 0.6;
+  filter: blur(0.3px);
+  user-select: none;
+  pointer-events: none;
+}
+.bubble-blocked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.22);
+  border-radius: 100px;
+  padding: 2px 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 8px;
+  color: var(--accent-coral);
+  letter-spacing: 0.07em;
+}
+.bubble-blocked-badge i {
+  font-size: 7px;
+}`,
+      previewFn: 'bubbleSystemPreview',
+    },
+  ],
+  sharedPreview: false,
+},
+
+/* ══════════════════════════════
+   大组3：输入框区域
+══════════════════════════════ */
+{
+  id: 'input-area',
+  num: '03',
+  title: '底部输入框',
+  groups: [
+    {
+      id: 'input-main',
+      label: '输入框区域',
+      icon: 'fa-solid fa-keyboard',
+      defaultCSS:
+`/* ── 输入框整体容器 ── */
+.input-area {
+  background: rgba(250, 250, 247, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--line);
+  padding: 11px 12px 11px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+}
+
+/* 输入行（按钮 + 输入框 + 按钮） */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── 加号按钮 ── */
+.plus-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-1px);
+}
+/* 加号按钮展开状态（旋转45°变×，变红） */
+.plus-btn.open {
+  transform: translateY(-1px) rotate(45deg);
+  background: var(--accent-coral);
+  color: white;
+}
+
+/* ── 输入框包裹层 ── */
+.input-field-wrap {
+  flex: 1;
+  position: relative;
+  transform: translateY(2px);
+}
+/* 文本输入框 */
+.input-field {
+  width: 100%;
+  height: 42px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px 18px 14px 18px;
+  padding: 0 40px 0 16px;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  font-family: inherit;
+  transition: 0.2s;
+}
+.input-field::placeholder {
+  color: var(--mute);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+}
+.input-field:focus {
+  border-color: var(--ink);
+}
+/* 右侧语言切换指示 */
+.input-field-indicator {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  color: var(--mute);
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+/* ── 装饰按钮（表情包 / 发送） ── */
+.deco-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: 0.2s;
+}
+.deco-btn:hover {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+/* 发送按钮（青绿色，倾斜） */
+.deco-btn.send {
+  background: var(--accent-lime);
+  border-color: var(--accent-lime);
+  color: var(--ink);
+  transform: translateY(-1px) rotate(-6deg);
+  touch-action: none;
+}
+.deco-btn.send:hover {
+  background: var(--ink);
+  color: var(--accent-lime);
+  transform: translateY(-1px) rotate(0);
+}`,
+      previewFn: 'inputPreview',
+    },
+  ],
+  sharedPreview: true,
+  previewFn: 'inputPreview',
+},
+
+]; // end SECTIONS
+
+/* ══════════════════════════════════════════════════
+   PREVIEW HTML BUILDERS
+══════════════════════════════════════════════════ */
+
+function msgRow(side, bubbleHTML, metaHTML='') {
+  const avatarBg = side==='char'
+    ? `url('https://i.ibb.co/Fkd1jT2j/1000175357.jpg') center/cover no-repeat, linear-gradient(135deg,#1a1a1a,#3a3a3c)`
+    : `url('https://i.ibb.co/hGg4QFM/1000175362.jpg') center/cover no-repeat, conic-gradient(from 180deg,#ffb8d1,#ff9a5a,#c7b8ff,#ffb8d1)`;
+  const userCls = side==='user' ? ' user' : '';
+  const rowDir = side==='user' ? 'row-reverse' : 'row';
+  return `<div class="msg-row${userCls}" style="display:flex;flex-direction:${rowDir};gap:5px;align-items:flex-end;max-width:100%;">
+    <div class="msg-avatar ${side}" style="width:28px;height:28px;border-radius:9px;flex-shrink:0;background:${avatarBg};"></div>
+    <div class="bubble-wrap" style="display:flex;flex-direction:column;gap:3px;max-width:220px;${side==='user'?'align-items:flex-end':'align-items:flex-start'}">
+      ${bubbleHTML}
+      ${metaHTML ? `<div class="bubble-meta" style="font-family:'Geist Mono',monospace;font-size:8.5px;color:#8a8a8e;letter-spacing:0.08em;padding:0 4px;display:flex;align-items:center;gap:2px;">${metaHTML}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+const PREVIEW_HTML = {
+  topCardPreview: `
+  <div style="background:#fafaf7;padding:0;border-radius:20px;overflow:hidden;">
+    <div class="top-card" style="margin:0;border-radius:20px 20px 24px 24px;">
+      <div class="top-menu" style="position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:3;">
+        <button class="menu-btn pill" style="width:auto;padding:0 10px;gap:5px;font-size:10px;font-weight:600;height:34px;border-radius:12px;background:#f1f0ea;border:none;cursor:pointer;display:flex;align-items:center;">
+          <i class="fa-solid fa-circle" style="font-size:5px;color:#ff6b6b"></i> REC
+        </button>
+        <button class="menu-btn" style="width:34px;height:34px;background:#f1f0ea;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;"><i class="fa-solid fa-phone"></i></button>
+        <button class="menu-btn" style="width:34px;height:34px;background:#f1f0ea;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;"><i class="fa-solid fa-ellipsis"></i></button>
+      </div>
+      <div class="char-block">
+        <div class="char-avatar" style="width:78px;height:78px;border-radius:24px;background:url('https://i.ibb.co/Fkd1jT2j/1000175357.jpg') center/cover no-repeat,linear-gradient(135deg,#1a1a1a,#3a3a3c);position:relative;flex-shrink:0;transform:rotate(-4deg);box-shadow:-4px 4px 5px -1px rgba(0,0,0,0.1);">
+          <span style="position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;background:#43d9a0;border-radius:50%;border:4px solid white;"></span>
+        </div>
+        <div class="char-info" style="flex:1;padding-bottom:2px;">
+          <div class="char-label">now chatting with</div>
+          <div class="char-name">野ye<span style="width:6px;height:6px;border-radius:50%;background:#ff6b6b;display:inline-block;transform:translateY(-8px);margin-left:8px;"></span></div>
+          <div class="char-status" style="margin-top:6px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+            <span class="live"><i class="fa-solid fa-circle" style="font-size:6px;color:#43d9a0"></i> ONLINE</span>
+            <span class="char-status-text" style="font-family:'Geist Mono',monospace;font-size:9.5px;color:#8a8a8e;line-height:1.45;">盯着屏幕等你回消息…</span>
+          </div>
+        </div>
+      </div>
+      <div class="user-chip" style="position:absolute;bottom:12px;right:20px;display:flex;flex-direction:column;align-items:flex-end;z-index:100;">
+        <div class="user-chip-meta">TSUKIMI · 04</div>
+        <div class="user-chip-main">
+          <div class="user-chip-avatar" style="width:32px;height:32px;border-radius:50%;background:url('https://i.ibb.co/hGg4QFM/1000175362.jpg') center/cover no-repeat;border:2px solid white;"></div>
+          <div class="user-chip-name">江眠月<em>· 正在发呆ing</em></div>
+        </div>
+      </div>
+    </div>
+  </div>`,
+
+  bubbleTextPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char','<div class="bubble">啧，什么时候来，等你好久了。</div>','<i class="fa-regular fa-clock" style="font-size:8px"></i> 09:41')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user','<div class="bubble">抱歉有点事耽搁了！</div>','<i class="fa-solid fa-check-double" style="color:#43d9a0;font-size:8px"></i> 09:42')}
+  </div>`,
+
+  bubbleVoicePreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble voice expanded"><div class="voice-main"><div class="voice-play"><i class="fa-solid fa-play"></i></div><div style="display:flex;gap:2.5px;align-items:center;flex:1;height:17px;" id="vw1"></div><span class="voice-duration">0:08</span></div><div class="voice-transcript" style="max-height:200px;border-top:1px dashed rgba(10,10,10,0.1);margin:0 12px;overflow:hidden;font-size:13px;line-height:1.55;"><div style="padding:4px 2px 7px;font-size:12px;"><div style="font-family:'Geist Mono',monospace;font-size:9px;opacity:0.55;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:5px;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-wand-magic-sparkles"></i> TRANSCRIPT</div>没事 · 我刚好在看一个很有意思的剧本，要一起读吗？</div></div></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble voice expanded"><div class="voice-main"><div class="voice-play"><i class="fa-solid fa-play"></i></div><div style="display:flex;gap:2.5px;align-items:center;flex:1;height:17px;" id="vw2"></div><span class="voice-duration">0:03</span></div><div class="voice-transcript" style="max-height:200px;border-top:1px dashed rgba(255,255,255,0.12);margin:0 12px;overflow:hidden;font-size:13px;line-height:1.55;"><div style="padding:4px 2px 7px;font-size:12px;"><div style="font-family:'Geist Mono',monospace;font-size:9px;opacity:0.55;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:5px;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-wand-magic-sparkles"></i> TRANSCRIPT</div>发我看看。</div></div></div>`,'')}
+  </div>`,
+
+  bubbleImgTextPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble img-text-card"><div class="img-text-card-inner"><div class="img-text-card-label"><i class="fa-solid fa-image"></i> IMAGE · TEXT</div><div class="img-text-card-text">月光是故人的字迹。</div></div></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble img-text-card"><div class="img-text-card-inner"><div class="img-text-card-label"><i class="fa-solid fa-image"></i> IMAGE · TEXT</div><div class="img-text-card-text">有些话，不说出口，才是永恒。</div></div></div>`,'')}
+  </div>`,
+
+  bubbleCameraPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble img-grid-bub"><div class="bub-img-grid" style="grid-template-columns:1fr;width:120px;"><img class="bub-img-cell" src="https://picsum.photos/seed/char1/120/90" style="aspect-ratio:4/3"/></div></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble img-grid-bub"><div class="bub-img-grid" style="grid-template-columns:repeat(2,1fr);width:120px;"><img class="bub-img-cell" src="https://picsum.photos/seed/u1/60/60"/><img class="bub-img-cell" src="https://picsum.photos/seed/u2/60/60"/></div></div>`,'')}
+  </div>`,
+
+  bubbleFilePreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble file-bub"><div class="file-bub-item"><i class="fa-solid fa-file-lines file-bub-icon" style="color:#43d9a0"></i><div><div class="file-bub-name">剧本_一夜梦.txt</div><div class="file-bub-size">156 KB</div></div></div></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble file-bub"><div class="file-bub-item"><i class="fa-solid fa-file-pdf file-bub-icon" style="color:#ff6b6b"></i><div><div class="file-bub-name">proposal.pdf</div><div class="file-bub-size">2.4 MB</div></div></div></div>`,'')}
+  </div>`,
+
+  bubbleLocationPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble location-bub"><i class="fa-solid fa-location-dot"></i><span>外滩咖啡 · 中山东一路</span></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble location-bub"><i class="fa-solid fa-location-dot"></i><span>人民广场 · 黄浦区</span></div>`,'')}
+  </div>`,
+
+  bubbleStickerPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble" style="padding:4px;background:transparent;box-shadow:none"><img src="https://picsum.photos/seed/stk1/90/90" style="width:70px;height:70px;border-radius:10px;display:block;object-fit:cover" /></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble" style="padding:4px;background:transparent;box-shadow:none"><img src="https://picsum.photos/seed/stk2/90/90" style="width:70px;height:70px;border-radius:10px;display:block;object-fit:cover" /></div>`,'')}
+  </div>`,
+
+  bubbleTransferPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble transfer"><div class="transfer-head"><span><i class="fa-solid fa-paper-plane" style="font-size:9px"></i> TRANSFER · RECEIVED</span><span>#00318</span></div><div class="transfer-body"><div class="transfer-icon"><i class="fa-solid fa-circle-dollar-to-slot"></i></div><div class="transfer-info"><div class="transfer-amount"><sup>¥</sup>88.00</div><div class="transfer-note">给你的小惊喜</div></div></div><div class="transfer-foot"><span>TAP TO OPEN</span><span class="tap"><i class="fa-solid fa-hand-pointer"></i> claim</span></div></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble transfer"><div class="transfer-head"><span><i class="fa-solid fa-paper-plane" style="font-size:9px"></i> TRANSFER · SENT</span><span>#00217</span></div><div class="transfer-body"><div class="transfer-icon"><i class="fa-solid fa-mug-saucer"></i></div><div class="transfer-info"><div class="transfer-amount"><sup>¥</sup>52.00</div><div class="transfer-note">帮我点杯 ☕️ 马上来</div></div></div><div class="transfer-foot"><span>TAP TO OPEN</span><span class="tap"><i class="fa-solid fa-hand-pointer"></i> view</span></div></div>`,'')}
+  </div>`,
+
+  bubbleGiftPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble gift"><div class="gift-head"><span><i class="fa-solid fa-gift" style="font-size:9px"></i> GIFT · FOR YOU</span><span>#00601</span></div><div class="gift-mystery"><div class="gift-mystery-icon"><i class="fa-solid fa-envelope-open-text"></i></div><div><div class="gift-mystery-label">给你的礼物</div><div class="gift-mystery-sub">tap to unwrap ✉️</div></div></div><div class="gift-foot"><span>TAP TO OPEN</span><span><i class="fa-solid fa-hand-pointer"></i> view</span></div></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble gift"><div class="gift-head"><span><i class="fa-solid fa-gift" style="font-size:9px"></i> GIFT · SENT</span><span>#00520</span></div><div class="gift-mystery"><div class="gift-mystery-icon"><i class="fa-solid fa-gift"></i></div><div><div class="gift-mystery-label">有一份礼物</div><div class="gift-mystery-sub">待查收 · tap to open</div></div></div><div class="gift-foot"><span>TAP TO OPEN</span><span><i class="fa-solid fa-hand-pointer"></i> view</span></div></div>`,'')}
+  </div>`,
+
+  bubbleCallPreview: `
+  <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">角色 · CHAR</div>
+    ${msgRow('char',`<div class="bubble call-invite"><div class="call-invite-icon voice"><i class="fa-solid fa-phone"></i></div><div class="call-invite-info"><div class="call-invite-label">语音通话邀请</div><div class="call-invite-sub">VOICE CALL · RINGING</div></div><button class="call-invite-btn">接听</button></div>`,'')}
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin:4px 0 2px;">用户 · USER</div>
+    ${msgRow('user',`<div class="bubble call-invite"><div class="call-invite-icon video"><i class="fa-solid fa-video"></i></div><div class="call-invite-info"><div class="call-invite-label">视频通话邀请</div><div class="call-invite-sub">VIDEO CALL · RINGING</div></div><button class="call-invite-btn">接听</button></div>`,'')}
+  </div>`,
+
+  bubbleSystemPreview: `
+  <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0;align-items:center;">
+    <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8a8e;text-align:center;margin-bottom:2px;">系统通知 · SYSTEM</div>
+    <div class="msg-system">祁京野 拍了拍你</div>
+    <div class="msg-system">祁京野 将状态切换为「忙碌」</div>
+    <div class="msg-recalled" style="align-self:center;font-family:'Geist Mono',monospace;font-size:9.5px;color:#8a8a8e;display:inline-flex;align-items:center;gap:8px;padding:5px 10px 5px 9px;border:1px dashed rgba(10,10,10,0.06);border-radius:100px;background:rgba(255,255,255,0.4);"><i class="fa-solid fa-rotate-left" style="font-size:9px"></i> char recalled a message <span style="color:#5b7cfa;font-weight:600;padding-left:6px;border-left:1px solid rgba(0,0,0,0.06);margin-left:4px;">re-edit <i class="fa-solid fa-arrow-right"></i></span></div>
+    <div style="max-width:240px;background:rgba(91,124,250,0.07);border:1px dashed rgba(91,124,250,0.28);border-radius:14px;padding:5px 11px;font-size:10px;color:#4a4a4d;line-height:1.4;align-self:center;">
+      <div style="font-family:'Geist Mono',monospace;font-size:8.5px;color:#5b7cfa;letter-spacing:0.1em;display:flex;align-items:center;gap:5px;opacity:0.85;margin-bottom:3px;"><i class="fa-solid fa-eye"></i> RECALLED CONTENT</div>
+      没事，你快来吧~已经定好座位了
+    </div>
+  </div>`,
+
+  inputPreview: `
+  <div class="input-area" style="border-radius:0 0 16px 16px;">
+    <div style="display:flex;align-items:center;gap:4px;" class="input-row">
+      <button class="plus-btn"><i class="fa-solid fa-plus"></i></button>
+      <div style="flex:1;position:relative;transform:translateY(2px);">
+        <input class="input-field" type="text" placeholder="say something to char…" readonly/>
+        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:'Geist Mono',monospace;font-size:9px;color:#8a8a8e;pointer-events:none;">EN/中</span>
+      </div>
+      <button class="deco-btn"><i class="fa-solid fa-face-laugh-beam"></i></button>
+      <button class="deco-btn send"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>`,
+};
+
+/* ══════════════════════════════════════════════════
+   RENDER ENGINE
+══════════════════════════════════════════════════ */
+
+// store: { groupId -> { textarea, defaultCSS, styleEl } }
+const STORE = {};
+
+function buildWaveHTML(id) {
+  const heights = [4,7,10,13,10,7,4,10,13,7,4,10,7];
+  return heights.map((h,i) =>
+    `<span style="width:2.5px;height:${h}px;background:currentColor;border-radius:2px;opacity:0.35;display:inline-block;"></span>`
+  ).join('');
+}
+
+function renderAll() {
+  const body = document.getElementById('pageBody');
+  body.innerHTML = '';
+
+  SECTIONS.forEach(section => {
+    const secEl = document.createElement('div');
+    secEl.className = 'big-group';
+    secEl.id = 'sec-' + section.id;
+
+    // ── Section Header
+    const hdr = document.createElement('div');
+    hdr.className = 'big-group-header';
+    hdr.innerHTML = `
+      <div class="big-group-title">
+        <span class="big-group-num">${section.num}</span>
+        <span class="big-group-name">${section.title}</span>
+      </div>`;
+    secEl.appendChild(hdr);
+
+    // ── For shared-preview sections (top card, input)
+    if (section.sharedPreview) {
+      // render all small groups (editors only, no individual previews)
+      section.groups.forEach(grp => {
+        secEl.appendChild(buildSmallGroup(grp, false));
+      });
+      // single shared preview
+      const previewWrap = document.createElement('div');
+      previewWrap.className = 'small-group';
+      previewWrap.innerHTML = `
+        <div class="preview-wrap">
+          <div class="preview-label"><i class="fa-solid fa-eye"></i> LIVE PREVIEW</div>
+          <div class="phone-shell" id="preview-${section.id}">
+            <div class="tsuki-scope chat-preview">
+              ${PREVIEW_HTML[section.previewFn]}
+            </div>
+          </div>
+        </div>`;
+      secEl.appendChild(previewWrap);
+
+      // ★ 先挂载到 DOM，再查找元素
+      body.appendChild(secEl);
+
+      // init style elements for each group in section
+      section.groups.forEach(grp => {
+        const ta = document.getElementById('ta-' + grp.id);
+        const styleEl = document.createElement('style');
+        styleEl.id = 'style-' + grp.id;
+        document.head.appendChild(styleEl);
+        STORE[grp.id] = { textarea: ta, defaultCSS: grp.defaultCSS, styleEl };
+        ta.addEventListener('input', () => updateStyle(grp.id));
+        updateStyle(grp.id);
+      });
+
+    } else {
+      // ── bubbles section: each small group has its own preview
+      // ★ 先把 secEl 挂到 DOM
+      body.appendChild(secEl);
+
+      section.groups.forEach(grp => {
+        const sgEl = buildSmallGroup(grp, true);
+        secEl.appendChild(sgEl);
+        const styleEl = document.createElement('style');
+        styleEl.id = 'style-' + grp.id;
+        document.head.appendChild(styleEl);
+        // ★ 此时 sgEl 已在 DOM 中，getElementById 能正确找到
+        const ta = document.getElementById('ta-' + grp.id);
+        STORE[grp.id] = { textarea: ta, defaultCSS: grp.defaultCSS, styleEl };
+        ta.addEventListener('input', () => updateStyle(grp.id));
+        updateStyle(grp.id);
+      });
+    }
+  });
+
+  // fill voice wave bars
+  document.querySelectorAll('[id^="vw"]').forEach(el => {
+    el.innerHTML = buildWaveHTML();
+  });
+}
+
+function buildSmallGroup(grp, withPreview) {
+  const el = document.createElement('div');
+  el.className = 'small-group';
+  el.id = 'sg-' + grp.id;
+
+  el.innerHTML = `
+    <div class="small-group-header">
+      <div class="small-group-title">
+        <i class="${grp.icon}"></i>
+        ${grp.label}
+      </div>
+      <div class="small-group-actions">
+        <button class="sg-btn copy-default" onclick="copySG('${grp.id}','default')" title="复制默认代码">
+          <i class="fa-regular fa-copy"></i> 默认
+        </button>
+        <button class="sg-btn copy-current" onclick="copySG('${grp.id}','current')" title="复制当前代码">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 当前
+        </button>
+      </div>
+    </div>
+    <div class="css-editor-wrap">
+      <div class="css-editor-label"></div>
+      <textarea class="css-textarea" id="ta-${grp.id}" spellcheck="false">${grp.defaultCSS}</textarea>
+    </div>
+    ${withPreview ? `
+    <div class="preview-wrap">
+      <div class="preview-label"><i class="fa-solid fa-eye"></i> LIVE PREVIEW</div>
+      <div class="phone-shell" id="preview-${grp.id}">
+        <div class="tsuki-scope chat-preview">
+          ${PREVIEW_HTML[grp.previewFn] || ''}
+        </div>
+      </div>
+    </div>` : ''}
+  `;
+  return el;
+}
+
+function updateStyle(groupId) {
+  const { textarea, styleEl } = STORE[groupId];
+  // Scope all CSS to .tsuki-scope to prevent leaking into the editor UI
+  const raw = textarea.value;
+  const scoped = raw.replace(/(^|\})\s*([^{}@][^{]*)\s*\{/g, (match, before, selector) => {
+    const sel = selector.trim();
+    if (!sel) return match;
+    // handle multi-selectors
+    const scopedSel = sel.split(',').map(s => `.tsuki-scope ${s.trim()}`).join(', ');
+    return `${before} ${scopedSel} {`;
+  });
+  styleEl.textContent = scoped;
+}
+
+/* ══════════════════════════════════════════════════
+   COPY FUNCTIONS
+══════════════════════════════════════════════════ */
+
+function copySG(groupId, mode) {
+  const { textarea, defaultCSS } = STORE[groupId];
+  const text = mode === 'default' ? defaultCSS : textarea.value;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(mode === 'default' ? '已复制默认代码' : '已复制当前代码');
+  });
+}
+
+function exportAll(mode) {
+  const all = SECTIONS.flatMap(s => s.groups).map(g => {
+    const css = mode === 'default'
+      ? g.defaultCSS
+      : (STORE[g.id] ? STORE[g.id].textarea.value : g.defaultCSS);
+    return `/* ════════════════════════\n   ${g.label}\n════════════════════════ */\n${css}`;
+  }).join('\n\n');
+
+  const filename = mode === 'default'
+    ? 'tsuki_css_default.txt'
+    : 'tsuki_css_current.txt';
+
+  const blob = new Blob([all], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`已导出 ${filename}`);
+}
+
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+renderAll();
+</script>
+</body>
+</html>
