@@ -1,0 +1,2093 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>寄往岁月 · 人生旅信</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Geist+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#f7f7f5;
+  --bg2:#efefec;
+  --w:#ffffff;
+  --ink:#161616;
+  --ink2:#383838;
+  --ink3:#787878;
+  --ink4:#b4b4b4;
+  --ln:rgba(0,0,0,0.07);
+  --ln2:rgba(0,0,0,0.11);
+  --red:#8c2020;
+  --ra:rgba(140,32,32,0.07);
+  --rb:rgba(140,32,32,0.15);
+  --ga:rgba(58,94,64,0.07);
+  --gb:rgba(58,94,64,0.22);
+  --grn:#3a5e40;
+  --serif:'Noto Serif SC',serif;
+  --mono:'Geist Mono',monospace;
+  --disp:'Fraunces',serif;
+}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(rgba(0,0,0,0.048) 1px,transparent 1px);background-size:24px 24px;}
+
+/* ── layout ── */
+.app{width:100%;max-width:500px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1;}
+
+/* ══════════════════════════════════════
+   TOP BAR — title + arc as one unified header
+   Arc bows UPWARD (∩ shape): circle center ABOVE,
+   avatars on the LOWER portion of the circle.
+   Title sits in the center of the arch.
+══════════════════════════════════════ */
+.topbar{
+  flex-shrink:0;
+  background:var(--w);
+  border-bottom:1px solid var(--ln2);
+  /* no padding-bottom — arc-outer handles its own spacing */
+  padding:0;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;
+}
+
+/* Arc outer: tall enough for avatars + name labels below them */
+.arc-outer{
+  width:100%;
+  /* overflow visible so names below arc bottom edge show,
+     but we clip horizontally via mask */
+  position:relative;
+  overflow:visible;
+  cursor:grab;
+  touch-action:pan-y;
+  mask-image:linear-gradient(to right,transparent 0%,#000 10%,#000 90%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 10%,#000 90%,transparent 100%);
+}
+.arc-outer:active{cursor:grabbing;}
+
+/* Title floats in the middle of the arch, z above canvas */
+.arc-title-wrap{
+  position:relative;z-index:10;
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:7px;padding-bottom:0px;
+  pointer-events:none;
+}
+.topbar-title{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);letter-spacing:.04em;text-align:center;}
+.topbar-sub{font-family:var(--mono);font-size:9px;color:var(--ink4);letter-spacing:.2em;margin-top:1px;}
+
+/* Canvas: absolutely covers arc-outer; height set by JS */
+.arc-canvas{position:absolute;left:0;right:0;top:0;pointer-events:none;}
+
+/* Each avatar node */
+.arc-node{
+  position:absolute;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;pointer-events:auto;
+  /* anchor = center of avatar ring */
+  transform:translate(-50%,-50%);
+  will-change:opacity;
+}
+
+.arc-ring{
+  position:relative;border-radius:50%;
+  padding:3px;background:var(--w);
+  flex-shrink:0;
+  transition:box-shadow .28s cubic-bezier(.22,1,.36,1);
+  overflow:hidden;
+}
+.arc-av{
+  border-radius:50%;overflow:hidden;
+  background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-weight:400;color:var(--ink3);
+  flex-shrink:0;position:relative;z-index:1;
+}
+.arc-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+/* Label BELOW avatar, NOT clipped */
+.arc-lbl{
+  font-family:var(--mono);font-size:7px;color:var(--ink4);
+  letter-spacing:.06em;text-align:center;
+  white-space:nowrap;
+  transition:color .25s,font-size .25s;
+  margin-top:2px;
+}
+.arc-node.center .arc-lbl{color:var(--red);font-size:8px;font-weight:500;}
+
+/* dots row */
+.arc-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 0 12px;flex-shrink:0;background:var(--w);}
+.arc-dot{width:4px;height:4px;border-radius:50%;background:var(--ink4);opacity:.28;transition:all .3s cubic-bezier(.22,1,.36,1);}
+.arc-dot.on{opacity:.72;background:var(--red);width:12px;border-radius:2px;}
+
+/* ══════════════════════════════════════
+   BOOKMARK DRAWER
+══════════════════════════════════════ */
+.drw-clip{flex-shrink:0;overflow:hidden;max-height:0;padding:0 14px;transition:max-height .46s cubic-bezier(.22,1,.36,1);}
+.drw-clip.open{max-height:260px;padding-bottom:2px;}
+.drw-box{background:var(--w);border:1px solid var(--ln2);border-radius:14px;overflow:hidden;box-shadow:0 3px 16px -6px rgba(0,0,0,0.1);}
+.drw-head{display:flex;align-items:center;gap:11px;padding:12px 15px 9px;border-bottom:1px solid var(--ln);}
+.d-av{width:36px;height:36px;border-radius:50%;overflow:hidden;background:var(--bg2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;font-weight:500;color:var(--ink3);border:1px solid var(--ln2);}
+.d-av img{width:100%;height:100%;object-fit:cover;}
+.d-name{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--ink);}
+.d-cnt{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.08em;margin-top:2px;}
+.bk-list{max-height:180px;overflow-y:auto;scrollbar-width:none;padding:5px 0;}
+.bk-list::-webkit-scrollbar{display:none;}
+.bk-item{display:flex;align-items:stretch;margin:3px 12px;border-radius:0 9px 9px 0;border:1px solid transparent;border-left:none;cursor:pointer;overflow:hidden;transition:background .18s,border-color .18s;}
+.bk-tab{flex-shrink:0;width:3px;background:var(--ln2);border-radius:2px 0 0 2px;transition:background .18s;}
+.bk-item:hover .bk-tab{background:var(--rb);}
+.bk-item.on .bk-tab{background:var(--red);}
+.bk-item:hover{background:rgba(0,0,0,0.025);}
+.bk-item.on{background:var(--ra);border-color:var(--rb);}
+.bk-body{flex:1;padding:8px 12px;min-width:0;}
+.bk-title{font-family:var(--serif);font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bk-meta{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.04em;margin-top:2px;}
+.bk-arr{flex-shrink:0;width:22px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--red);opacity:0;transition:opacity .18s;}
+.bk-item.on .bk-arr{opacity:1;}
+.bk-empty{padding:20px;text-align:center;font-family:var(--serif);font-size:13px;color:var(--ink4);}
+
+/* ══════════════════════════════════════
+   LETTER AREA
+══════════════════════════════════════ */
+.lt-area{flex:1;padding:0 14px 80px;}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:14px;text-align:center;min-height:260px;}
+.welcome-g{font-family:var(--disp);font-style:italic;font-size:84px;color:var(--ink);opacity:.07;line-height:1;animation:br 5s ease-in-out infinite;}
+@keyframes br{0%,100%{opacity:.05}50%{opacity:.13}}
+.welcome-t{font-family:var(--serif);font-size:14px;font-weight:300;color:var(--ink3);letter-spacing:.14em;line-height:2.3;}
+.welcome-h{font-family:var(--mono);font-size:8px;color:var(--ink4);letter-spacing:.14em;opacity:.7;}
+
+.sec-div{display:flex;align-items:center;gap:10px;padding:15px 0 11px;}
+.sec-ln{flex:1;height:1px;background:var(--ln2);}
+.sec-t{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.22em;flex-shrink:0;}
+
+.char-row{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
+.cr-av{width:26px;height:26px;border-radius:50%;overflow:hidden;background:var(--bg2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:10px;font-weight:400;color:var(--ink3);border:1px solid var(--ln2);}
+.cr-av img{width:100%;height:100%;object-fit:cover;}
+.cr-name{font-family:var(--serif);font-size:14px;font-weight:400;color:var(--ink2);}
+
+/* ── timeline ── */
+.tl{position:relative;padding-left:28px;}
+.tl::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--ln2) 5%,var(--ln2) 95%,transparent);}
+.tl-item{position:relative;padding-bottom:20px;animation:fup .44s cubic-bezier(.22,1,.36,1) both;}
+@keyframes fup{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.tl-dot{position:absolute;left:-21px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--w);border:1.5px solid var(--ln2);z-index:2;display:flex;align-items:center;justify-content:center;transition:border-color .2s;}
+.tl-dot-in{width:4px;height:4px;border-radius:50%;background:var(--ink4);transition:background .2s,transform .2s;}
+.tl-item.expanded .tl-dot{border-color:var(--red);}
+.tl-item.expanded .tl-dot-in{background:var(--red);transform:scale(1.3);}
+.tl-ts{font-family:var(--mono);font-size:8.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
+.age-chip{font-family:var(--serif);font-size:10px;font-weight:400;color:var(--red);background:var(--ra);border-radius:3px;padding:1px 7px;}
+
+/* ── cards ── */
+.tl-item .c-preview{display:block;}
+.tl-item .c-full{display:none;}
+.tl-item.expanded .c-preview{display:none;}
+.tl-item.expanded .c-full{display:block;}
+
+.c-preview{border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s;}
+.c-preview:hover{transform:translateY(-2px);}
+/* 四角园林感双边框基础 */
+.va .c-preview,.vd .c-preview{border-radius:8px;}
+.vb .c-preview,.vc .c-preview,.ve .c-preview{border-radius:8px;}
+
+/* ══ VA · 园林窗格 double-border lattice ══ */
+.va .c-preview{
+  background:var(--w);
+  border:1px solid rgba(140,32,32,0.18);
+  padding:13px 15px 13px 15px;
+  position:relative;
+  box-shadow:0 2px 14px -5px rgba(140,32,32,0.09),0 1px 4px -2px rgba(0,0,0,0.06);
+  outline:1px solid rgba(140,32,32,0.07);
+  outline-offset:3px;
+}
+.va .c-preview:hover{box-shadow:0 6px 22px -6px rgba(140,32,32,0.16),0 2px 8px -3px rgba(0,0,0,0.09);}
+/* 横纹底纹 */
+.va .c-preview::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent,transparent 24px,rgba(140,32,32,0.028) 24px,rgba(140,32,32,0.028) 25px);}
+/* 右上角折角 */
+.va .c-preview::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 16px 16px 0;border-color:transparent var(--bg) transparent transparent;filter:drop-shadow(-1px 1px 0 rgba(140,32,32,0.12));}
+/* 四角装饰 via box-shadow inset corner dots */
+.va .c-preview .cp-eye::after{content:'❧';position:absolute;top:9px;left:9px;font-size:9px;color:rgba(140,32,32,0.22);pointer-events:none;line-height:1;}
+
+/* ══ VB · 织锦边框 — top crane stripe + side bamboo ══ */
+.vb .c-preview{
+  background:var(--w);
+  border:1px solid var(--ln2);
+  padding:0;
+  position:relative;
+  box-shadow:0 2px 14px -5px rgba(0,0,0,0.09);
+  overflow:visible;
+}
+.vb .c-preview:hover{box-shadow:0 6px 22px -6px rgba(0,0,0,0.13);}
+.vb-t{
+  height:auto;
+  padding:5px 13px 4px;
+  background:linear-gradient(100deg,rgba(140,32,32,0.06) 0%,rgba(140,32,32,0.02) 60%,transparent 100%);
+  border-bottom:1px solid rgba(140,32,32,0.11);
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;overflow:hidden;
+}
+.vb-t::before{
+  content:'✦ · · · ✦ · · · ✦ · · · ✦ · · · ✦ · · · ✦ · · · ✦ · · · ✦';
+  font-size:5px;color:rgba(140,32,32,0.3);letter-spacing:3px;
+  position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;
+  overflow:hidden;white-space:nowrap;line-height:1;
+}
+.vb-b{padding:12px 15px;position:relative;}
+/* 左侧竹节纹 */
+.vb-b::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:repeating-linear-gradient(to bottom,rgba(58,94,64,0.5) 0px,rgba(58,94,64,0.5) 14px,rgba(58,94,64,0.15) 14px,rgba(58,94,64,0.15) 15px,transparent 15px,transparent 22px);
+}
+
+/* ══ VC · 邮票 + 云纹边饰 ══ */
+.vc .c-preview{
+  background:var(--w);
+  border:1px solid rgba(0,0,0,0.1);
+  padding:13px 58px 13px 15px;
+  position:relative;
+  box-shadow:0 2px 14px -5px rgba(0,0,0,0.09);
+}
+.vc .c-preview:hover{box-shadow:0 6px 22px -6px rgba(0,0,0,0.13);}
+/* 云纹底角装饰 */
+.vc .c-preview::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(0,0,0,0.04) 4px,rgba(0,0,0,0.04) 5px);
+  pointer-events:none;
+}
+.vc-stmp{
+  position:absolute;top:10px;right:10px;width:36px;height:46px;
+  border:1.5px solid rgba(140,32,32,0.28);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:rgba(140,32,32,0.025);
+}
+.vc-stmp::before{content:'';position:absolute;inset:3px;border:1px dashed rgba(140,32,32,0.18);}
+/* 邮票齿孔效果 */
+.vc-stmp::after{
+  content:'';position:absolute;
+  top:-3px;left:2px;right:2px;height:0;
+  border-top:3px dotted rgba(140,32,32,0.15);
+}
+.vc-sc{font-family:var(--serif);font-size:14px;color:var(--red);opacity:.55;position:relative;z-index:1;}
+.vc-sv{font-family:var(--mono);font-size:4px;color:var(--ink4);letter-spacing:.08em;position:relative;z-index:1;}
+
+/* ══ VD · 竹简 — garden lattice window ══ */
+.vd .c-preview{
+  background:var(--w);
+  border:1px solid rgba(58,94,64,0.2);
+  display:flex;padding:0;
+  box-shadow:0 2px 14px -5px rgba(58,94,64,0.14);
+  outline:1px solid rgba(58,94,64,0.06);
+  outline-offset:3px;
+}
+.vd .c-preview:hover{box-shadow:0 6px 22px -6px rgba(58,94,64,0.2);}
+.vd-s{
+  flex-shrink:0;width:28px;
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(58,94,64,0.08) 0px,rgba(58,94,64,0.08) 1px,
+      transparent 1px,transparent 8px),
+    repeating-linear-gradient(to right,
+      rgba(58,94,64,0.06) 0px,rgba(58,94,64,0.06) 1px,
+      transparent 1px,transparent 8px),
+    linear-gradient(to bottom,rgba(58,94,64,0.04),rgba(58,94,64,0.09),rgba(58,94,64,0.04));
+  border-right:1px solid rgba(58,94,64,0.15);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+/* 竹节标记 */
+.vd-s::before{
+  content:'';position:absolute;left:0;right:0;height:1px;top:50%;
+  background:rgba(58,94,64,0.22);
+}
+.vd-s::after{
+  content:'竹';writing-mode:vertical-rl;
+  font-family:var(--serif);font-size:7px;color:rgba(58,94,64,0.3);
+  letter-spacing:2px;position:absolute;
+}
+.vd-b{flex:1;padding:12px 14px;}
+
+/* ══ VE · 明信片 · 山水意象 ══ */
+.ve .c-preview{
+  background:var(--w);
+  border:1px solid var(--ln2);
+  padding:0;overflow:hidden;
+  box-shadow:0 2px 14px -5px rgba(0,0,0,0.09);
+}
+.ve .c-preview:hover{box-shadow:0 6px 22px -6px rgba(0,0,0,0.13);}
+.ve-sp{display:flex;}
+.ve-l{
+  flex:1;padding:12px 11px 12px 14px;
+  border-right:1px dashed rgba(0,0,0,0.09);
+  position:relative;
+}
+/* 山水淡纹 */
+.ve-l::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:18px;
+  background:linear-gradient(to top,rgba(58,94,64,0.04),transparent);
+  pointer-events:none;
+}
+.ve-r{
+  flex-shrink:0;width:60px;
+  display:flex;flex-direction:column;align-items:center;
+  padding:9px 5px;gap:6px;
+  background:linear-gradient(170deg,rgba(140,32,32,0.02),transparent 60%);
+}
+.ve-stmp{
+  width:36px;height:44px;
+  border:1.5px solid rgba(140,32,32,0.25);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  background:rgba(140,32,32,0.02);
+}
+.ve-stmp::before{content:'';position:absolute;inset:3px;border:1px dashed rgba(140,32,32,0.14);}
+.ve-stmp::after{
+  content:'';position:absolute;
+  top:-3px;left:2px;right:2px;height:0;
+  border-top:3px dotted rgba(140,32,32,0.12);
+}
+.ve-sc{font-family:var(--serif);font-size:16px;color:var(--red);opacity:.42;position:relative;z-index:1;}
+.ve-pm{
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(0,0,0,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:4px;color:var(--ink4);text-align:center;line-height:1.6;
+  opacity:.42;transform:rotate(-12deg);position:relative;
+  background:radial-gradient(circle,rgba(140,32,32,0.02),transparent 70%);
+}
+.ve-pm::before{content:'';position:absolute;inset:2px;border-radius:50%;border:1px dashed rgba(0,0,0,0.07);}
+
+/* preview text */
+.cp-eye{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.18em;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
+.cp-etag{font-family:var(--serif);font-size:10px;color:var(--red);background:var(--ra);border-radius:3px;padding:1px 6px;}
+.cp-title{font-family:var(--serif);font-size:17px;font-weight:500;color:var(--ink);line-height:1.3;margin-bottom:6px;}
+.cp-exc{font-family:var(--serif);font-size:12.5px;color:var(--ink3);line-height:1.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:.02em;}
+.cp-hint{margin-top:9px;font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.12em;opacity:.65;display:flex;align-items:center;gap:3px;}
+.cp-arr{display:inline-block;transition:transform .2s;}
+.tl-item.expanded .cp-arr{transform:rotate(180deg);}
+
+/* ── 信笺标题 & 摘要区块 ── */
+.full-title-row{
+  margin-bottom:11px;
+  padding-bottom:11px;
+  border-bottom:1px dashed rgba(140,32,32,0.1);
+}
+.full-title-text{
+  font-family:var(--serif);font-size:19px;font-weight:500;
+  color:var(--ink);line-height:1.25;letter-spacing:.03em;
+  margin-bottom:2px;
+}
+.full-title-sub{
+  font-family:var(--mono);font-size:7px;color:var(--ink4);
+  letter-spacing:.22em;opacity:.7;
+}
+
+/* 摘要卡片 — 渐变意境感 */
+.full-exc-card{
+  margin:0 -2px 13px;
+  padding:11px 14px 12px;
+  border-radius:7px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,
+    rgba(140,32,32,0.055) 0%,
+    rgba(140,32,32,0.03) 40%,
+    rgba(180,160,120,0.04) 70%,
+    rgba(58,94,64,0.04) 100%);
+  border:1px solid rgba(140,32,32,0.1);
+  border-left:2.5px solid rgba(140,32,32,0.25);
+}
+/* 右下角装饰纹 */
+.full-exc-card::before{
+  content:'';position:absolute;
+  bottom:-12px;right:-12px;
+  width:60px;height:60px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(140,32,32,0.07),transparent 70%);
+  pointer-events:none;
+}
+/* 引号装饰 */
+.full-exc-card::after{
+  content:'"';
+  position:absolute;top:-4px;right:12px;
+  font-family:var(--disp);font-size:52px;font-style:italic;
+  color:rgba(140,32,32,0.1);line-height:1;
+  pointer-events:none;
+}
+.full-exc-lb{
+  font-family:var(--mono);font-size:7px;color:rgba(140,32,32,0.55);
+  letter-spacing:.22em;margin-bottom:6px;
+  display:flex;align-items:center;gap:5px;
+}
+.full-exc-lb::before{content:'';width:10px;height:1px;background:rgba(140,32,32,0.35);}
+.full-exc-txt{
+  font-family:var(--serif);font-size:13px;font-weight:300;
+  color:var(--ink2);line-height:1.75;letter-spacing:.04em;
+  position:relative;z-index:1;
+}
+.c-full{animation:uf .42s cubic-bezier(.22,1,.36,1) both;}
+@keyframes uf{from{opacity:0;transform:scaleY(.96);transform-origin:top;}to{opacity:1;transform:none;}}
+.full-paper{
+  background:var(--w);
+  border:1px solid rgba(140,32,32,0.16);
+  border-radius:10px;overflow:hidden;
+  box-shadow:0 6px 28px -10px rgba(0,0,0,0.13);
+  outline:1px solid rgba(140,32,32,0.06);
+  outline-offset:3px;
+  position:relative;
+}
+/* 四角云纹装饰 */
+.full-paper::before{
+  content:'';position:absolute;top:6px;left:6px;right:6px;bottom:6px;
+  border:1px solid rgba(140,32,32,0.055);
+  border-radius:7px;pointer-events:none;z-index:0;
+}
+.full-body{
+  padding:20px 22px 16px;
+  position:relative;z-index:1;
+  background:repeating-linear-gradient(transparent,transparent 25px,rgba(140,32,32,0.025) 25px,rgba(140,32,32,0.025) 26px);
+}
+.full-body::before{
+  content:'';position:absolute;left:50px;top:0;bottom:0;width:1px;
+  background:rgba(140,32,32,0.07);pointer-events:none;
+}
+/* 右侧竖向装饰线 */
+.full-body::after{
+  content:'';position:absolute;right:50px;top:0;bottom:0;width:1px;
+  background:rgba(140,32,32,0.04);pointer-events:none;
+}
+.full-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid rgba(140,32,32,0.1);cursor:pointer;transition:opacity .15s;}
+.full-hdr:hover{opacity:.8;}
+.full-to{display:flex;flex-direction:column;gap:2px;}
+.full-to-lb{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.2em;}
+.full-to-name{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink);line-height:1.1;}
+.full-to-sub{font-family:var(--serif);font-size:10.5px;font-weight:300;color:var(--ink3);letter-spacing:.04em;}
+.full-stmp-col{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.full-stmp{
+  width:40px;height:50px;
+  border:1.5px solid rgba(140,32,32,0.25);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;background:rgba(140,32,32,0.02);
+}
+.full-stmp::before{content:'';position:absolute;top:-3px;left:2px;right:2px;border-top:3px dotted rgba(140,32,32,0.14);}
+.full-stmp::after{content:'';position:absolute;inset:3px;border:1px dashed rgba(140,32,32,0.16);}
+.full-stmp-ch{font-family:var(--serif);font-size:17px;color:var(--red);opacity:.44;position:relative;z-index:1;}
+.full-pm{
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(0,0,0,0.09);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:4.5px;color:var(--ink4);text-align:center;line-height:1.6;
+  opacity:.42;transform:rotate(-13deg);position:relative;
+}
+.full-pm::before{content:'';position:absolute;inset:2px;border-radius:50%;border:1px dashed rgba(0,0,0,0.07);}
+.full-sal{font-family:var(--serif);font-size:13.5px;font-weight:400;color:var(--ink2);margin-bottom:9px;letter-spacing:.03em;}
+.full-txt{font-family:var(--serif);font-size:13px;font-weight:300;color:var(--ink2);line-height:1.78;letter-spacing:.04em;white-space:pre-wrap;word-break:break-word;margin-bottom:12px;}
+.blk{padding:10px 13px;border-radius:0 7px 7px 0;margin-bottom:9px;}
+.blk-r{background:var(--ra);border-left:2px solid var(--rb);}
+.blk-g{background:var(--ga);border-left:2px solid var(--gb);}
+.blk-lb{font-family:var(--mono);font-size:7.5px;letter-spacing:.2em;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.blk-lb-r{color:var(--red);}
+.blk-lb-g{color:var(--grn);}
+.blk-lb::before{content:'';width:11px;height:1px;background:currentColor;opacity:.55;}
+.blk-txt{font-family:var(--serif);font-size:12.5px;font-weight:300;color:var(--ink2);line-height:1.72;letter-spacing:.04em;}
+.full-ftr{display:flex;align-items:flex-end;justify-content:space-between;padding-top:11px;border-top:1px solid rgba(140,32,32,0.1);margin-top:4px;}
+.full-signed{display:flex;flex-direction:column;gap:2px;}
+.full-sig-lb{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.15em;}
+.full-sig-name{font-family:var(--serif);font-size:18px;font-weight:500;color:var(--ink);}
+.full-sig-dt{font-family:var(--mono);font-size:8px;color:var(--ink4);letter-spacing:.07em;}
+.full-seal{
+  width:42px;height:42px;
+  border:1.5px solid rgba(140,32,32,0.36);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  transform:rotate(-5deg);
+  position:relative;
+  background:rgba(140,32,32,0.025);
+}
+.full-seal::before{content:'';position:absolute;inset:3px;border:1px dashed rgba(140,32,32,0.18);border-radius:1px;}
+.full-seal-ch{font-family:var(--serif);font-size:17px;color:var(--red);opacity:.52;position:relative;z-index:1;}
+.full-coll{width:100%;padding:9px;border:none;border-top:1px solid rgba(140,32,32,0.08);background:none;font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.2em;cursor:pointer;transition:background .18s;position:relative;z-index:1;}
+.full-coll:hover{background:rgba(140,32,32,0.03);}
+
+/* ── fab + settings ── */
+.fab{position:fixed;bottom:22px;right:18px;z-index:500;width:42px;height:42px;border-radius:50%;background:var(--ink);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px -4px rgba(0,0,0,0.3);transition:transform .18s,box-shadow .18s;}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 18px -4px rgba(0,0,0,0.36);}
+.fab-i{font-family:var(--serif);font-size:14px;color:rgba(255,255,255,0.82);font-weight:400;}
+.ov{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;}
+.ov.open{display:flex;}
+.sp{width:100%;max-width:500px;background:var(--w);border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 32px -8px rgba(0,0,0,0.17);animation:su .38s cubic-bezier(.22,1,.36,1) both;}
+@keyframes su{from{transform:translateY(44px);opacity:0}to{transform:none;opacity:1}}
+.sp-pill{display:flex;justify-content:center;padding:11px 0 0;}
+.sp-bar{width:34px;height:4px;border-radius:2px;background:var(--ln2);}
+.sp-head{padding:12px 18px 10px;border-bottom:1px solid var(--ln);}
+.sp-title{font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);}
+.sp-sub{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.18em;margin-top:3px;}
+.sp-body{flex:1;overflow-y:auto;scrollbar-width:none;padding:14px 18px 6px;}
+.sp-body::-webkit-scrollbar{display:none;}
+.sp-slbl{font-family:var(--mono);font-size:7.5px;color:var(--ink4);letter-spacing:.2em;margin-bottom:11px;display:flex;align-items:center;gap:6px;}
+.sp-slbl::before{content:'';width:12px;height:1px;background:var(--ink4);opacity:.4;}
+.sp-grid{display:flex;flex-wrap:wrap;gap:13px;}
+.sp-char{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;}
+.sp-cav{width:46px;height:46px;border-radius:50%;border:2px solid var(--ln2);padding:2.5px;background:var(--w);transition:border-color .2s,box-shadow .2s;position:relative;}
+.sp-cav-in{width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:15px;font-weight:400;color:var(--ink3);}
+.sp-cav-in img{width:100%;height:100%;object-fit:cover;}
+.sp-char.on .sp-cav{border-color:var(--red);box-shadow:0 0 0 2.5px var(--ra);}
+.sp-char.on .sp-cav::after{content:'✓';position:absolute;top:-1px;right:-1px;width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;line-height:15px;text-align:center;font-family:sans-serif;}
+.sp-cname{font-family:var(--serif);font-size:11px;color:var(--ink3);text-align:center;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sp-cwrap{display:none;margin-top:14px;}
+.sp-cwrap.show{display:block;}
+.sp-clbl{font-family:var(--serif);font-size:13px;font-weight:400;color:var(--ink2);margin-bottom:7px;}
+.sp-ci{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;cursor:pointer;transition:background .18s;margin-bottom:3px;}
+.sp-ci:hover{background:var(--ln);}
+.sp-ci.on{background:var(--ra);}
+.sp-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--ln2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:8px;color:#fff;transition:all .18s;}
+.sp-ci.on .sp-chk{background:var(--red);border-color:var(--red);}
+.sp-cname2{flex:1;font-family:var(--serif);font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sp-foot{flex-shrink:0;padding:11px 18px 22px;border-top:1px solid var(--ln);}
+.sp-btn{width:100%;padding:14px;background:var(--ink);color:#fff;border:none;border-radius:11px;font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:.18em;cursor:pointer;transition:opacity .18s,transform .15s;}
+.sp-btn:hover{opacity:.86;}
+.sp-btn:active{transform:scale(.98);}
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;font-family:var(--serif);font-size:12.5px;padding:9px 20px;border-radius:20px;z-index:9999;pointer-events:none;opacity:0;transition:all .3s cubic-bezier(.22,1,.36,1);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ 顶部古风提示横幅 ══ */
+.letter-banner{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:500px;z-index:8000;
+  background:linear-gradient(90deg,rgba(140,32,32,0.92) 0%,rgba(100,18,18,0.97) 60%,rgba(140,32,32,0.92) 100%);
+  color:rgba(255,245,230,0.96);
+  font-family:var(--serif);font-size:12px;letter-spacing:.18em;
+  padding:10px 20px 9px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,200,160,0.18);
+  box-shadow:0 2px 16px -4px rgba(140,32,32,0.35);
+  pointer-events:none;
+  opacity:0;
+  transform:translateX(-50%) translateY(-100%);
+  transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1);
+}
+.letter-banner.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.letter-banner-inner{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+}
+.letter-banner-deco{
+  font-size:10px;opacity:.55;letter-spacing:.06em;flex-shrink:0;
+}
+.letter-banner-txt{flex:1;text-align:center;}
+.letter-banner.done{
+  background:linear-gradient(90deg,rgba(38,74,44,0.92),rgba(22,58,28,0.97) 60%,rgba(38,74,44,0.92));
+  border-bottom:1px solid rgba(130,200,130,0.18);
+}
+.letter-banner.error{
+  background:linear-gradient(90deg,rgba(80,60,20,0.92),rgba(60,42,10,0.97) 60%,rgba(80,60,20,0.92));
+}
+
+/* ══ 消息条数古风输入框 ══ */
+.msg-count-row{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:10px 18px 2px;
+}
+.msg-count-lbl{
+  font-family:var(--serif);font-size:12px;color:var(--ink3);letter-spacing:.1em;flex-shrink:0;
+}
+.msg-count-wrap{
+  position:relative;flex:1;max-width:120px;
+}
+.msg-count-input{
+  width:100%;
+  padding:7px 10px 7px 10px;
+  background:var(--w);
+  border:1.5px solid var(--ln2);
+  outline:1px solid rgba(140,32,32,0.06);
+  outline-offset:2px;
+  border-radius:0;
+  font-family:var(--serif);font-size:13px;color:var(--ink);
+  text-align:center;
+  letter-spacing:.08em;
+  appearance:none;-webkit-appearance:none;
+  transition:border-color .2s,outline-color .2s;
+}
+.msg-count-input:focus{
+  outline:none;
+  border-color:rgba(140,32,32,0.35);
+  box-shadow:0 0 0 2px rgba(140,32,32,0.08);
+}
+.msg-count-unit{
+  font-family:var(--mono);font-size:8px;color:var(--ink4);letter-spacing:.1em;
+  flex-shrink:0;
+}
+
+/* ══ 亲启按钮改为双边框方形小按钮 ══ */
+.qinqi-btn{
+  display:inline-block;
+  padding:7px 18px;
+  background:var(--ink);
+  color:rgba(255,245,230,0.9);
+  font-family:var(--serif);font-size:12px;letter-spacing:.28em;
+  border:none;
+  outline:1.5px solid rgba(255,220,180,0.22);
+  outline-offset:3px;
+  cursor:pointer;
+  position:relative;
+  transition:opacity .18s,transform .15s,outline-color .2s;
+}
+.qinqi-btn::before{
+  content:'';
+  position:absolute;inset:-5px;
+  border:1px solid rgba(255,220,180,0.12);
+  pointer-events:none;
+}
+.qinqi-btn:hover{opacity:.84;outline-color:rgba(255,220,180,0.4);}
+.qinqi-btn:active{transform:scale(.97);}
+.qinqi-btn:disabled{opacity:.42;cursor:not-allowed;}
+
+/* sp-foot 改为居中flex */
+.sp-foot{flex-shrink:0;padding:10px 18px 22px;border-top:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;gap:0;}
+.ld{display:flex;align-items:center;gap:8px;padding:28px;font-family:var(--serif);font-size:12.5px;color:var(--ink4);}
+.ld-d{display:flex;gap:5px;}
+.ld-d span{width:5px;height:5px;border-radius:50%;background:var(--ink4);opacity:.22;animation:lp 1.2s ease-in-out infinite;}
+.ld-d span:nth-child(2){animation-delay:.18s;}.ld-d span:nth-child(3){animation-delay:.36s;}
+/* ══════════════════════════════════════
+   SP TAB BAR
+══════════════════════════════════════ */
+.sp-tabs{display:flex;gap:0;border-bottom:1px solid var(--ln);flex-shrink:0;padding:0 18px;}
+.sp-tab{flex:1;padding:10px 0 9px;font-family:var(--serif);font-size:13px;font-weight:400;color:var(--ink4);text-align:center;cursor:pointer;border:none;background:none;position:relative;transition:color .2s;letter-spacing:.06em;}
+.sp-tab::after{content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:1.5px;background:var(--red);border-radius:1px;opacity:0;transition:opacity .22s;}
+.sp-tab.on{color:var(--ink);}
+.sp-tab.on::after{opacity:1;}
+.sp-tab-sub{font-family:var(--mono);font-size:6.5px;letter-spacing:.14em;display:block;margin-top:1px;color:var(--ink4);opacity:.6;}
+
+/* ── tab pages ── */
+.sp-page{display:none;}
+.sp-page.on{display:block;}
+
+/* ══════════════════════════════════════
+   PROMPT CARDS
+══════════════════════════════════════ */
+:root{
+  --pink:#b5407a;
+  --pinka:rgba(181,64,122,0.07);
+  --pinkb:rgba(181,64,122,0.18);
+}
+.pt-list{display:flex;flex-direction:column;gap:10px;padding-bottom:6px;}
+
+/* 单张提示词卡片 */
+.pt-card{
+  border-radius:11px;overflow:hidden;
+  border:1.5px solid transparent;
+  transition:border-color .2s,box-shadow .2s;
+  position:relative;
+}
+.pt-card.selected{box-shadow:0 0 0 2px var(--red);}
+.pt-card.selected.pink{box-shadow:0 0 0 2px var(--pink);}
+
+/* 卡片头部（点击展开/折叠） */
+.pt-head{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 13px;cursor:pointer;
+  position:relative;
+  user-select:none;
+}
+.pt-sel-dot{
+  flex-shrink:0;width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--ln2);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;
+}
+.pt-card.selected .pt-sel-dot{background:var(--red);border-color:var(--red);}
+.pt-card.selected.pink .pt-sel-dot{background:var(--pink);border-color:var(--pink);}
+.pt-sel-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;opacity:0;transition:opacity .18s;}
+.pt-card.selected .pt-sel-dot::after{opacity:1;}
+
+.pt-info{flex:1;min-width:0;}
+.pt-name{font-family:var(--serif);font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.2;}
+.pt-desc{font-family:var(--mono);font-size:7px;color:var(--ink4);letter-spacing:.1em;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.pt-actions{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.pt-act-btn{
+  width:26px;height:26px;border-radius:6px;border:none;background:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--ink4);transition:background .15s,color .15s;
+}
+.pt-act-btn svg{width:13px;height:13px;stroke-width:1.8;}
+.pt-act-btn:hover{background:var(--ln);color:var(--ink2);}
+.pt-act-btn.del:hover{background:rgba(140,32,32,0.07);color:var(--red);}
+.pt-chev{display:flex;align-items:center;color:var(--ink4);transition:transform .25s;flex-shrink:0;}
+.pt-chev svg{width:14px;height:14px;stroke-width:1.8;}
+.pt-card.open .pt-chev{transform:rotate(180deg);}
+
+/* 展开内容区 */
+.pt-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .32s cubic-bezier(.22,1,.36,1);
+}
+.pt-card.open .pt-body{max-height:500px;}
+.pt-body-inner{padding:0 13px 12px;}
+
+/* 提示词文本显示 */
+.pt-txt-view{
+  font-family:var(--serif);font-size:12px;font-weight:300;
+  color:var(--ink2);line-height:1.75;letter-spacing:.03em;
+  white-space:pre-wrap;word-break:break-word;
+}
+/* 编辑状态 */
+.pt-edit-wrap{display:none;}
+.pt-card.editing .pt-txt-view{display:none;}
+.pt-card.editing .pt-edit-wrap{display:block;}
+.pt-name-input{
+  width:100%;padding:7px 11px;margin-bottom:8px;
+  border:1px solid var(--ln2);border-radius:7px;
+  font-family:var(--serif);font-size:13.5px;font-weight:500;
+  color:var(--ink);background:var(--bg);outline:none;
+  transition:border-color .18s;
+}
+.pt-name-input:focus{border-color:rgba(140,32,32,0.3);}
+.pt-textarea{
+  width:100%;min-height:110px;padding:9px 11px;
+  border:1px solid var(--ln2);border-radius:7px;
+  font-family:var(--serif);font-size:12px;font-weight:300;
+  color:var(--ink2);line-height:1.75;letter-spacing:.03em;
+  background:var(--bg);resize:vertical;outline:none;
+  transition:border-color .18s;
+}
+.pt-textarea:focus{border-color:rgba(140,32,32,0.3);}
+.pt-edit-bar{display:flex;gap:7px;margin-top:8px;justify-content:flex-end;}
+.pt-save-btn,.pt-cancel-btn{
+  padding:5px 14px;border-radius:7px;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:.12em;transition:all .18s;
+}
+.pt-save-btn{background:var(--ink);color:#fff;}
+.pt-save-btn:hover{opacity:.82;}
+.pt-cancel-btn{background:var(--ln);color:var(--ink3);}
+.pt-cancel-btn:hover{background:var(--ln2);}
+
+/* ── 见信如面 card (墨红古风) ── */
+.pt-card.ink{
+  background:linear-gradient(145deg,#fdf8f4 0%,#faf4ef 50%,#f8f2ec 100%);
+  border-color:rgba(140,32,32,0.15);
+}
+.pt-card.ink .pt-head{
+  background:linear-gradient(90deg,rgba(140,32,32,0.055) 0%,transparent 80%);
+  border-bottom:1px solid rgba(140,32,32,0.08);
+}
+.pt-card.ink.open .pt-head{border-bottom-color:rgba(140,32,32,0.08);}
+.pt-card.ink .pt-name{color:#4a1a1a;}
+.pt-card.ink .pt-desc{color:rgba(140,32,32,0.55);}
+/* 右侧竹纹装饰 */
+.pt-card.ink::before{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:3px;
+  background:repeating-linear-gradient(to bottom,rgba(140,32,32,0.18) 0,rgba(140,32,32,0.18) 10px,transparent 10px,transparent 15px);
+  pointer-events:none;
+}
+/* 左侧印章红线 */
+.pt-card.ink::after{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:2.5px;
+  background:linear-gradient(to bottom,rgba(140,32,32,0.4),rgba(140,32,32,0.12),rgba(140,32,32,0.4));
+  pointer-events:none;
+}
+.pt-card.ink.selected{border-color:var(--red);}
+
+/* ── 恋爱记事 card (粉红情书) ── */
+.pt-card.pink{
+  background:linear-gradient(140deg,#fff5f8 0%,#fef0f5 40%,#fde8f2 80%,#fce4ee 100%);
+  border-color:rgba(181,64,122,0.15);
+}
+.pt-card.pink .pt-head{
+  background:linear-gradient(90deg,rgba(181,64,122,0.07) 0%,rgba(255,200,220,0.08) 60%,transparent 100%);
+  border-bottom:1px solid rgba(181,64,122,0.09);
+}
+.pt-card.pink .pt-name{color:#7a1a42;}
+.pt-card.pink .pt-desc{color:rgba(181,64,122,0.6);}
+/* 右上角爱心渐晕 */
+.pt-card.pink::before{
+  content:'♡';position:absolute;top:6px;right:10px;
+  font-size:22px;color:rgba(181,64,122,0.1);
+  pointer-events:none;line-height:1;
+}
+.pt-card.pink .pt-textarea:focus{border-color:rgba(181,64,122,0.35);}
+.pt-card.pink.selected{border-color:var(--pink);}
+
+/* ── 新增自定义 card (中性) ── */
+.pt-card.custom{
+  background:var(--w);
+  border-color:var(--ln2);
+}
+.pt-card.custom .pt-head{border-bottom:1px solid var(--ln);}
+
+/* 新增提示词按钮 */
+.pt-add-btn{
+  width:100%;padding:11px;border-radius:10px;
+  border:1.5px dashed var(--ln2);background:none;
+  font-family:var(--serif);font-size:13px;color:var(--ink4);
+  cursor:pointer;transition:all .2s;letter-spacing:.08em;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  margin-top:2px;
+}
+.pt-add-btn:hover{border-color:rgba(140,32,32,0.25);color:var(--ink2);background:rgba(140,32,32,0.02);}
+.pt-add-btn::before{content:'+';font-size:16px;font-weight:300;line-height:1;}
+
+/* 当前选中提示词展示在底部 */
+.pt-selected-bar{
+  margin-top:10px;padding:9px 12px;border-radius:8px;
+  background:var(--ra);border:1px solid var(--rb);
+  display:none;
+}
+.pt-selected-bar.show{display:block;}
+.pt-selected-bar-lb{font-family:var(--mono);font-size:7px;color:var(--red);letter-spacing:.18em;margin-bottom:3px;}
+.pt-selected-bar-name{font-family:var(--serif);font-size:12px;color:var(--ink2);}
+
+@keyframes lp{0%,100%{opacity:.18}50%{opacity:.85}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR + ARC: unified header, title floats in arch -->
+  <div class="topbar">
+    <div class="arc-outer" id="arcWrap">
+      <!-- Title centered in the arch -->
+      <div class="arc-title-wrap">
+        <div class="topbar-title">寄往岁月</div>
+        <div class="topbar-sub">LETTERS · TO · SELF</div>
+      </div>
+      <!-- Avatar nodes injected here -->
+      <div class="arc-canvas" id="arcCanvas"></div>
+    </div>
+  </div>
+  <div class="arc-dots" id="arcDots"></div>
+
+  <!-- DRAWER -->
+  <div class="drw-clip" id="drwClip">
+    <div class="drw-box">
+      <div class="drw-head">
+        <div class="d-av" id="dAv"></div>
+        <div>
+          <div class="d-name" id="dName">—</div>
+          <div class="d-cnt" id="dCnt">聊天列表</div>
+        </div>
+      </div>
+      <div class="bk-list" id="bkList"></div>
+    </div>
+  </div>
+
+  <!-- LETTERS -->
+  <div class="lt-area" id="ltArea">
+    <div class="welcome" id="welcome">
+      <div class="welcome-g">书</div>
+      <div class="welcome-t">寄往岁月的信<br/>写给彼时的自己</div>
+      <div class="welcome-h">↑ 左右滑动月相，点选角色</div>
+    </div>
+    <div id="ltCont" style="display:none;"></div>
+  </div>
+</div>
+
+<button class="fab" onclick="openSP()"><span class="fab-i">择</span></button>
+<div class="ov" id="ov" onclick="if(event.target===this)closeSP()">
+  <div class="sp">
+    <div class="sp-pill"><div class="sp-bar"></div></div>
+    <div class="sp-head">
+      <div class="sp-title">择信而读</div>
+      <div class="sp-sub">MULTI · SELECT · LETTERS</div>
+    </div>
+    <!-- TAB BAR -->
+    <div class="sp-tabs">
+      <button class="sp-tab on" id="tabA" onclick="switchTab('A')">
+        择信
+        <span class="sp-tab-sub">SELECT</span>
+      </button>
+      <button class="sp-tab" id="tabB" onclick="switchTab('B')">
+        信笺提示词
+        <span class="sp-tab-sub">PROMPT</span>
+      </button>
+    </div>
+
+    <!-- PAGE A: 选信 -->
+    <div class="sp-body sp-page on" id="pageA">
+      <div class="sp-slbl">选择角色</div>
+      <div class="sp-grid" id="spGrid"><div class="ld"><div class="ld-d"><span></span><span></span><span></span></div></div></div>
+      <div class="sp-cwrap" id="spCW">
+        <div class="sp-slbl" style="margin-top:4px;">选择聊天</div>
+        <div class="sp-clbl" id="spCL"></div>
+        <div id="spCI"></div>
+      </div>
+    </div>
+
+    <!-- PAGE B: 提示词 -->
+    <div class="sp-body sp-page" id="pageB">
+      <div class="pt-list" id="ptList"></div>
+      <button class="pt-add-btn" onclick="ptAdd()">新增提示词卡片</button>
+      <div class="pt-selected-bar" id="ptSelectedBar">
+        <div class="pt-selected-bar-lb">当前选用 · ACTIVE PROMPT</div>
+        <div class="pt-selected-bar-name" id="ptSelectedName">—</div>
+      </div>
+    </div>
+
+    <div class="sp-foot" id="spFoot">
+      <div class="msg-count-row">
+        <span class="msg-count-lbl">取读尺素</span>
+        <div class="msg-count-wrap">
+          <input class="msg-count-input" id="msgCountInput" type="number" min="0" value="0" placeholder="0"/>
+        </div>
+        <span class="msg-count-unit">条聊天记录</span>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="qinqi-btn" id="qinqiBtn" onclick="doConfirm()">亲　启</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 顶部古风提示横幅 -->
+<div class="letter-banner" id="letterBanner">
+  <div class="letter-banner-inner">
+    <span class="letter-banner-deco">✦</span>
+    <span class="letter-banner-txt" id="letterBannerTxt">研墨铺纸，正在召唤岁月书使……</span>
+    <span class="letter-banner-deco">✦</span>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════
+   DB — uses window.__tsukiDb when available (from db-schema.js)
+   Falls back to its own open() only if needed.
+   Does NOT fight with db-schema.js's versionchange handler.
+══════════════════════════════════════ */
+const IDB_NAME = 'tsukiphonepromax';
+// Only the stores we actually need to read
+const NEED_STORES = ['chars','chats','messages','letters'];
+
+async function getDb(){
+  // Prefer the shared connection from db-schema.js
+  if(window.__tsukiDb) return window.__tsukiDb;
+  if(window.tsukiDbReady){
+    try{ return await window.tsukiDbReady; }catch(e){}
+  }
+  // Fallback: open read-only (no schema changes, avoids version conflict)
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open(IDB_NAME);
+    r.onsuccess = e => res(e.target.result);
+    r.onerror   = e => rej(e.target.error);
+    // Don't touch onupgradeneeded — let db-schema.js handle it
+  });
+}
+// 桥接给 PromptHelper.js 使用（它优先读 window.openDb）
+window.openDb = getDb;
+
+async function dbAll(store){
+  try{
+    const db = await getDb();
+    if(!db || !db.objectStoreNames.contains(store)) return [];
+    return new Promise((r,j)=>{
+      const q = db.transaction(store,'readonly').objectStore(store).getAll();
+      q.onsuccess = ()=>r(q.result||[]);
+      q.onerror   = e=>j(e.target.error);
+    });
+  }catch(e){ console.warn('[Letter] dbAll error',store,e); return []; }
+}
+
+async function dbGet(store, key){
+  try{
+    const db = await getDb();
+    if(!db || !db.objectStoreNames.contains(store)) return null;
+    return new Promise((r,j)=>{
+      const q = db.transaction(store,'readonly').objectStore(store).get(key);
+      q.onsuccess = ()=>r(q.result||null);
+      q.onerror   = e=>j(e.target.error);
+    });
+  }catch(e){ return null; }
+}
+
+async function dbPut(store, obj){
+  try{
+    const db = await getDb();
+    if(!db || !db.objectStoreNames.contains(store)) return;
+    return new Promise((r,j)=>{
+      const tx = db.transaction(store,'readwrite');
+      const q  = tx.objectStore(store).put(obj);
+      q.onsuccess = ()=>r(q.result);
+      q.onerror   = e=>j(e.target.error);
+    });
+  }catch(e){ console.warn('[Letter] dbPut error',e); }
+}
+
+async function loadMsgs(chatId){
+  try{
+    const db = await getDb();
+    if(!db || !db.objectStoreNames.contains('messages')) return [];
+    return new Promise(res=>{
+      const st    = db.transaction('messages','readonly').objectStore('messages');
+      const range = IDBKeyRange.bound([chatId,0],[chatId,Infinity]);
+      const msgs  = [];
+      const req   = st.openCursor(range,'next');
+      req.onsuccess = e=>{ const c=e.target.result; if(c){msgs.push(c.value);c.continue();}else res(msgs); };
+      req.onerror   = ()=>res([]);
+    });
+  }catch(e){ return []; }
+}
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let _chars=[], _chats=[];
+let _arcIdx=0;
+let _activeCharId=null, _activeChatId=null;
+let _spCharId=null, _spSel=new Set();
+
+/* ══════════════════════════════════════
+   MOON ARC — real SVG crescent phases
+══════════════════════════════════════ */
+
+/**
+ * Draw a moon phase as an SVG circle.
+ * phase 0=new … 4=full … 8=new again (cyclic)
+ * Returns an <svg> element sized sz×sz.
+ *
+ * Method: two overlapping circles on a black background circle.
+ *   - The lit half is a white filled half-circle (left or right)
+ *   - The terminator shadow is another circle that "bites" into it
+ */
+function moonSVG(sz, phaseIdx){
+  // sz = ringW (outer ring dimension including padding)
+  // We want the SVG to cover the entire ring div so the crescent
+  // naturally clips to the circle boundary.
+  const r  = sz / 2;
+  const cx = r, cy = r;
+  const phase = ((phaseIdx % 8) + 8) % 8;
+
+  let frac, waxing;
+  if(phase <= 4){ frac = phase/4; waxing = true; }
+  else          { frac = (8-phase)/4; waxing = false; }
+
+  const litColor  = '#dedad4';   // warm grey lit side
+  const darkColor = '#2e2c2a';   // dark side
+
+  const ns  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns,'svg');
+  svg.setAttribute('width', sz);
+  svg.setAttribute('height', sz);
+  svg.setAttribute('viewBox',`0 0 ${sz} ${sz}`);
+  // Absolutely covers the ring div; border-radius clips to circle
+  svg.style.cssText = `position:absolute;inset:0;width:${sz}px;height:${sz}px;border-radius:50%;pointer-events:none;overflow:hidden;z-index:2;opacity:0.82;`;
+
+  // Full dark base
+  const base = document.createElementNS(ns,'circle');
+  base.setAttribute('cx',cx); base.setAttribute('cy',cy); base.setAttribute('r',r);
+  base.setAttribute('fill', darkColor);
+  svg.appendChild(base);
+
+  if(frac === 0) return svg;   // new moon — all dark
+
+  if(frac === 1){
+    // Full moon — replace with lit circle
+    base.setAttribute('fill', litColor);
+    return svg;
+  }
+
+  // Lit half-circle (right for waxing, left for waning)
+  const half = document.createElementNS(ns,'path');
+  if(waxing){
+    half.setAttribute('d',`M ${cx},0 A ${r},${r} 0 0,1 ${cx},${sz} Z`);
+  } else {
+    half.setAttribute('d',`M ${cx},0 A ${r},${r} 0 0,0 ${cx},${sz} Z`);
+  }
+  half.setAttribute('fill', litColor);
+  svg.appendChild(half);
+
+  // Terminator ellipse
+  const ell = document.createElementNS(ns,'ellipse');
+  ell.setAttribute('cy', cy);
+  ell.setAttribute('ry', r);
+  ell.setAttribute('cx', cx);
+
+  if(frac < 0.5){
+    // Crescent: dark ellipse bites into lit half
+    ell.setAttribute('rx', r*(1 - frac*2));
+    ell.setAttribute('fill', darkColor);
+  } else {
+    // Gibbous: lit ellipse expands from center
+    ell.setAttribute('rx', r*(frac*2 - 1));
+    ell.setAttribute('fill', litColor);
+  }
+  svg.appendChild(ell);
+
+  return svg;
+}
+
+function buildArc(){
+  const wrapEl  = document.getElementById('arcWrap');
+  const canvas  = document.getElementById('arcCanvas');
+  const dotsEl  = document.getElementById('arcDots');
+  canvas.innerHTML=''; dotsEl.innerHTML='';
+
+  const n = _chars.length;
+  if(!n){
+    canvas.innerHTML='<div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:13px;color:var(--ink4);">暂无角色</div>';
+    return;
+  }
+
+  const W  = wrapEl.offsetWidth || 390;
+
+  // ∩ arch geometry: circle center ABOVE the wrap.
+  // Avatars sit on the LOWER portion of a large circle.
+  // At angle=π/2 (6-o'clock) → center avatar is at the BOTTOM of the arc.
+  // At angles < π/2 or > π/2 → side avatars are HIGHER (arc bows upward).
+  //
+  // We place the circle center at y = -arcTop (above the wrap top).
+  // ARCH_TOP = how far the arc peak rises above wrap top (creates the dome).
+  // Center avatar y = cy + R*sin(π/2) = cy + R
+  // We want center avatar near bottom of topbar, so:
+  //   cy + R = AVATAR_BOTTOM_Y  →  cy = AVATAR_BOTTOM_Y - R
+
+  // The title sits inside arc-title-wrap (normal flow, ~52px tall).
+  // Avatars need to be positioned relative to the arc-outer element.
+  // arc-outer height is set dynamically.
+
+  const TITLE_H   = 56;    // approx height of title block in px
+  const AVATAR_SZ = 42;    // center avatar diameter
+  const RING_PAD  = 4;
+  const LABEL_H   = 18;    // height for name label below ring
+  const AVATAR_BOTTOM = TITLE_H + 8 + (AVATAR_SZ/2 + RING_PAD); // y of center of center-avatar
+
+  // Large radius → gentle curve
+  const R  = Math.max(480, W * 1.4);
+  const cx = W / 2;
+  const cy = AVATAR_BOTTOM - R;   // circle center well above wrap (negative y typically)
+
+  // Angular step between items — wider spacing
+  const ANG_STEP = 0.13;   // ~7.5° per slot, feels spacious
+
+  // Calculate total height needed: tallest side avatar y + ring + label
+  let maxY = AVATAR_BOTTOM;
+  for(let i=0; i<n; i++){
+    const offset = i - _arcIdx;
+    const angle  = Math.PI/2 + offset * ANG_STEP;
+    const y      = cy + R * Math.sin(angle);
+    if(y > maxY) maxY = y;
+  }
+  const wrapH = maxY + RING_PAD + LABEL_H + 14;
+  wrapEl.style.height = wrapH + 'px';
+  canvas.style.height  = wrapH + 'px';
+
+  _chars.forEach((ch, i) => {
+    const offset   = i - _arcIdx;
+    const angle    = Math.PI/2 + offset * ANG_STEP;
+    const x        = cx + R * Math.cos(angle);
+    const y        = cy + R * Math.sin(angle);
+
+    const dist     = Math.abs(offset);
+    const isCenter = (i === _arcIdx);
+    const maxD     = Math.max(Math.ceil(n/2), 3);
+    const t        = Math.max(0, 1 - dist/maxD);
+    const sz       = isCenter ? AVATAR_SZ : Math.round(26 + t * 12);
+    const op       = isCenter ? 1 : Math.max(0.18, 0.22 + t * 0.50);
+
+    const phaseIdx = Math.max(0, Math.min(7, 4 - Math.round(dist * 1.5)));
+
+    const ringGlow = isCenter
+      ? `box-shadow:0 0 0 1.5px var(--red),0 3px 12px -3px rgba(140,32,32,0.22);`
+      : dist===1 ? `box-shadow:0 1px 6px -2px rgba(0,0,0,0.09);`
+                 : `box-shadow:0 1px 3px -1px rgba(0,0,0,0.05);`;
+
+    const node = document.createElement('div');
+    node.className = 'arc-node' + (isCenter ? ' center' : '');
+    node.style.cssText = `left:${x}px;top:${y}px;opacity:${op};`;
+
+    const avInner = ch.avatar
+      ? `<img src="${esc(ch.avatar)}" alt=""/>`
+      : `<span>${(ch.name||'?').charAt(0)}</span>`;
+
+    const ringW = sz + RING_PAD*2;
+    node.innerHTML = `
+      <div class="arc-ring" style="width:${ringW}px;height:${ringW}px;${ringGlow}">
+        <div class="arc-av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.38)}px;">
+          ${avInner}
+        </div>
+      </div>
+      <div class="arc-lbl">${esc(ch.name||ch.remark||'?')}</div>
+    `;
+
+    if(!isCenter){ node.querySelector('.arc-ring').appendChild(moonSVG(ringW, phaseIdx)); }
+    node.addEventListener('click', ()=>selectChar(i));
+    canvas.appendChild(node);
+
+    const dot = document.createElement('div');
+    dot.className = 'arc-dot' + (isCenter ? ' on' : '');
+    dotsEl.appendChild(dot);
+  });
+}
+
+/* ── smooth drag with momentum ── */
+let _drg = {on:false, sx:0, bi:0, vel:0, lx:0, raf:null, frac:0};
+
+function arcDown(x){
+  if(_drg.raf){cancelAnimationFrame(_drg.raf);_drg.raf=null;}
+  _drg={on:true,sx:x,bi:_arcIdx,frac:_arcIdx,vel:0,lx:x,raf:null};
+}
+function arcMove(x){
+  if(!_drg.on)return;
+  _drg.vel = x - _drg.lx; _drg.lx = x;
+  const step = (_drg.sx - x) / 52;
+  const ni = Math.max(0, Math.min(_chars.length-1, _drg.bi + step));
+  _drg.frac = ni;
+  const rnd = Math.round(ni);
+  if(rnd !== _arcIdx){ _arcIdx = rnd; buildArc(); }
+}
+function arcUp(){
+  if(!_drg.on)return; _drg.on=false;
+  let v = -_drg.vel;
+  function momentum(){
+    if(Math.abs(v)<0.3)return;
+    v *= 0.82;
+    const ni = Math.max(0, Math.min(_chars.length-1, _arcIdx + v/52));
+    const rnd = Math.round(ni);
+    if(rnd !== _arcIdx){ _arcIdx=rnd; buildArc(); }
+    _drg.raf = requestAnimationFrame(momentum);
+  }
+  _drg.raf = requestAnimationFrame(momentum);
+}
+
+function initArcEvents(){
+  const w = document.getElementById('arcWrap');
+  w.addEventListener('touchstart', e=>arcDown(e.touches[0].clientX), {passive:true});
+  w.addEventListener('touchmove',  e=>arcMove(e.touches[0].clientX), {passive:true});
+  w.addEventListener('touchend',   arcUp, {passive:true});
+  w.addEventListener('mousedown',  e=>arcDown(e.clientX));
+  window.addEventListener('mousemove', e=>arcMove(e.clientX));
+  window.addEventListener('mouseup',   arcUp);
+}
+
+/* ══════════════════════════════════════
+   CHAR / CHAT SELECTION
+══════════════════════════════════════ */
+function selectChar(i){
+  _arcIdx = i; buildArc();
+  const ch = _chars[i]; if(!ch)return;
+  // Different char selected → clear active chat and letter area immediately
+  if(_activeCharId !== ch.id){
+    _activeCharId = ch.id;
+    _activeChatId = null;
+    clearLetterArea();
+  }
+  openDrawer(ch);
+}
+
+function clearLetterArea(){
+  document.getElementById('welcome').style.display='none';
+  const cont = document.getElementById('ltCont');
+  cont.style.display='none';
+  cont.innerHTML='';
+}
+
+function openDrawer(ch){
+  const chats = _chats.filter(c=>c.charIds&&c.charIds.includes(ch.id));
+  const av = document.getElementById('dAv');
+  av.innerHTML = ch.avatar ? `<img src="${esc(ch.avatar)}" alt=""/>` : (ch.name||'?').charAt(0);
+  document.getElementById('dName').textContent  = ch.name||ch.remark||'—';
+  document.getElementById('dCnt').textContent   = `${chats.length} 段对话`;
+  const list = document.getElementById('bkList');
+  list.innerHTML='';
+  if(!chats.length){
+    list.innerHTML='<div class="bk-empty">此角色暂无聊天记录</div>';
+  } else {
+    chats.forEach(chat=>{
+      const el=document.createElement('div');
+      el.className='bk-item'+(chat.id===_activeChatId?' on':'');
+      const t=chat.customName||chat.title||chat.name||'Untitled';
+      el.innerHTML=`<div class="bk-tab"></div><div class="bk-body"><div class="bk-title">${esc(t)}</div><div class="bk-meta">${chat.type==='group'?'群聊':'私信'} · ${fd(chat.updatedAt)}</div></div><div class="bk-arr">▸</div>`;
+      el.addEventListener('click',()=>doSelectChat(chat,ch,el));
+      list.appendChild(el);
+    });
+  }
+  document.getElementById('drwClip').classList.add('open');
+}
+
+async function doSelectChat(chat,ch,el){
+  _activeChatId=chat.id;
+  document.querySelectorAll('.bk-item').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  await renderLetters(ch,chat);
+}
+
+/* ══════════════════════════════════════
+   LETTERS — load or create from DB
+══════════════════════════════════════ */
+const VTYPES = ['va','vb','vc','vd','ve'];
+
+const SEC_TITLES = [
+  ['见字如面','初识那年','相遇之始','流光记忆'],
+  ['半途留言','渐入佳境','共度时光','岁月如歌'],
+  ['他乡来信','归途书简','长夜倾谈','无眠时分'],
+  ['烟火细语','平凡日常','碎碎念念','寻常光景'],
+  ['意难平处','未竟之语','心事重重','千言万语'],
+];
+
+const STUB_BODIES = [
+`见字如面。
+
+展信若晤，不知你近来可好。那些年我们说过的话，想过的事，有多少最终化作了沉默，又有多少在某个辗转难眠的夜里，还会悄悄浮上心头？
+
+我想告诉你的，其实一直都没有减少过，只是越来越不知道从何说起。
+
+时日长了，有些话不说也懂；可有些话，不说就真的没有机会了。
+
+愿你无恙，愿你平安，愿你有人问暖，有人相伴，有灯火等候。`,
+
+`吾妻书。
+
+展信佳。
+
+窗外又落了一场雨，淅沥沥地打在屋檐上，我便想起了你喜欢雨天的样子——端着茶杯，望着远处发呆，也不知在想什么，却让人觉得那一刻的你，和周遭的一切都恰如其分。
+
+有时候我想，我所能描述你的词汇，早就穷尽了。剩下的那些，只好让时间去记。
+
+窗外雨声渐密，一切安好，勿念。`,
+
+`故人书。
+
+好久不见，近来可好？
+
+我常常会想起那段日子，想起那些说了一半的句子，和埋在回忆里的笑声。也许时间真的会冲淡许多东西，但总有些影子，在某一个不经意的瞬间，又清晰地浮现出来，让人措手不及。
+
+你还是从前的模样吗？还是已经变了很多，连自己都认不出来了？
+
+无论如何，希望你一切都好，希望你所在的地方，有温暖的光，和值得爱的人。`,
+
+`深夜来信。
+
+已是子时，窗外万籁俱寂，月色落在书桌上，冷而白。
+
+不知道为什么，在这样的时刻，总会想起你说过的那些话。你说，人最怕的不是别离，而是明明还在，心却已经走远了。
+
+那时我没有答话，因为我知道你说的，是真的。有些距离，不是空间造成的。我现在才想清楚这些，只是不知道，说出来，还有没有用。`,
+
+`来信匆匆。
+
+字句仓促，意在言外。
+
+你知道我不善表达，总在说出口的那一刻，把最想说的那部分藏了起来。就像现在——我有很多话，却不知从哪里开始，也不知要说到哪里结束。
+
+那就先到这里吧。等哪天，我想清楚了，再慢慢告诉你。
+
+一切如故，见信如晤。`,
+];
+
+const STUB_REGRETS = [
+  '那次争执之后，我没有先开口。等到想开口，已经不知道说什么了。',
+  '有些话本可以当面说清楚，却一拖再拖，拖成了永远的缺口。',
+  '我没有在那个最好的时机，告诉你，你对我来说意味着什么。',
+  '那些夜里，我关掉了对话框，却不知道你在等我回复。',
+  '我总以为还有时间，可时间从不等人说"再等一等"。',
+];
+const STUB_HOPES = [
+  '愿往后的日子里，有人懂你一半，你也懂自己一半，加起来刚好圆满。',
+  '愿你此后遇见的人，都真心待你；愿你不再需要猜测，什么是被珍视的感觉。',
+  '愿你在某个平凡的午后，忽然发现，原来一切都已经好了。',
+  '愿未来的你，比现在勇敢一点点，能说出口那些最重要的话。',
+  '愿所有的意难平，都随岁月慢慢和解，化成你胸口最柔软的地方。',
+];
+const STUB_AGES  = ['十八岁','二十二岁','二十五岁','二十八岁','三十岁'];
+const STUB_OFF   = [86400000*365*5, 86400000*365*3, 86400000*365, 86400000*180, 86400000*30];
+
+function buildSections(msgs, charName){
+  const txts = msgs.filter(m=>typeof m.content==='string'&&m.content.trim()&&m.type!=='system');
+  const N = 5;
+  const sections = [];
+  const chunk = txts.length ? Math.max(3, Math.ceil(txts.length/N)) : 0;
+
+  for(let i=0; i<N; i++){
+    const sl   = txts.slice(i*chunk, (i+1)*chunk);
+    const tset = SEC_TITLES[i%SEC_TITLES.length];
+    if(!sl.length){
+      sections.push({
+        idx:i, title:tset[i%tset.length], type:VTYPES[i%VTYPES.length],
+        ts:Date.now()-STUB_OFF[i], age:STUB_AGES[i],
+        excerpt:STUB_BODIES[i].split('\n').find(l=>l.length>6)||'见字如面。',
+        body:STUB_BODIES[i],
+        regret:STUB_REGRETS[i%STUB_REGRETS.length],
+        hope:STUB_HOPES[i%STUB_HOPES.length],
+      });
+    } else {
+      const cmsgs = sl.filter(m=>m.senderRole==='char').map(m=>m.content.trim());
+      const umsgs = sl.filter(m=>m.senderRole==='user').map(m=>m.content.trim());
+      const all   = [...cmsgs,...umsgs].filter(Boolean);
+      const body  = all.length ? all.slice(0,6).join('\n\n') : STUB_BODIES[i];
+      sections.push({
+        idx:i, title:tset[i%tset.length], type:VTYPES[i%VTYPES.length],
+        ts:sl[0]?.timestamp||Date.now(), age:gAge(sl[0]?.timestamp,i),
+        excerpt:(all[0]||'').substring(0,55)+(all[0]&&all[0].length>55?'…':''),
+        body, regret:(cmsgs.slice(-2).join('\n')||STUB_REGRETS[i%STUB_REGRETS.length]).substring(0,200),
+        hope:(umsgs.slice(-1)[0]||STUB_HOPES[i%STUB_HOPES.length]).substring(0,200),
+      });
+    }
+  }
+  return sections;
+}
+
+function gAge(ts,idx){
+  if(!ts) return STUB_AGES[idx%STUB_AGES.length];
+  return `${new Date(ts).getFullYear()%100+18}岁`;
+}
+
+async function loadOrCreate(charId, chatId, charName, chatTitle){
+  const id  = `letter_${charId}_${chatId}`;
+  let rec   = await dbGet('letters', id);
+  if(rec) return rec;
+  const msgs = await loadMsgs(chatId);
+  rec = { id, charId, chatId, charName:charName||'?', chatTitle:chatTitle||'Untitled',
+          sections:buildSections(msgs, charName), createdAt:Date.now(), updatedAt:Date.now() };
+  await dbPut('letters', rec);
+  return rec;
+}
+
+/* Always returns 5 default stub letter sections — no message parsing */
+function buildDefaultSections(){
+  const N = 5;
+  return Array.from({length:N}, (_,i)=>{
+    const tset = SEC_TITLES[i % SEC_TITLES.length];
+    return {
+      idx:i, title:tset[i % tset.length], type:VTYPES[i % VTYPES.length],
+      ts:Date.now() - STUB_OFF[i], age:STUB_AGES[i],
+      excerpt:STUB_BODIES[i].split('\n').find(l=>l.length>5)||'见字如面。',
+      body:STUB_BODIES[i],
+      regret:STUB_REGRETS[i % STUB_REGRETS.length],
+      hope:STUB_HOPES[i % STUB_HOPES.length],
+    };
+  });
+}
+
+async function renderLetters(ch, chat){
+  const cont = document.getElementById('ltCont');
+  document.getElementById('welcome').style.display='none';
+  cont.style.display='block';
+  cont.innerHTML='';
+
+  // Header row
+  const div = ce('div','sec-div');
+  div.innerHTML=`<div class="sec-ln"></div><div class="sec-t">人生旅信 · TIMELINE</div><div class="sec-ln"></div>`;
+  cont.appendChild(div);
+  const cr = ce('div','char-row');
+  cr.id = 'aiCharRow';
+  cr.innerHTML=`<div class="cr-av">${ch.avatar?`<img src="${esc(ch.avatar)}" alt=""/>`:ch.name.charAt(0)}</div><div class="cr-name">${esc(ch.name||'?')} · <span id="aiUserNameSpan">—</span></div>`;
+  cont.appendChild(cr);
+
+  // 先查 IDB 有无 AI 生成的存库信笺
+  const recId = `letter_${ch.id}_${chat.id}`;
+  const saved = await dbGet('letters', recId);
+
+  if(saved && Array.isArray(saved.letters) && saved.letters.length > 0){
+    // 有存库 → 直接渲染
+    const tl = ce('div','tl');
+    tl.id = 'aiLetterTl';
+    cont.appendChild(tl);
+    renderAiLetters(saved.letters, ch, chat, saved.userName || '—');
+    return;
+  }
+
+  // 无存库 → 显示占位提示
+  const hint = ce('div','welcome');
+  hint.style.minHeight='180px';
+  hint.innerHTML = `
+    <div class="welcome-g" style="font-size:48px;opacity:.06;">信</div>
+    <div class="welcome-t" style="font-size:13px;">此段旅途尚无信笺<br/>点击右下角「择」，选择本段聊天亲启</div>
+    <div class="welcome-h">TAP · 择 · TO · GENERATE</div>`;
+  cont.appendChild(hint);
+}
+
+/* build timeline item */
+function mkTlItem(sec,i,ch){
+  const item = ce('div','tl-item');
+  item.style.animationDelay=`${i*65}ms`;
+  const dot = ce('div','tl-dot'); dot.innerHTML='<div class="tl-dot-in"></div>';
+  const ts  = ce('div','tl-ts');
+  ts.innerHTML=`<span>${fdL(sec.ts)}</span><span class="age-chip">${esc(sec.age)}</span>`;
+  const prev = mkPrev(sec,ch);
+  const full = mkFull(sec,ch);
+  prev.querySelector('.c-preview').addEventListener('click',()=>{
+    item.classList.add('expanded');
+    setTimeout(()=>item.scrollIntoView({behavior:'smooth',block:'start'}),20);
+  });
+  full.querySelector('.full-coll').addEventListener('click',e=>{
+    e.stopPropagation(); item.classList.remove('expanded');
+  });
+  full.querySelector('.full-hdr').addEventListener('click',()=>{
+    item.classList.remove('expanded');
+  });
+  item.appendChild(dot); item.appendChild(ts);
+  item.appendChild(prev); item.appendChild(full);
+  return item;
+}
+
+function mkPrev(sec,ch){
+  const v=sec.type, wrap=ce('div',v);
+  const inner=`
+    <div class="cp-eye">
+      ${{va:'信笺',vb:'素笺',vc:'邮票',vd:'竹简',ve:'明信'}[v]||'信笺'} · LETTER
+      <span class="cp-etag">${esc(sec.age)}</span>
+    </div>
+    <div class="cp-title">${esc(sec.title)}</div>
+    <div class="cp-exc">${esc(sec.excerpt||sec.body.split('\n').find(l=>l.length>5)||'…')}</div>
+    <div class="cp-hint">展开读信 <span class="cp-arr">↓</span></div>`;
+
+  if(v==='va')      wrap.innerHTML=`<div class="c-preview">${inner}</div>`;
+  else if(v==='vb') wrap.innerHTML=`<div class="c-preview"><div class="vb-t"></div><div class="vb-b">${inner}</div></div>`;
+  else if(v==='vc') wrap.innerHTML=`<div class="c-preview"><div class="vc-stmp"><div class="vc-sc">信</div><div class="vc-sv">LETTER</div></div>${inner}</div>`;
+  else if(v==='vd') wrap.innerHTML=`<div class="c-preview"><div class="vd-s"></div><div class="vd-b">${inner}</div></div>`;
+  else              wrap.innerHTML=`<div class="c-preview"><div class="ve-sp"><div class="ve-l">${inner}</div><div class="ve-r"><div class="ve-stmp"><div class="ve-sc">信</div></div><div class="ve-pm">岁月<br/>邮驿<br/>${new Date(sec.ts).getFullYear()}</div></div></div></div>`;
+  return wrap;
+}
+
+function mkFull(sec,ch){
+  const d=ce('div','c-full');
+  d.innerHTML=`
+    <div class="full-paper">
+      <div class="full-body">
+        <div class="full-hdr">
+          <div class="full-to">
+            <div class="full-to-lb">致 · TO</div>
+            <div class="full-to-name">${esc(sec.age)}的自己</div>
+            <div class="full-to-sub">来自 ${esc(ch.name||'往昔')} · ${fdL(sec.ts)}</div>
+          </div>
+          <div class="full-stmp-col">
+            <div class="full-stmp"><div class="full-stmp-ch">信</div></div>
+            <div class="full-pm">岁月<br/>邮驿<br/>${new Date(sec.ts).getFullYear()}</div>
+          </div>
+        </div>
+        <div class="full-title-row">
+          <div class="full-title-text">${esc(sec.title)}</div>
+          <div class="full-title-sub">TITLE · 信笺题名</div>
+        </div>
+        <div class="full-exc-card">
+          <div class="full-exc-lb">摘录 · EXCERPT</div>
+          <div class="full-exc-txt">${esc(sec.excerpt||sec.body.split('\n').find(l=>l.length>5)||'…')}</div>
+        </div>
+        <div class="full-sal">你好，${esc(sec.age)}的自己：</div>
+        <div class="full-txt">${esc((sec.body||'').replace(/^\s+/,''))}</div>
+        <div class="blk blk-r">
+          <div class="blk-lb blk-lb-r">意难平 · 未言之憾</div>
+          <div class="blk-txt">${esc(sec.regret)}</div>
+        </div>
+        <div class="blk blk-g">
+          <div class="blk-lb blk-lb-g">憧憬 · 所愿之事</div>
+          <div class="blk-txt">${esc(sec.hope)}</div>
+        </div>
+        <div class="full-ftr">
+          <div class="full-signed">
+            <div class="full-sig-lb">落款 · FROM</div>
+            <div class="full-sig-name">${esc(ch.name||'昔日')}</div>
+            <div class="full-sig-dt">${fdL(sec.ts)}</div>
+          </div>
+          <div class="full-seal"><div class="full-seal-ch">${(ch.name||'我').charAt(0)}</div></div>
+        </div>
+      </div>
+      <button class="full-coll">收 · 起 · 信 · 笺</button>
+    </div>`;
+  return d;
+}
+
+/* ══════════════════════════════════════
+   SETTINGS PANEL
+══════════════════════════════════════ */
+function openSP(){ buildSPChars(); ptRender(); document.getElementById('ov').classList.add('open'); }
+function closeSP(){ document.getElementById('ov').classList.remove('open'); }
+
+function switchTab(t){
+  document.getElementById('tabA').classList.toggle('on', t==='A');
+  document.getElementById('tabB').classList.toggle('on', t==='B');
+  document.getElementById('pageA').classList.toggle('on', t==='A');
+  document.getElementById('pageB').classList.toggle('on', t==='B');
+  document.getElementById('spFoot').style.display = t==='A' ? '' : 'none';
+}
+
+function buildSPChars(){
+  const g=document.getElementById('spGrid'); g.innerHTML='';
+  if(!_chars.length){g.innerHTML='<div style="font-size:13px;color:var(--ink4);">暂无角色</div>';return;}
+  _chars.forEach(ch=>{
+    const el=document.createElement('div'); el.className='sp-char'+(ch.id===_spCharId?' on':'');
+    el.innerHTML=`<div class="sp-cav"><div class="sp-cav-in">${ch.avatar?`<img src="${esc(ch.avatar)}" alt=""/>`:ch.name.charAt(0)}</div></div><div class="sp-cname">${esc(ch.name||ch.remark||'?')}</div>`;
+    el.addEventListener('click',()=>spChar(ch.id)); g.appendChild(el);
+  });
+}
+function spChar(cid){
+  _spCharId=cid;
+  document.querySelectorAll('.sp-char').forEach((el,i)=>el.classList.toggle('on',_chars[i]&&_chars[i].id===cid));
+  const chats=_chats.filter(c=>c.charIds&&c.charIds.includes(cid));
+  const ch=_chars.find(c=>c.id===cid);
+  document.getElementById('spCW').classList.add('show');
+  document.getElementById('spCL').textContent=(ch?.name||'角色')+' 的旅途';
+  const list=document.getElementById('spCI'); list.innerHTML='';
+  if(!chats.length){list.innerHTML='<div style="padding:10px 0;font-size:13px;color:var(--ink4);">暂无聊天</div>';return;}
+  chats.forEach(chat=>{
+    const id=chat.id, sel=_spSel.has(id);
+    const el=document.createElement('div'); el.className='sp-ci'+(sel?' on':'');
+    el.innerHTML=`<div class="sp-chk">${sel?'✓':''}</div><div class="sp-cname2">${esc(chat.customName||chat.title||chat.name||'Untitled')}</div>`;
+    el.addEventListener('click',()=>{
+      if(_spSel.has(id)){
+        _spSel.delete(id);el.classList.remove('on');el.querySelector('.sp-chk').textContent='';
+      } else {
+        // 单选模式：清空已选，只选当前
+        _spSel.clear();
+        document.querySelectorAll('#spCI .sp-ci').forEach(x=>{x.classList.remove('on');x.querySelector('.sp-chk').textContent='';});
+        _spSel.add(id);el.classList.add('on');el.querySelector('.sp-chk').textContent='✓';
+      }
+    }); list.appendChild(el);
+  });
+}
+function doConfirm(){
+  // ① 必须且只能选中一个聊天
+  const sel = [..._spSel];
+  if(sel.length === 0){ showToast('请先选择一个聊天'); return; }
+  if(sel.length > 1){ showToast('亲启功能每次只支持一段旅途'); return; }
+
+  const chatId = sel[0];
+  const chat   = _chats.find(c => c.id === chatId);
+  if(!chat){ showToast('未找到该聊天记录'); return; }
+
+  // 找对应角色
+  const charId = (chat.charIds || [])[0];
+  const ch     = _chars.find(c => c.id === charId) || {id:'?', name:'往昔', avatar:null};
+
+  // 获取当前选中的信笺提示词
+  const activePrompt = (typeof window.getActivePrompt === 'function') ? window.getActivePrompt() : null;
+  const stylePromptText = activePrompt ? activePrompt.prompt : '';
+
+  // 获取消息条数
+  const msgCountEl = document.getElementById('msgCountInput');
+  const _raw = parseInt(msgCountEl?.value);
+  const msgCount = (!_raw || _raw <= 0) ? Infinity : _raw;
+
+  // 关闭面板
+  closeSP();
+
+  // 显示信笺区域（先渲染 header，提示等待）
+  const cont = document.getElementById('ltCont');
+  document.getElementById('welcome').style.display = 'none';
+  cont.style.display = 'block';
+  cont.innerHTML = '';
+
+  const div = ce('div','sec-div');
+  div.innerHTML = `<div class="sec-ln"></div><div class="sec-t">人生旅信 · TIMELINE</div><div class="sec-ln"></div>`;
+  cont.appendChild(div);
+  const cr = ce('div','char-row');
+  cr.id = 'aiCharRow';
+  cr.innerHTML = `<div class="cr-av">${ch.avatar?`<img src="${esc(ch.avatar)}" alt=""/>`:ch.name.charAt(0)}</div><div class="cr-name">${esc(ch.name||'?')} · <span id="aiUserNameSpan">…</span></div>`;
+  cont.appendChild(cr);
+
+  // 时间线占位
+  const tl = ce('div','tl');
+  tl.id = 'aiLetterTl';
+  const ldiv = ce('div','ld');
+  ldiv.innerHTML = `<div class="ld-d"><span></span><span></span><span></span></div><span>信笺正在穿越时光而来…</span>`;
+  tl.appendChild(ldiv);
+  cont.appendChild(tl);
+
+  // 禁用亲启按钮（避免重复点击）
+  const qBtn = document.getElementById('qinqiBtn');
+  if(qBtn){ qBtn.disabled = true; }
+
+  // 调用 lettersend 模块
+  if(typeof window.doLetterSend !== 'function'){
+    showBanner('信笺模块尚未就绪，请检查 lettersend.js 是否加载', 'error');
+    if(qBtn) qBtn.disabled = false;
+    return;
+  }
+
+  window.doLetterSend({
+    chatId,
+    ch,
+    chat,
+    stylePromptText,
+    msgCount,
+    onBanner: (text, phase) => showBanner(text, phase),
+    onRender: (letters, ch, chat, userName) => renderAiLetters(letters, ch, chat, userName),
+  }).finally(()=>{
+    if(qBtn) qBtn.disabled = false;
+  });
+}
+
+/* ══════════════════════════════════════
+   PROMPT CARDS
+══════════════════════════════════════ */
+const PT_DEFAULTS = [
+  {
+    id:'pt_ink',
+    name:'见信如面',
+    desc:'意难平 · 娓娓道来 · 岁月酸涩',
+    style:'ink',
+    locked:true,
+    prompt:`【信笺类型：意难平】
+
+这组信的核心是"放不下"。不是伤感，是某件具体的事、某个具体的节点，让人此后总在某个瞬间想起，喉咙发紧。
+
+写法要求：
+- 每封信必须有一个具体的遗憾锚点——不是泛泛的"那段岁月"，是某个动作、某句没说出口的话、某次走错的路口
+- 情绪是压着的，不倾泻，不煽情；意难平的感觉是"我知道过去了，但我没办法假装它不重要"
+- 可以写"如果当时……"，但不能写成悔恨滔滔；是回头看一眼，不是反复舔伤口
+- 结尾禁止"一切都会好的"式收尾，意难平就是意难平，不需要强行和解`,
+  },
+  {
+    id:'pt_pink',
+    name:'恋爱记事',
+    desc:'粉红泡泡 · 心跳加速 · 情书满溢',
+    style:'pink',
+    locked:true,
+    prompt:`【信笺类型：情书】
+
+这组信的核心是爱意，但不是直白告白——是爱意藏在细节里、被生活的纹理包裹着的那种感觉。
+
+写法要求：
+- 每封信必须有一个具体的爱意触点——不是"我喜欢你"，是某个让心跳停顿的动作、某个习惯、某个被记住了很久的细节
+- 情感是温热的、有一点烧灼感，但是克制的；不是倾诉，是像写了一封没打算寄出去的信
+- 可以忐忑、可以心跳加速、可以偷偷高兴——但落脚点是写信人自己的心境，不是对方
+- 结尾可以是悄悄的等待，也可以是终于说出口的一句话，但不能写成"我永远爱你"式的表白句`,
+  },
+  {
+    id:'pt_hook',
+    name:'钓系引力',
+    desc:'暧昧拉扯 · 若即若离 · 欲言又止',
+    style:'custom',
+    locked:true,
+    prompt:`【信笺类型：性张力·隐秘心思】
+
+这组信的核心是隐秘的心理层面——欲望、占有欲、被注视的渴望、或某种说不清的拉扯感。不是情书，也不是意难平，是写信人自己某个不会对人说的念头。
+
+写法要求：
+- 每封信必须有一个具体的心理触点——某个细节被放大时产生的感受、某种说不清是嫉妒还是迷恋的情绪、某次靠近时皮肤的记忆
+- 语气是暧昧的、有温度的，但落脚点是内心的游移，不是肢体描写；是"我知道我在想什么，但我不会承认"的感觉
+- 感官细节（声音、体温、气味、眼神的弧度）可以出现，但要克制——放大某一个细节比铺陈一片更有张力
+- 结尾不示弱，不收尾，或留一个让人坐立难安的句子；禁止写成道德说教，也禁止写成直白色情`,
+  },
+];
+
+let _prompts = [];
+let _selectedPromptId = null;
+
+function ptLoad(){
+  try{
+    const raw = localStorage.getItem('tsuki_prompts');
+    _prompts = raw ? JSON.parse(raw) : [...PT_DEFAULTS];
+  }catch(e){ _prompts = [...PT_DEFAULTS]; }
+  // locked 提示词强制与代码同步（name/desc/prompt 全部覆盖，不保留本地旧版本）
+  PT_DEFAULTS.forEach(def=>{
+    const idx = _prompts.findIndex(p=>p.id===def.id);
+    if(idx === -1){
+      _prompts.unshift({...def});
+    } else {
+      _prompts[idx] = {..._prompts[idx], ...def};
+    }
+  });
+  try{
+    _selectedPromptId = localStorage.getItem('tsuki_prompt_sel') || null;
+  }catch(e){}
+}
+
+function ptSave(){
+  try{
+    localStorage.setItem('tsuki_prompts', JSON.stringify(_prompts));
+    if(_selectedPromptId) localStorage.setItem('tsuki_prompt_sel', _selectedPromptId);
+    else localStorage.removeItem('tsuki_prompt_sel');
+  }catch(e){}
+}
+
+function ptRender(){
+  const list = document.getElementById('ptList');
+  list.innerHTML = '';
+  _prompts.forEach(p => list.appendChild(ptMakeCard(p)));
+  ptUpdateBar();
+}
+
+function ptMakeCard(p){
+  const card = document.createElement('div');
+  card.className = `pt-card ${p.style||'custom'}${p.id===_selectedPromptId?' selected':''}`;
+  card.dataset.id = p.id;
+
+  const svgEdit = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>`;
+  const svgDel  = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+  const svgChev = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+  card.innerHTML = `
+    <div class="pt-head">
+      <div class="pt-sel-dot"></div>
+      <div class="pt-info">
+        <div class="pt-name">${esc(p.name)}</div>
+        <div class="pt-desc">${esc(p.desc||'')}</div>
+      </div>
+      <div class="pt-actions">
+        ${!p.locked?`<button class="pt-act-btn edit" title="编辑">${svgEdit}</button>`:''}
+        ${!p.locked?`<button class="pt-act-btn del" title="删除">${svgDel}</button>`:''}
+      </div>
+      <span class="pt-chev">${svgChev}</span>
+    </div>
+    <div class="pt-body">
+      <div class="pt-body-inner">
+        <div class="pt-txt-view">${esc(p.prompt)}</div>
+        <div class="pt-edit-wrap">
+          <input class="pt-name-input" type="text" value="${esc(p.name)}" placeholder="提示词名称"/>
+          <textarea class="pt-textarea">${esc(p.prompt)}</textarea>
+          <div class="pt-edit-bar">
+            <button class="pt-cancel-btn">取消</button>
+            <button class="pt-save-btn">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // toggle open/close on head (not action buttons)
+  card.querySelector('.pt-head').addEventListener('click', e=>{
+    if(e.target.closest('.pt-actions')) return;
+    card.classList.toggle('open');
+  });
+
+  // select on dot click
+  card.querySelector('.pt-sel-dot').addEventListener('click', e=>{
+    e.stopPropagation();
+    _selectedPromptId = (_selectedPromptId===p.id) ? null : p.id;
+    ptSave(); ptRender();
+  });
+
+  // edit button — only for non-locked cards
+  const editBtn = card.querySelector('.pt-act-btn.edit');
+  if(editBtn) editBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    card.classList.add('open','editing');
+    card.querySelector('.pt-name-input').value = p.name;
+    card.querySelector('.pt-textarea').value = p.prompt;
+    card.querySelector('.pt-name-input').focus();
+  });
+
+  // delete button (only on non-locked)
+  const delBtn = card.querySelector('.pt-act-btn.del');
+  if(delBtn) delBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    if(!confirm(`删除「${p.name}」？`)) return;
+    _prompts = _prompts.filter(x=>x.id!==p.id);
+    if(_selectedPromptId===p.id) _selectedPromptId=null;
+    ptSave(); ptRender();
+  });
+
+  // save
+  card.querySelector('.pt-save-btn').addEventListener('click', e=>{
+    e.stopPropagation();
+    const newName = card.querySelector('.pt-name-input').value.trim();
+    const newText = card.querySelector('.pt-textarea').value.trim();
+    if(newName) p.name = newName;
+    p.prompt = newText;
+    ptSave(); ptRender();
+    showToast('提示词已保存');
+  });
+
+  // cancel
+  card.querySelector('.pt-cancel-btn').addEventListener('click', e=>{
+    e.stopPropagation();
+    card.classList.remove('editing');
+  });
+
+  return card;
+}
+
+function ptAdd(){
+  const id = 'pt_' + Date.now();
+  _prompts.push({
+    id, name:'新建提示词', desc:'点击标题展开编辑', style:'custom', locked:false,
+    prompt:'在此输入你的信笺提示词…',
+  });
+  ptSave(); ptRender();
+  // auto-open and edit the new card
+  setTimeout(()=>{
+    const card = document.querySelector(`.pt-card[data-id="${id}"]`);
+    if(card){ card.classList.add('open','editing'); card.querySelector('.pt-name-input').focus(); }
+  }, 50);
+}
+
+function ptUpdateBar(){
+  const bar = document.getElementById('ptSelectedBar');
+  const nameEl = document.getElementById('ptSelectedName');
+  const sel = _prompts.find(p=>p.id===_selectedPromptId);
+  if(sel){ bar.classList.add('show'); nameEl.textContent=sel.name; }
+  else   { bar.classList.remove('show'); }
+}
+
+// expose active prompt for external API use
+window.getActivePrompt = ()=> _prompts.find(p=>p.id===_selectedPromptId) || null;
+
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function ce(tag,cls){ const e=document.createElement(tag); if(cls)e.className=cls; return e; }
+function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fd(ts){ if(!ts)return '—'; const d=new Date(ts); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`; }
+function fdL(ts){ if(!ts)return '—'; const d=new Date(ts); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3400); }
+
+/* ══════════════════════════════════════
+   顶部古风横幅
+══════════════════════════════════════ */
+let _bannerTimer = null;
+function showBanner(text, phase){
+  const banner = document.getElementById('letterBanner');
+  const txt    = document.getElementById('letterBannerTxt');
+  if(!banner) return;
+  txt.textContent = text;
+  banner.className = 'letter-banner show' + (phase ? ' ' + phase : '');
+  if(_bannerTimer){ clearTimeout(_bannerTimer); _bannerTimer = null; }
+  if(phase === 'done' || phase === 'error'){
+    _bannerTimer = setTimeout(()=>{
+      banner.classList.remove('show');
+    }, 4200);
+  }
+}
+
+/* ══════════════════════════════════════
+   AI 信笺渲染
+══════════════════════════════════════ */
+function renderAiLetters(letters, ch, chat, userName){
+  const tl = document.getElementById('aiLetterTl');
+  if(!tl) return;
+  tl.innerHTML = '';
+  // 更新用户名展示
+  const nameSpan = document.getElementById('aiUserNameSpan');
+  if(nameSpan) nameSpan.textContent = esc(userName || '用户');
+  // 按年龄排序（从小到大）
+  const sorted = [...letters].sort((a,b) => (a.ageNum||0) - (b.ageNum||0));
+  sorted.forEach((sec, i) => {
+    tl.appendChild(mkAiTlItem(sec, i, ch));
+  });
+}
+
+function mkAiTlItem(sec, i, ch){
+  const item = ce('div','tl-item');
+  item.style.animationDelay = `${i * 65}ms`;
+  const dot = ce('div','tl-dot'); dot.innerHTML='<div class="tl-dot-in"></div>';
+  const ts  = ce('div','tl-ts');
+  ts.innerHTML = `<span>${fdL(sec.ts)}</span><span class="age-chip">${esc(sec.age)}</span>`;
+  const prev = mkAiPrev(sec, ch);
+  const full = mkAiFullCard(sec, ch);
+  prev.querySelector('.c-preview').addEventListener('click',()=>{
+    item.classList.add('expanded');
+    setTimeout(()=>item.scrollIntoView({behavior:'smooth',block:'start'}),20);
+  });
+  full.querySelector('.full-coll').addEventListener('click',e=>{
+    e.stopPropagation(); item.classList.remove('expanded');
+  });
+  full.querySelector('.full-hdr').addEventListener('click',()=>{
+    item.classList.remove('expanded');
+  });
+  item.appendChild(dot); item.appendChild(ts);
+  item.appendChild(prev); item.appendChild(full);
+  return item;
+}
+
+function mkAiPrev(sec, ch){
+  const v = sec.type || 'va';
+  const wrap = ce('div', v);
+  const inner = `
+    <div class="cp-eye">
+      ${{va:'信笺',vb:'素笺',vc:'邮票',vd:'竹简',ve:'明信'}[v]||'信笺'} · LETTER
+      <span class="cp-etag">${esc(sec.age)}</span>
+    </div>
+    <div class="cp-title">${esc(sec.title)}</div>
+    <div class="cp-exc">${esc(sec.excerpt || (sec.paragraphs?.[0]||'').substring(0,50))}</div>
+    <div class="cp-hint">展开读信 <span class="cp-arr">↓</span></div>`;
+
+  if(v==='va')      wrap.innerHTML=`<div class="c-preview">${inner}</div>`;
+  else if(v==='vb') wrap.innerHTML=`<div class="c-preview"><div class="vb-t"></div><div class="vb-b">${inner}</div></div>`;
+  else if(v==='vc') wrap.innerHTML=`<div class="c-preview"><div class="vc-stmp"><div class="vc-sc">信</div><div class="vc-sv">LETTER</div></div>${inner}</div>`;
+  else if(v==='vd') wrap.innerHTML=`<div class="c-preview"><div class="vd-s"></div><div class="vd-b">${inner}</div></div>`;
+  else              wrap.innerHTML=`<div class="c-preview"><div class="ve-sp"><div class="ve-l">${inner}</div><div class="ve-r"><div class="ve-stmp"><div class="ve-sc">信</div></div><div class="ve-pm">岁月<br/>邮驿<br/>${new Date(sec.ts).getFullYear()}</div></div></div></div>`;
+  return wrap;
+}
+
+function mkAiFullCard(sec, ch){
+  const d = ce('div','c-full');
+  // 多段正文
+  const bodyHtml = (sec.paragraphs || [sec.body || '']).map(p =>
+    `<div class="full-txt">${esc(p)}</div>`
+  ).join('');
+
+  d.innerHTML = `
+    <div class="full-paper">
+      <div class="full-body">
+        <div class="full-hdr">
+          <div class="full-to">
+            <div class="full-to-lb">致 · TO</div>
+            <div class="full-to-name">${esc(sec.age)}的${esc(ch.name||'自己')}</div>
+            <div class="full-to-sub">来自 ${esc(ch.name||'往昔')} · ${fdL(sec.ts)}</div>
+          </div>
+          <div class="full-stmp-col">
+            <div class="full-stmp"><div class="full-stmp-ch">信</div></div>
+            <div class="full-pm">岁月<br/>邮驿<br/>${new Date(sec.ts).getFullYear()}</div>
+          </div>
+        </div>
+        <div class="full-title-row">
+          <div class="full-title-text">${esc(sec.title)}</div>
+          <div class="full-title-sub">TITLE · 信笺题名</div>
+        </div>
+        <div class="full-exc-card">
+          <div class="full-exc-lb">摘录 · EXCERPT</div>
+          <div class="full-exc-txt">${esc(sec.excerpt || (sec.paragraphs?.[0]||'').substring(0,50))}</div>
+        </div>
+        <div class="full-sal">${esc(sec.age)}的自己，展信佳：</div>
+        ${bodyHtml}
+        ${sec.regret ? `<div class="blk blk-r">
+          <div class="blk-lb blk-lb-r">意难平 · 未言之憾</div>
+          <div class="blk-txt">${esc(sec.regret)}</div>
+        </div>` : ''}
+        ${sec.hope ? `<div class="blk blk-g">
+          <div class="blk-lb blk-lb-g">憧憬 · 所愿之事</div>
+          <div class="blk-txt">${esc(sec.hope)}</div>
+        </div>` : ''}
+        <div class="full-ftr">
+          <div class="full-signed">
+            <div class="full-sig-lb">落款 · FROM</div>
+            <div class="full-sig-name">${esc(ch.name||'昔日')}</div>
+            <div class="full-sig-dt">${fdL(sec.ts)}</div>
+          </div>
+          <div class="full-seal"><div class="full-seal-ch">${(ch.name||'我').charAt(0)}</div></div>
+        </div>
+      </div>
+      <button class="full-coll">收 · 起 · 信 · 笺</button>
+    </div>`;
+  return d;
+}
+
+
+async function init(){
+  // Wait for db-schema.js to finish if it's present (avoids race condition)
+  if(window.tsukiDbReady){
+    try{ await window.tsukiDbReady; }catch(e){}
+  }
+  try{
+    [_chars, _chats] = await Promise.all([dbAll('chars'), dbAll('chats')]);
+    _chars.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    _chats.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  }catch(e){
+    console.warn('[Letter] init DB error',e); _chars=[]; _chats=[];
+  }
+
+  // Demo fallback so UI isn't empty
+  if(!_chars.length){
+    _chars=[
+      {id:'d1',name:'许知砚',avatar:null},{id:'d2',name:'温予川',avatar:null},
+      {id:'d3',name:'祁京野',avatar:null},{id:'d4',name:'连枭',avatar:null},
+    ];
+    _chats=[
+      {id:'c1',charIds:['d1'],name:'往昔时光',type:'private',updatedAt:Date.now()-86400000*365},
+      {id:'c2',charIds:['d1'],name:'初见那年',type:'private',updatedAt:Date.now()-86400000*200},
+      {id:'c3',charIds:['d2'],name:'流年似水',type:'private',updatedAt:Date.now()-86400000*100},
+    ];
+  }
+
+  _arcIdx = Math.floor(_chars.length/2);
+  ptLoad();
+  buildArc();
+  initArcEvents();
+}
+
+init();
+</script>
+<script src="PromptHelper.js"></script>
+<script src="lettersend.js"></script>
+</body>
+</html>
