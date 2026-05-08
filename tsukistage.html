@@ -206,14 +206,22 @@
       .char-grid {
         flex: 1;
         overflow-y: auto;
-        scrollbar-width: none;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(10,10,10,0.12) transparent;
         padding: 6px 14px 14px;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
+        /* 固定行高，防止角色多时卡片被压缩 */
+        align-content: start;
+        min-height: 0;
       }
       .char-grid::-webkit-scrollbar {
-        display: none;
+        width: 3px;
+      }
+      .char-grid::-webkit-scrollbar-thumb {
+        background: rgba(10,10,10,0.15);
+        border-radius: 2px;
       }
 
       .char-card {
@@ -236,6 +244,9 @@
           0 1px 0 rgba(255, 255, 255, 0.7) inset;
         position: relative;
         overflow: hidden;
+        /* 固定高度，防止角色多时被压缩 */
+        min-height: 118px;
+        flex-shrink: 0;
       }
       .char-card::before {
         content: '';
@@ -549,14 +560,21 @@
       .theater-list {
         flex: 1;
         overflow-y: auto;
-        scrollbar-width: none;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(10,10,10,0.12) transparent;
         padding: 6px 14px 14px;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        /* 防止列表项被压缩 */
+        min-height: 0;
       }
       .theater-list::-webkit-scrollbar {
-        display: none;
+        width: 3px;
+      }
+      .theater-list::-webkit-scrollbar-thumb {
+        background: rgba(10,10,10,0.15);
+        border-radius: 2px;
       }
 
       .t-card {
@@ -565,16 +583,82 @@
         padding: 14px 14px 12px;
         cursor: pointer;
         user-select: none;
-        transition: transform 0.18s;
+        transition: transform 0.18s, opacity 0.18s;
         position: relative;
         overflow: hidden;
         box-shadow:
           0 2px 14px -4px rgba(10, 10, 10, 0.08),
           0 1px 0 rgba(255, 255, 255, 0.8) inset;
+        /* 固定高度，防止剧场多时被压缩 */
+        min-height: 128px;
+        flex-shrink: 0;
       }
       .t-card:active {
         transform: scale(0.984);
       }
+
+      /* 长按删除覆盖层 */
+      .t-card.press-holding {
+        transform: scale(0.97);
+        box-shadow:
+          0 0 0 2.5px rgba(255, 107, 107, 0.5),
+          0 2px 14px -4px rgba(10, 10, 10, 0.12);
+      }
+      .t-delete-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 107, 107, 0.92);
+        border-radius: 22px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        opacity: 0;
+        transition: opacity 0.18s;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .t-card.confirm-delete .t-delete-overlay {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .t-delete-overlay i {
+        font-size: 22px;
+        color: white;
+      }
+      .t-delete-overlay span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: rgba(255,255,255,0.9);
+      }
+      .t-delete-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 4px;
+      }
+      .t-del-cancel, .t-del-confirm {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 10px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      .t-del-cancel {
+        background: rgba(255,255,255,0.25);
+        color: white;
+      }
+      .t-del-confirm {
+        background: white;
+        color: #ff4d4d;
+      }
+      .t-del-cancel:active { opacity: 0.7; }
+      .t-del-confirm:active { transform: scale(0.96); }
       .t-card::before {
         content: '';
         position: absolute;
@@ -2544,6 +2628,27 @@
           req.onerror = () => rej(req.error);
         });
       };
+      const dbDelete = async (store, key) => {
+        const db = await openDb();
+        return new Promise((res, rej) => {
+          const req = db.transaction(store, 'readwrite').objectStore(store).delete(key);
+          req.onsuccess = () => res();
+          req.onerror = () => rej(req.error);
+        });
+      };
+      const dbDeleteByIndex = async (store, idx, val) => {
+        const db = await openDb();
+        return new Promise((res, rej) => {
+          const tx = db.transaction(store, 'readwrite');
+          const req = tx.objectStore(store).index(idx).openCursor(IDBKeyRange.only(val));
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) { cursor.delete(); cursor.continue(); }
+          };
+          tx.oncomplete = () => res();
+          tx.onerror = () => rej(tx.error);
+        });
+      };
 
       async function getNextFloor(theaterId) {
         const db = await openDb();
@@ -2791,8 +2896,96 @@
             <i class="fa-solid fa-layer-group" style="font-size:7px"></i>
             F·${theater.lastFloor || 0}
           </div>
+        </div>
+        <div class="t-delete-overlay">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>删除此剧场？</span>
+          <div class="t-delete-actions">
+            <button class="t-del-cancel">取消</button>
+            <button class="t-del-confirm">删除</button>
+          </div>
         </div>`;
-        card.addEventListener('click', () => openTheater(theater));
+
+        // ── 长按删除逻辑（兼顾 touch + mouse）──
+        let pressTimer = null;
+        let isPressing = false;
+        let moved = false;
+
+        const startPress = () => {
+          moved = false;
+          isPressing = true;
+          pressTimer = setTimeout(() => {
+            if (!moved) {
+              card.classList.add('confirm-delete');
+            }
+          }, 550);
+        };
+        const cancelPress = () => {
+          isPressing = false;
+          clearTimeout(pressTimer);
+          card.classList.remove('press-holding');
+        };
+        const markMoved = () => { moved = true; cancelPress(); };
+
+        card.addEventListener('touchstart', startPress, { passive: true });
+        card.addEventListener('touchend', cancelPress);
+        card.addEventListener('touchmove', markMoved, { passive: true });
+        card.addEventListener('mousedown', startPress);
+        card.addEventListener('mouseup', cancelPress);
+        card.addEventListener('mouseleave', cancelPress);
+
+        // 点击进入剧场（未在删除确认状态时）
+        card.addEventListener('click', (e) => {
+          if (card.classList.contains('confirm-delete')) return;
+          if (moved) return;
+          openTheater(theater);
+        });
+
+        // 取消删除
+        card.querySelector('.t-del-cancel').addEventListener('click', (e) => {
+          e.stopPropagation();
+          card.classList.remove('confirm-delete');
+        });
+
+        // 确认删除
+        card.querySelector('.t-del-confirm').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          try {
+            // 删除剧场本体
+            await dbDelete('theaters', theater.id);
+            // 删除该剧场下所有消息（theater_messages keyPath = [theaterId, floor]）
+            const db = await openDb();
+            await new Promise((res, rej) => {
+              const tx = db.transaction('theater_messages', 'readwrite');
+              const s = tx.objectStore('theater_messages');
+              const range = IDBKeyRange.bound([theater.id, -Infinity], [theater.id, Infinity]);
+              const req = s.openCursor(range);
+              req.onsuccess = e => {
+                const cur = e.target.result;
+                if (cur) { cur.delete(); cur.continue(); }
+              };
+              tx.oncomplete = res;
+              tx.onerror = () => rej(tx.error);
+            });
+          } catch (err) {
+            console.warn('[Stage] 删除剧场失败', err);
+          }
+          card.style.transition = 'opacity 0.22s, transform 0.22s';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.92)';
+          setTimeout(() => {
+            card.remove();
+            // 如果列表空了，重新渲染 empty state
+            const list = document.getElementById('theaterList');
+            if (!list.querySelector('.t-card')) {
+              list.innerHTML = `<div class="empty-state">
+                <i class="fa-solid fa-masks-theater"></i>
+                <p>暂无剧场 — 前往新建</p></div>`;
+              document.getElementById('nav1').classList.remove('has-content');
+            }
+          }, 220);
+        });
+
         return card;
       }
 
