@@ -24,7 +24,11 @@
  *   OpenAI生图：openai_config
  *   人生旅信：letters
  *   TTS合成：voice_tts
- *   音乐播放器：music（新增 · 訴月雲樂播放偏好/背景/队列快照）
+ *   音乐播放器：music（訴月雲樂播放偏好/背景/队列快照）
+ *   直播间：liverooms（liveroom.html 直播房间记录）
+ *   写卡工作室：card_sessions（cardstudio.html 写卡对话会话）
+ *   记忆宫殿：memories（memory-palace.html 记忆条目，含增量楼层标记）
+ *   记忆宫殿：mem_favorites（memory-palace.html 收藏的对话片段与记忆）
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -41,11 +45,11 @@
    */
   const FULL_SCHEMA = {
     // ── 基础表 ──────────────────────────────────────────────────────────────
-    config:   { keyPath: 'id' },
-    chars:    { keyPath: 'id' },
-    users:    { keyPath: 'id' },
+    config: { keyPath: 'id' },
+    chars: { keyPath: 'id' },
+    users: { keyPath: 'id' },
     worldbook: null,
-    chats:    { keyPath: 'id' },
+    chats: { keyPath: 'id' },
     messages: { keyPath: ['chatId', 'floor'] },
 
     // ── 线下剧场（TsukiSummary / StageSend / tsukistage.html）────────────
@@ -66,7 +70,7 @@
     diaries: { keyPath: 'id' },
 
     // ── 日历（calendar.html）─────────────────────────────────────────────
-    cal_events:   { keyPath: 'id' },
+    cal_events: { keyPath: 'id' },
     cal_comments: {
       keyPath: 'id',
       indexes: [{ name: 'by_target', keyPath: 'targetId' }],
@@ -111,7 +115,7 @@
     voice_messages: {
       keyPath: 'id',
       indexes: [
-        { name: 'by_chat',  keyPath: 'chatId' },
+        { name: 'by_chat', keyPath: 'chatId' },
         { name: 'by_floor', keyPath: ['chatId', 'floor'], unique: false },
       ],
     },
@@ -134,8 +138,8 @@
     moments: {
       keyPath: 'id',
       indexes: [
-        { name: 'by_chat',    keyPath: 'chatId' },
-        { name: 'by_char',    keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
+        { name: 'by_char', keyPath: 'charId' },
         { name: 'by_created', keyPath: 'createdAt' },
       ],
     },
@@ -209,8 +213,8 @@
     letters: {
       keyPath: 'id',
       indexes: [
-        { name: 'by_char',    keyPath: 'charId' },
-        { name: 'by_chat',    keyPath: 'chatId' },
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
         { name: 'by_updated', keyPath: 'updatedAt' },
       ],
     },
@@ -253,6 +257,52 @@
     //      contextLimit:  number,
     //    }
     music: { keyPath: 'id' },
+
+    // ── 直播间（liveroom.html）────────────────────────────────────────────
+    // 每个角色/用户对应一条记录，id = `lr_${ownerId}`
+    // {
+    //   id:        string,             // `lr_${ownerId}`  主键
+    //   ownerId:   string,             // chars.id 或 users.id
+    //   ownerType: 'char' | 'user',    // 来源类型
+    //   nickname:  string | null,      // 直播昵称（占位）
+    //   title:     string | null,      // 直播间标题
+    //   tags:      string[],           // 直播 tag（最多3个）
+    //   intro:     string | null,      // 直播间简介（支持 HTML span/style）
+    //   note:      string | null,      // 个人说明（支持多行/样式）
+    //   messages:  lr_message[],       // 内嵌消息数组
+    //   createdAt: number,             // Date.now()
+    //   updatedAt: number,             // Date.now()
+    // }
+    liverooms: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_owner', keyPath: 'ownerId', unique: false },
+        { name: 'by_type', keyPath: 'ownerType', unique: false },
+      ],
+    },
+
+    // ── 写卡工作室会话（cardstudio.html）────────────────────────────────
+    // 每条记录代表一次写卡对话会话，消息内嵌存储，与绑定的 char/user 卡一一对应
+    // record 结构：
+    // {
+    //   id:           string,          // `cs_${Date.now()}` 主键
+    //   title:        string,          // 首条消息截断（自动生成）
+    //   cardType:     'char'|'user'|'none',  // 绑定类型
+    //   boundCardId:  string|null,     // 绑定的 chars.id 或 users.id（唯一，不重复创建）
+    //   messages:     Array,           // [{role:'user'|'assistant', content, ts}]
+    //   systemPrompt: string,          // 本会话注入的系统提示词快照
+    //   templateOn:   boolean,         // 写卡模板开关状态
+    //   createdAt:    number,          // Date.now()
+    //   updatedAt:    number,          // Date.now()
+    // }
+    card_sessions: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_created', keyPath: 'createdAt' },
+        { name: 'by_updated', keyPath: 'updatedAt' },
+        { name: 'by_cardType', keyPath: 'cardType' },
+      ],
+    },
 
     // ── MiniMax TTS 语音合成配置（minimax-voice.html）────────────────────
     // 存储两类数据，通过 id 前缀区分：
@@ -306,8 +356,189 @@
     voice_tts: {
       keyPath: 'id',
       indexes: [
-        { name: 'by_char',    keyPath: 'charId' },
+        { name: 'by_char', keyPath: 'charId' },
         { name: 'by_created', keyPath: 'createdAt' },
+      ],
+    },
+
+    // ── 来信箱（mailbox.html）────────────────────────────────────────────
+    // 每封信独立存储，id = `ml_${charId}_${Date.now()}`
+    // record 结构：
+    // {
+    //   id:          string,          // 主键 `ml_${charId}_${Date.now()}`
+    //   charId:      string,          // 关联角色 id（chars 表）
+    //   chatId:      string,          // 关联聊天 id（chats 表）
+    //   mood:        string,          // 情绪类型: 'joy'|'miss'|'sad'|'cold'|'mad'|'soft'|'secret'
+    //   theme:       string,          // 信笺主题: 'normal'|'pink'|'blue'|'dark'|'red'
+    //   status:      string,          // 'sealed'|'opened'|'replied'|'archived'
+    //   subject:     string,          // 信件标题
+    //   date:        string,          // 'YYYY-MM-DD HH:mm'
+    //   location:    string,          // 寄信地点（如"深夜书房"）
+    //   sealSymbol:  string,          // 蜡封符号（单字符 emoji 或符号）
+    //   sealTheme:   string,          // 蜡封颜色主题标识
+    //   stamps:      Array,           // 邮票数组 [{emoji, bg}]（1-3枚）
+    //   body:        Array,           // 信件段落数组，每段是一个 segment 对象：
+    //     // {
+    //     //   type: 'p'              → 普通段落
+    //     //       | 'fold'           → 折痕（下方有 hiddenText）
+    //     //       | 'redact'         → 遮盖文字（inline）
+    //     //       | 'secret'         → 悬浮心思（inline）
+    //     //       | 'strike'         → 删除线文字（inline）
+    //     //       | 'egg'            → 其他彩蛋互动
+    //     //   text:       string,    → 主文本（p/redact/secret/strike/egg 时）
+    //     //   hiddenText: string,    → 折痕隐藏内容 / 秘密心思气泡内容
+    //     //   locked:     boolean,   → 是否需要亲密度解锁（默认 false）
+    //     // }
+    //   //
+    //   // ─── 注意：body 使用「标记文本」，AI 返回时用特殊符号包裹内联元素：
+    //   //   普通段落直接是字符串
+    //   //   [[redact:被遮盖的文字]]          → 遮盖块（点击解锁）
+    //   //   [[secret:显示词|气泡心思]]       → 悬浮心思词
+    //   //   [[strike:有删除线的文字]]         → 划掉的字
+    //   //   [[egg:触发文字|隐藏内容]]        → 点击彩蛋
+    //   //   折痕用单独的 {type:'fold'} segment 对象表达
+    //   //
+    //   sigName:     string,          // 签名（如"眠月 · 深夜"）
+    //   enclosure:   Array,           // 随信附带（角色携带），每项：
+    //     // {
+    //     //   emoji:   string,        // 展示 emoji（如 🌸）
+    //     //   label:   string,        // 物品名称
+    //     //   content: string,        // 附带内容描述（影响下封信叙事）
+    //     // }
+    //   fragment:    Object,          // 今日碎片（随这封信一起返回）：
+    //     // {
+    //     //   type:    string,        // 'diary'|'note'|'draft'|'confession'
+    //     //   locked:  boolean,       // 是否加密（加密时需亲密度解锁）
+    //     //   content: string,        // 碎片内容
+    //     // }
+    //   heartWall:   Array,           // 锁心墙 — 随这封信锁住的心思，每项：
+    //     // {
+    //     //   locked:  boolean,       // 是否锁住（true=锁，false=已解锁可读）
+    //     //   content: string,        // 心思内容（锁住时显示为 ???）
+    //     //   unlock:  string,        // 解锁条件描述
+    //     // }
+    //   intimacyDelta: number,        // 这封信产生的亲密度变化（正负）
+    //   createdAt:   number,          // Date.now()
+    //   openedAt:    number | null,   // 拆封时间戳
+    //   repliedAt:   number | null,   // 回信时间戳
+    // }
+    mailbox_letters: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
+        { name: 'by_mood', keyPath: 'mood' },
+        { name: 'by_status', keyPath: 'status' },
+        { name: 'by_created', keyPath: 'createdAt' },
+      ],
+    },
+
+    // ── 来信箱：亲密度 & 全局状态（mailbox.html）────────────────────────
+    // 每个 charId 对应一条记录，id = `mb_state_${charId}`
+    // {
+    //   id:              string,          // `mb_state_${charId}`
+    //   charId:          string,          // 关联角色 id
+    //   intimacy:        number,          // 当前亲密度（0-1000+）
+    //   sealCollection:  string[],        // 已解锁蜡封 id 列表
+    //   unreadCount:     number,          // 未读信件数
+    //   lastLetterAt:    number | null,   // 上封信时间戳（用于冷却计算）
+    //   flightEndAt:     number | null,   // 当前寄出信件到达时间戳
+    //   userGiftEmoji:   string,          // 用户自定义随信礼物 emoji
+    //   userGiftLabel:   string,          // 用户自定义礼物名称
+    //   userGiftContent: string,          // 用户自定义礼物描述内容
+    //   updatedAt:       number,          // Date.now()
+    // }
+    mailbox_state: {
+      keyPath: 'id',
+      indexes: [{ name: 'by_char', keyPath: 'charId' }],
+    },
+
+    // ── 来信箱：回信记录（mailbox.html）─────────────────────────────────
+    // 每封回信独立存储，id = `mr_${letterId}_${Date.now()}`
+    // {
+    //   id:          string,        // 主键
+    //   letterId:    string,        // 关联 mailbox_letters.id
+    //   charId:      string,        // 角色 id
+    //   mood:        string,        // 回信情绪印章
+    //   giftEmoji:   string,        // 用户选择携带的礼物 emoji
+    //   giftLabel:   string,        // 礼物名称
+    //   giftContent: string,        // 礼物内容（影响下封来信叙事）
+    //   body:        string,        // 回信正文
+    //   createdAt:   number,        // Date.now()
+    // }
+    mailbox_replies: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_letter', keyPath: 'letterId' },
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_created', keyPath: 'createdAt' },
+      ],
+    },
+
+    // ── 来信箱：信箱配置（mailbox.html）─────────────────────────────────
+    // 每个 charId 对应一条配置记录，id = `mb_cfg_${charId}`
+    // {
+    //   id:              string,          // `mb_cfg_${charId}`  主键
+    //   charId:          string,          // 关联角色 id（chars 表）
+    //   userId:          string,          // 当前绑定用户 id（可手动覆盖 char.bindId）
+    //   mailDelay:       number,          // 用户寄信到 AI 收到的延迟（分钟，默认 120）
+    //   replyDelay:      number,          // AI 生成回信的延迟（分钟，默认 120）
+    //   lastUserSendAt:  number | null,   // 用户上次寄信的绝对时间戳 ms
+    //   pendingReplyAt:  number | null,   // AI 应该在此时间戳生成回信（lastUserSendAt + replyDelay*60000）
+    //   updatedAt:       number,          // Date.now()
+    // }
+    mailbox_config: {
+      keyPath: 'id',
+      indexes: [{ name: 'by_char', keyPath: 'charId' }],
+    },
+
+    // ── 记忆宫殿：记忆条目（memory-palace.html）─────────────────────────
+    // 每条提取出的记忆独立存储，按 charId / chatId / 分类三重索引
+    // {
+    //   id:               string,   // `mem_${charId}_${category}_${ts}_${seq}`
+    //   charId:           string,   // 关联角色 id（chars 表）
+    //   chatId:           string,   // 关联聊天 id（chats 表）
+    //   category:         string,   // 分类：promise / detail / habit / conflict / nickname
+    //   title:            string,   // 记忆标题（诗意简短，20字内）
+    //   content:          string,   // 第三人称叙述（80字内）
+    //   emotion:          string,   // 情绪标签：sweet/warm/tense/angry/complex/neutral
+    //   rarity:           string,   // 稀有度：legend / rare / common
+    //   floor:            number,   // 来源楼层号
+    //   extractedFloors:  { min: number, max: number }, // 本次提取覆盖的楼层范围（用于增量）
+    //   createdAt:        number,   // Date.now()
+    // }
+    memories: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
+        { name: 'by_category', keyPath: 'category' },
+        { name: 'by_char_chat', keyPath: ['charId', 'chatId'], unique: false },
+      ],
+    },
+
+    // ── 记忆宫殿：收藏夹（memory-palace.html）───────────────────────────
+    // 用户手动收藏的对话片段或记忆条目，按 charId / chatId / 文件夹索引
+    // {
+    //   id:           string,          // `fav_${ts}` 或 `fav_dlg_${ts}`
+    //   charId:       string,          // 关联角色 id
+    //   chatId:       string,          // 关联聊天 id
+    //   folder:       string,          // 收藏夹名称（用户自定义）
+    //   type:         'memory'|'dialog', // memory=从档案收藏，dialog=从聊天记录收藏
+    //   title:        string,          // 标题（memory 类型用）
+    //   content:      string,          // 内容摘要（memory 类型用）
+    //   messages:     object[],        // 消息数组（dialog 类型用，含 senderRole/content/floor）
+    //   floorRange:   string,          // 楼层范围描述，如 "12-18"（dialog 类型用）
+    //   note:         string,          // 用户备注（可选）
+    //   ts:           number,          // Date.now()
+    // }
+    mem_favorites: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
+        { name: 'by_folder', keyPath: 'folder' },
+        { name: 'by_char_chat', keyPath: ['charId', 'chatId'], unique: false },
       ],
     },
   };
@@ -379,16 +610,11 @@
         const db = e.target.result;
         const currentVersion = db.version;
 
-        const missingStores = Object.keys(FULL_SCHEMA).filter(
-          name => !db.objectStoreNames.contains(name)
-        );
+        const missingStores = Object.keys(FULL_SCHEMA).filter(name => !db.objectStoreNames.contains(name));
 
         if (missingStores.length === 0) {
           // 结构完整，直接用这个连接
-          console.log(
-            `%c[db-schema] ✅ DB 结构完整 (v${currentVersion})，无需升级`,
-            'color:#8a8a8e'
-          );
+          console.log(`%c[db-schema] ✅ DB 结构完整 (v${currentVersion})，无需升级`, 'color:#8a8a8e');
           // 监听版本变更，其他标签触发升级时自动关闭此连接
           db.onversionchange = () => {
             console.log('%c[db-schema] onversionchange — closing to allow upgrade', 'color:#f9c784');
@@ -403,7 +629,7 @@
         // 第二步：有缺失 → 关掉 probe，以 currentVersion+1 触发升级
         console.warn(
           `[db-schema] 发现缺失 store: [${missingStores.join(', ')}]，` +
-          `准备从 v${currentVersion} 升级至 v${currentVersion + 1}`
+            `准备从 v${currentVersion} 升级至 v${currentVersion + 1}`,
         );
         db.close();
 
@@ -422,8 +648,8 @@
           };
           console.log(
             `%c[db-schema] ✅ 升级完成 (v${upgradedDb.version})，` +
-            `stores: [${Array.from(upgradedDb.objectStoreNames).join(', ')}]`,
-            'color:#43d9a0;font-weight:bold'
+              `stores: [${Array.from(upgradedDb.objectStoreNames).join(', ')}]`,
+            'color:#43d9a0;font-weight:bold',
           );
           window.__tsukiDb = upgradedDb;
           resolve(upgradedDb);
@@ -435,9 +661,7 @@
         };
 
         upgradeReq.onblocked = () => {
-          console.warn(
-            '[db-schema] ⚠️ DB 升级被阻塞，请关闭同域名下其他打开的 Tsukimi 页面后刷新'
-          );
+          console.warn('[db-schema] ⚠️ DB 升级被阻塞，请关闭同域名下其他打开的 Tsukimi 页面后刷新');
         };
       };
 
@@ -475,5 +699,4 @@
     };
     console.log('[db-schema] ✅ window.openDb 已挂载');
   }
-
 })();
