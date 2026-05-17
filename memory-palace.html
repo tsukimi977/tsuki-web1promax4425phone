@@ -1,0 +1,2550 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+    <title>Memory Palace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..800;1,9..144,200..800&family=Geist:wght@200;300;400;500;600&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- TsukiTheme 注入目标 -->
+    <style id="tsuki-dynamic-style"></style>
+    <style>
+      /* ═══════════════════════════════════
+         BASE RESET & TOKENS  — 黑粉白极简系
+      ═══════════════════════════════════ */
+      * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+      :root {
+        /* 核心三色 */
+        --pk: #f9a8d4;        /* 粉主色 */
+        --pk2: #fbcfe8;       /* 浅粉 */
+        --pk3: rgba(249,168,212,0.12); /* 粉底 */
+        --bk: #111111;        /* 纯黑 */
+        --bk2: #1a1a1a;       /* 深黑 */
+        --wh: #f5f0eb;        /* 暖白底 */
+        --wh2: #ede8e2;       /* 暖白2 */
+        /* 文字 */
+        --ink: #111;
+        --ink2: rgba(17,17,17,0.72);
+        --muted: rgba(17,17,17,0.32);
+        /* 边线 */
+        --line: rgba(17,17,17,0.12);
+        --line2: rgba(17,17,17,0.07);
+        /* 功能色 */
+        --ok: #22c55e;
+        --warn: #f59e0b;
+        --rd: #8c5a72;   /* 保留部分旧变量兼容 */
+        --r: #c8a4b8;
+        --b: #8aa8c0;
+        --muted-old: #8a7280;
+        /* 卡片基底 */
+        --card: #fff;
+        --bg: var(--wh);
+        --bg2: var(--wh2);
+        --sh: 3px 3px 0 var(--pk);
+        --sh-sm: 2px 2px 0 var(--pk);
+      }
+
+      html, body {
+        width:100%; height:100%; overflow:hidden;
+        background:var(--wh);
+        font-family:'Geist Mono','PingFang SC',monospace;
+        color:var(--bk);
+        -webkit-font-smoothing:antialiased;
+      }
+
+      /* 点阵背景 */
+      body::before {
+        content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+        background-image:radial-gradient(circle, rgba(17,17,17,0.08) 1px, transparent 1px);
+        background-size:18px 18px;
+      }
+      body::after {
+        content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0.018 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+        mix-blend-mode:multiply;
+      }
+
+      #app { position:fixed; inset:0; display:flex; flex-direction:column; overflow:hidden; z-index:1; }
+
+      /* ═══ VIEW STACK ═══ */
+      .view {
+        position:absolute; inset:0; display:flex; flex-direction:column;
+        transition:opacity 0.26s ease, transform 0.26s cubic-bezier(0.22,1,0.36,1);
+        will-change:transform,opacity;
+      }
+      .view.hidden { opacity:0; pointer-events:none; transform:translateX(26px); }
+      .view.back-hidden { opacity:0; pointer-events:none; transform:translateX(-16px); }
+
+      /* ═══ POSTER HEADER ═══ */
+      #vMain { z-index:10; }
+
+      .poster-head {
+        flex-shrink:0; position:relative; height:244px; overflow:hidden;
+        background:var(--bk);
+      }
+      /* 胶片条 */
+      .ph-film {
+        position:absolute; left:0; right:0; height:22px; background:#000;
+        display:flex; align-items:center; overflow:hidden; z-index:2;
+      }
+      .ph-film-t { top:0; } .ph-film-b { bottom:0; }
+      .ph-film-holes { display:flex; align-items:center; gap:7px; padding:0 6px; flex-shrink:0; }
+      .ph-film-hole { width:10px; height:8px; border-radius:2px; background:var(--wh); flex-shrink:0; }
+      .ph-film-text {
+        flex:1; overflow:hidden; white-space:nowrap; font-size:7px;
+        letter-spacing:.14em; color:rgba(255,255,255,.22);
+        animation:filmscroll 20s linear infinite;
+      }
+      @keyframes filmscroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+      /* 左侧粉竖条 */
+      .poster-head::before {
+        content:''; position:absolute; left:0; top:22px; bottom:22px; width:4px;
+        background:linear-gradient(180deg,var(--pk),var(--pk2) 50%,var(--pk)); z-index:3;
+      }
+
+      /* 中央内容 */
+      .ph-inner {
+        position:absolute; left:14px; top:22px; bottom:22px; right:0;
+        display:flex; align-items:center; padding:0 10px 0 14px;
+      }
+      .ph-left { flex:1; min-width:0; }
+      .ph-tag {
+        font-size:7px; letter-spacing:.2em; color:var(--pk); margin-bottom:6px;
+        font-weight:700;
+      }
+      .ph-title {
+        font-family:'Fraunces',serif; font-style:italic; font-weight:300;
+        font-size:26px; color:#fff; letter-spacing:-.03em; line-height:1.1;
+        margin-bottom:4px;
+      }
+      .ph-sub { font-size:8px; color:rgba(255,255,255,.3); letter-spacing:.08em; margin-bottom:10px; }
+      .ph-stats { display:flex; gap:6px; align-items:center; }
+      .ph-stat {
+        display:flex; flex-direction:column; align-items:center;
+        border:1px solid rgba(255,255,255,.12); padding:4px 9px;
+      }
+      .ph-stat-num {
+        font-family:'Fraunces',serif; font-style:italic; font-size:15px;
+        font-weight:300; line-height:1; color:var(--pk);
+      }
+      .ph-stat-lbl { font-size:6px; color:rgba(255,255,255,.3); margin-top:1px; letter-spacing:.08em; }
+
+      .ph-right { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+      .ph-portraits { position:relative; width:100px; height:88px; }
+      .ph-av-char {
+        position:absolute; right:0; bottom:0; width:66px; height:66px;
+        border:1.5px solid rgba(255,255,255,.15); overflow:hidden;
+        background:#1a1a1a;
+        display:flex; align-items:center; justify-content:center;
+        font-size:18px; color:rgba(255,255,255,.25);
+      }
+      .ph-av-user {
+        position:absolute; left:0; top:0; width:50px; height:50px;
+        border:1.5px solid var(--pk); overflow:hidden;
+        background:#111;
+        display:flex; align-items:center; justify-content:center;
+        font-size:13px; color:rgba(249,168,212,.4);
+      }
+      .ph-av-char img, .ph-av-user img { width:100%; height:100%; object-fit:cover; display:block; }
+      .ph-names { display:flex; gap:8px; font-size:7px; letter-spacing:.08em; }
+      .ph-n-char { color:rgba(255,255,255,.28); }
+      .ph-n-user { color:var(--pk); }
+
+      /* chat badge + settings */
+      .ph-badge {
+        position:absolute; left:14px; bottom:30px;
+        display:inline-flex; align-items:center; gap:5px;
+        background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+        padding:5px 10px; cursor:pointer; transition:all .18s;
+      }
+      .ph-badge:active { background:rgba(249,168,212,.12); }
+      .ph-badge-icon { font-size:8px; color:var(--pk); }
+      .ph-badge-name { font-size:9.5px; color:rgba(255,255,255,.7); max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .ph-badge-arr { font-size:8px; color:rgba(255,255,255,.25); }
+      .ph-set-btn {
+        position:absolute; right:12px; bottom:30px;
+        width:28px; height:28px; border:1px solid rgba(255,255,255,.12);
+        background:rgba(255,255,255,.05);
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer; color:rgba(255,255,255,.4); font-size:10px; transition:all .18s;
+      }
+      .ph-set-btn:active { border-color:var(--pk); color:var(--pk); }
+      /* 角落角标 */
+      .ph-corner { position:absolute; width:10px; height:10px; border-color:rgba(255,255,255,.15); border-style:solid; }
+      .ph-corner-tl { top:26px; left:10px; border-width:1px 0 0 1px; }
+      .ph-corner-tr { top:26px; right:8px; border-width:1px 1px 0 0; }
+      .ph-corner-bl { bottom:26px; left:10px; border-width:0 0 1px 1px; }
+      .ph-corner-br { bottom:26px; right:8px; border-width:0 1px 1px 0; }
+      /* 右侧竖排编号 */
+      .ph-side-num {
+        position:absolute; right:4px; top:50%; transform:translateY(-50%);
+        writing-mode:vertical-rl; font-size:7px; letter-spacing:.14em;
+        color:rgba(255,255,255,.1); font-weight:700;
+      }
+      /* 数据条 */
+      .ph-datarow {
+        position:absolute; top:26px; right:40px;
+        display:flex; flex-direction:column; gap:2px; align-items:flex-end;
+      }
+      .ph-dataline { font-size:6px; letter-spacing:.1em; color:rgba(255,255,255,.18); }
+      .ph-dataline.hi { color:rgba(249,168,212,.5); }
+
+      /* ═══ NAV TABS ═══ */
+      .nav-tabs {
+        flex-shrink:0; display:flex; align-items:stretch;
+        height:40px; background:var(--bk); border-bottom:1px solid rgba(255,255,255,.08);
+        position:relative; z-index:20;
+      }
+      .nav-tab {
+        flex:1; display:flex; align-items:center; justify-content:center; gap:4px;
+        font-size:9.5px; letter-spacing:.06em; color:rgba(255,255,255,.28);
+        cursor:pointer; transition:all .18s; position:relative;
+        border:none; background:transparent; border-right:1px solid rgba(255,255,255,.06);
+      }
+      .nav-tab:last-child { border-right:none; }
+      .nav-tab.active { color:var(--pk); background:rgba(249,168,212,.06); }
+      .nav-tab.active::after {
+        content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+        background:var(--pk);
+      }
+      .nav-tab i { font-size:9px; }
+
+      /* ═══ SCROLL BODY ═══ */
+      .scroll-body { flex:1; overflow-y:auto; overflow-x:hidden; padding:0 0 90px; background:var(--wh); }
+      .scroll-body::-webkit-scrollbar { display:none; }
+
+      /* ═══ SECTION LABEL ═══ */
+      .sec-label { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+      .sec-label-text {
+        font-size:7.5px; letter-spacing:.22em; color:rgba(17,17,17,.35); text-transform:uppercase;
+      }
+      .sec-label-line { flex:1; height:1px; background:var(--bk); opacity:.1; }
+      .sec-label-num { font-size:7.5px; color:rgba(249,168,212,.7); }
+
+      /* ═══ EMOTION TIMELINE ═══ */
+      .emo-section { padding:16px 14px 0; }
+      .emo-card {
+        background:var(--bk2); border:1.5px solid rgba(255,255,255,.1);
+        position:relative; overflow:hidden;
+        box-shadow:3px 3px 0 var(--pk);
+      }
+      .emo-card-top {
+        padding:14px 14px 0; display:flex; align-items:flex-start; justify-content:space-between;
+      }
+      .emo-card-label { font-size:7px; letter-spacing:.2em; color:var(--pk); margin-bottom:4px; font-weight:700; }
+      .emo-card-title {
+        font-family:'Fraunces',serif; font-style:italic; font-size:15px; color:#fff; font-weight:400;
+      }
+      .emo-card-meta { text-align:right; }
+      .emo-card-range { font-size:8px; color:rgba(255,255,255,.35); letter-spacing:.06em; }
+      .emo-card-total { font-size:7px; color:rgba(249,168,212,.4); margin-top:2px; }
+      .emo-svg-wrap { padding:8px 10px 4px; height:68px; }
+      #emoSvg { width:100%; height:100%; overflow:visible; display:block; }
+      .emo-legend { display:flex; justify-content:space-between; padding:0 14px 8px; }
+      .emo-lbl { font-size:7px; color:rgba(255,255,255,.2); }
+      .emo-pills { display:flex; gap:5px; padding:0 14px 13px; flex-wrap:wrap; }
+      .emo-pill {
+        font-size:7px; padding:2px 8px; border:1px solid currentColor;
+        letter-spacing:.04em;
+      }
+
+      /* ═══ 4 STAT CARDS — 完全不同风格 ═══ */
+      .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; padding-bottom:18px; }
+
+      /* 承诺 — 黑底粉字 偏移阴影 */
+      .sc-promise {
+        background:var(--bk); border:1.5px solid rgba(249,168,212,.3);
+        padding:13px 12px; cursor:pointer; position:relative; overflow:hidden;
+        box-shadow:var(--sh); transition:all .18s; text-align:left;
+      }
+      .sc-promise:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--pk); }
+      .sc-promise .sc-tag { font-size:6.5px; letter-spacing:.18em; color:var(--pk); font-weight:700; margin-bottom:6px; }
+      .sc-promise .sc-num { font-family:'Fraunces',serif; font-style:italic; font-size:32px; font-weight:200; color:#fff; line-height:1; }
+      .sc-promise .sc-lbl { font-size:8px; color:rgba(249,168,212,.55); margin-top:2px; }
+      .sc-promise .sc-deco { position:absolute; right:-4px; top:-4px; font-size:42px; color:rgba(249,168,212,.06); font-weight:700; }
+
+      /* 细节 — 白底黑字 尖角装饰 */
+      .sc-detail {
+        background:#fff; border:1.5px solid var(--bk);
+        padding:13px 12px; cursor:pointer; position:relative; overflow:hidden;
+        transition:all .18s; text-align:right;
+      }
+      .sc-detail:active { transform:translate(1px,1px); }
+      .sc-detail .sc-tag { font-size:6.5px; letter-spacing:.18em; color:rgba(17,17,17,.35); font-weight:700; margin-bottom:6px; }
+      .sc-detail .sc-num { font-family:'Fraunces',serif; font-style:italic; font-size:32px; font-weight:200; color:var(--bk); line-height:1; }
+      .sc-detail .sc-lbl { font-size:8px; color:rgba(17,17,17,.35); margin-top:2px; }
+      .sc-detail::after { content:'▶▶'; position:absolute; left:8px; bottom:8px; font-size:9px; color:rgba(17,17,17,.08); }
+
+      /* 习惯 — 粉底黑字 竖排 */
+      .sc-habit {
+        background:var(--pk); border:1.5px solid var(--bk);
+        padding:13px 12px; cursor:pointer; position:relative; overflow:hidden;
+        box-shadow:var(--sh-sm); transition:all .18s;
+      }
+      .sc-habit:active { transform:translate(1px,1px); box-shadow:none; }
+      .sc-habit .sc-tag { font-size:6.5px; letter-spacing:.18em; color:rgba(17,17,17,.5); font-weight:700; margin-bottom:6px; }
+      .sc-habit .sc-num { font-family:'Fraunces',serif; font-style:italic; font-size:32px; font-weight:200; color:var(--bk); line-height:1; }
+      .sc-habit .sc-lbl { font-size:8px; color:rgba(17,17,17,.5); margin-top:2px; }
+      .sc-habit .sc-deco { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:9px; color:rgba(17,17,17,.12); writing-mode:vertical-rl; letter-spacing:.12em; }
+
+      /* 争执 — 细框 斜线底纹 */
+      .sc-conflict {
+        background:repeating-linear-gradient(45deg, var(--wh) 0, var(--wh) 4px, rgba(17,17,17,.04) 4px, rgba(17,17,17,.04) 5px);
+        border:1.5px solid var(--bk); padding:13px 12px; cursor:pointer;
+        position:relative; overflow:hidden; transition:all .18s;
+      }
+      .sc-conflict:active { transform:translate(1px,1px); }
+      .sc-conflict .sc-tag { font-size:6.5px; letter-spacing:.18em; color:rgba(17,17,17,.4); font-weight:700; margin-bottom:6px; }
+      .sc-conflict .sc-num { font-family:'Fraunces',serif; font-style:italic; font-size:32px; font-weight:200; color:var(--bk); line-height:1; }
+      .sc-conflict .sc-lbl { font-size:8px; color:rgba(17,17,17,.38); margin-top:2px; }
+      .sc-conflict .sc-badge { position:absolute; right:0; top:0; background:var(--bk); color:var(--pk); font-size:6px; padding:3px 7px; letter-spacing:.1em; }
+
+      /* ═══ ARCHIVE TAB — 4张完全不同个性的卡片 ═══ */
+      .archive-section { padding:16px 14px 0; }
+      .archive-grid { display:flex; flex-direction:column; gap:10px; }
+
+      /* 承诺卡 — 全黑 粉阴影 横版大字 */
+      .arc-promise {
+        background:var(--bk); border:1.5px solid rgba(249,168,212,.2);
+        cursor:pointer; position:relative; overflow:hidden;
+        box-shadow:4px 4px 0 var(--pk); transition:all .2s;
+      }
+      .arc-promise:active { transform:translate(3px,3px); box-shadow:1px 1px 0 var(--pk); }
+      .arc-promise .arc-head {
+        padding:13px 14px 10px; border-bottom:1px solid rgba(255,255,255,.08);
+        display:flex; align-items:center; justify-content:space-between;
+      }
+      .arc-promise .arc-hl { display:flex; align-items:center; gap:8px; }
+      .arc-promise .arc-icon {
+        width:26px; height:26px; border:1px solid rgba(249,168,212,.3);
+        display:flex; align-items:center; justify-content:center;
+        font-size:11px; color:var(--pk);
+      }
+      .arc-promise .arc-name { font-size:13px; font-weight:700; color:#fff; letter-spacing:.04em; }
+      .arc-promise .arc-sub { font-size:8px; color:rgba(249,168,212,.4); margin-top:1px; letter-spacing:.06em; }
+      .arc-promise .arc-cnt {
+        font-family:'Fraunces',serif; font-style:italic; font-size:36px;
+        font-weight:200; color:rgba(249,168,212,.15); line-height:1;
+      }
+      .arc-promise .arc-body { padding:10px 14px 13px; }
+      .arc-promise .arc-item {
+        display:flex; align-items:baseline; gap:7px; padding:4px 0;
+        border-bottom:1px solid rgba(255,255,255,.05);
+        font-size:11.5px; color:rgba(255,255,255,.65); line-height:1.5;
+      }
+      .arc-promise .arc-item:last-child { border:none; }
+      .arc-promise .arc-item-dot { font-size:7px; color:var(--pk); flex-shrink:0; }
+      .arc-promise .arc-more { font-size:7.5px; color:rgba(249,168,212,.4); text-align:right; margin-top:6px; letter-spacing:.1em; }
+      .arc-promise .arc-empty { font-size:11px; color:rgba(255,255,255,.2); font-style:italic; padding:4px 0; }
+      .arc-promise .arc-deco { position:absolute; bottom:-10px; right:-4px; font-size:60px; color:rgba(249,168,212,.04); font-weight:700; pointer-events:none; }
+
+      /* 细节卡 — 白底 左侧黑竖条 收据风 */
+      .arc-detail {
+        background:#fff; border:1.5px solid var(--bk);
+        cursor:pointer; position:relative;
+        transition:all .2s; display:grid; grid-template-columns:56px 1fr;
+      }
+      .arc-detail:active { transform:scale(0.985); }
+      .arc-detail .arc-side {
+        background:var(--bk); display:flex; flex-direction:column;
+        align-items:center; justify-content:center; padding:14px 0; gap:4px;
+      }
+      .arc-detail .arc-side-num {
+        font-family:'Fraunces',serif; font-style:italic; font-size:28px;
+        font-weight:200; color:#fff; writing-mode:horizontal-tb;
+      }
+      .arc-detail .arc-side-lbl {
+        font-size:6px; letter-spacing:.16em; color:rgba(255,255,255,.3);
+        writing-mode:vertical-rl;
+      }
+      .arc-detail .arc-side-icon { font-size:11px; color:var(--pk); margin-top:4px; }
+      .arc-detail .arc-main { padding:12px 13px; }
+      .arc-detail .arc-hd { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:9px; padding-bottom:7px; border-bottom:1px dashed rgba(17,17,17,.12); }
+      .arc-detail .arc-name { font-size:13px; font-weight:700; color:var(--bk); letter-spacing:.04em; }
+      .arc-detail .arc-sub { font-size:7.5px; color:rgba(17,17,17,.3); letter-spacing:.08em; }
+      .arc-detail .arc-item {
+        display:flex; align-items:baseline; gap:6px; padding:3.5px 0;
+        border-bottom:1px dashed rgba(17,17,17,.07); font-size:11px; color:rgba(17,17,17,.7);
+      }
+      .arc-detail .arc-item:last-child { border:none; }
+      .arc-detail .arc-item-f { font-size:7px; color:rgba(17,17,17,.3); flex-shrink:0; }
+      .arc-detail .arc-more { font-size:7px; color:rgba(17,17,17,.3); text-align:right; margin-top:4px; letter-spacing:.08em; }
+      .arc-detail .arc-empty { font-size:11px; color:rgba(17,17,17,.22); font-style:italic; }
+      /* 收据锯齿 */
+      .arc-detail::after { content:''; display:block; height:6px; background:repeating-linear-gradient(-45deg,transparent,transparent 4px,var(--wh2) 4px,var(--wh2) 5px); position:absolute; bottom:-1px; left:0; right:0; }
+
+      /* 习惯卡 — 粉底 标签 胶带风 */
+      .arc-habit {
+        background:var(--pk); border:1.5px solid var(--bk);
+        cursor:pointer; position:relative; overflow:hidden;
+        box-shadow:3px 3px 0 var(--bk); transition:all .2s;
+      }
+      .arc-habit:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--bk); }
+      .arc-habit .arc-head {
+        background:var(--bk); padding:8px 14px;
+        display:flex; align-items:center; justify-content:space-between;
+      }
+      .arc-habit .arc-name { font-size:11px; font-weight:700; color:#fff; letter-spacing:.08em; }
+      .arc-habit .arc-badge {
+        background:var(--pk); color:var(--bk); font-size:7px;
+        font-weight:700; padding:2px 8px; letter-spacing:.1em;
+      }
+      .arc-habit .arc-body { padding:12px 14px 13px; }
+      .arc-habit .arc-sub { font-size:8px; color:rgba(17,17,17,.5); margin-bottom:9px; letter-spacing:.06em; }
+      .arc-habit .arc-cnt { font-family:'Fraunces',serif; font-style:italic; font-size:42px; font-weight:200; color:var(--bk); line-height:1; margin-bottom:8px; }
+      .arc-habit .arc-items { display:flex; flex-direction:column; gap:5px; }
+      .arc-habit .arc-item {
+        display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(17,17,17,.75);
+        background:rgba(17,17,17,.08); padding:5px 9px;
+      }
+      .arc-habit .arc-item::before { content:'—'; font-size:9px; color:rgba(17,17,17,.35); }
+      .arc-habit .arc-more { font-size:7px; color:rgba(17,17,17,.4); text-align:right; margin-top:5px; letter-spacing:.1em; }
+      .arc-habit .arc-empty { font-size:11px; color:rgba(17,17,17,.4); font-style:italic; }
+      /* 胶带装饰 */
+      .arc-habit .arc-tape {
+        position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+        width:50px; height:14px; background:rgba(17,17,17,.12);
+      }
+
+      /* 争执卡 — 斜纹 标签 旗帜 */
+      .arc-conflict {
+        background:repeating-linear-gradient(45deg,var(--wh) 0,var(--wh) 4px,rgba(17,17,17,.04) 4px,rgba(17,17,17,.04) 5px);
+        border:1.5px solid var(--bk); cursor:pointer; position:relative; overflow:hidden;
+        transition:all .2s;
+      }
+      .arc-conflict:active { transform:scale(0.984); }
+      .arc-conflict .arc-flag {
+        position:absolute; top:0; right:0;
+        width:0; height:0;
+        border-style:solid; border-width:0 42px 42px 0;
+        border-color:transparent var(--bk) transparent transparent;
+      }
+      .arc-conflict .arc-flag-txt {
+        position:absolute; top:4px; right:2px; font-size:7px;
+        font-weight:700; color:#fff; letter-spacing:.05em;
+        transform:rotate(45deg); transform-origin:center;
+      }
+      .arc-conflict .arc-head {
+        padding:13px 14px 9px;
+        display:flex; align-items:center; gap:10px; border-bottom:1.5px solid var(--bk);
+      }
+      .arc-conflict .arc-icon {
+        width:30px; height:30px; background:var(--bk);
+        display:flex; align-items:center; justify-content:center;
+        font-size:12px; color:var(--pk); flex-shrink:0;
+      }
+      .arc-conflict .arc-info { flex:1; }
+      .arc-conflict .arc-name { font-size:13px; font-weight:700; color:var(--bk); }
+      .arc-conflict .arc-sub { font-size:7.5px; color:rgba(17,17,17,.4); letter-spacing:.06em; }
+      .arc-conflict .arc-cnt { font-family:'Fraunces',serif; font-style:italic; font-size:28px; color:rgba(17,17,17,.2); line-height:1; }
+      .arc-conflict .arc-body { padding:10px 14px 13px; }
+      .arc-conflict .arc-item {
+        display:flex; align-items:baseline; gap:7px; padding:5px 0;
+        border-bottom:1px solid rgba(17,17,17,.1); font-size:11px; color:rgba(17,17,17,.7);
+      }
+      .arc-conflict .arc-item:last-child { border:none; }
+      .arc-conflict .arc-item-f { font-size:7px; background:var(--bk); color:#fff; padding:1px 5px; flex-shrink:0; }
+      .arc-conflict .arc-more { font-size:7px; color:rgba(17,17,17,.35); text-align:right; margin-top:4px; letter-spacing:.1em; }
+      .arc-conflict .arc-empty { font-size:11px; color:rgba(17,17,17,.28); font-style:italic; }
+
+      /* ═══ DETAIL VIEW — 细边框ins卡片 ═══ */
+      #vDetail { z-index:30; background:var(--wh); }
+      .detail-header {
+        flex-shrink:0; height:50px; display:flex; align-items:center;
+        padding:0 14px; gap:12px; background:var(--bk); border-bottom:none;
+      }
+      .detail-back {
+        width:30px; height:30px; border:1px solid rgba(255,255,255,.2);
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer; color:rgba(255,255,255,.6); font-size:10px; transition:all .15s;
+        flex-shrink:0; background:transparent;
+      }
+      .detail-back:active { border-color:var(--pk); color:var(--pk); }
+      .detail-title {
+        font-family:'Fraunces',serif; font-style:italic; font-size:16px;
+        color:#fff; font-weight:400; flex:1; letter-spacing:-.01em;
+      }
+      .detail-count { font-size:9px; color:var(--pk); opacity:.7; }
+
+      .mem-list { padding:12px 14px 90px; display:flex; flex-direction:column; gap:8px; }
+
+      /* 记忆卡片 — 细边框ins风格 */
+      .mem-card {
+        background:#fff; border:1.5px solid var(--bk);
+        position:relative; overflow:hidden;
+        transition:all .18s;
+      }
+      .mem-card:active { transform:translate(2px,2px); box-shadow:none !important; }
+      .mem-card.is-legend { box-shadow:4px 4px 0 var(--pk); }
+      .mem-card.is-rare { box-shadow:3px 3px 0 rgba(17,17,17,.4); }
+
+      /* 顶部bar */
+      .mem-card-top-bar { height:3px; width:100%; }
+
+      .mem-card-body { padding:12px 13px 11px; position:relative; }
+
+      /* 背景大号序号 */
+      .mem-card-bg-num {
+        position:absolute; right:6px; top:-6px;
+        font-family:'Fraunces',serif; font-style:italic; font-size:68px;
+        font-weight:200; color:rgba(17,17,17,.04); line-height:1; pointer-events:none;
+      }
+
+      .mem-card-meta-row { display:flex; align-items:center; gap:6px; margin-bottom:7px; }
+      .mem-rarity-badge {
+        font-size:6.5px; font-weight:700; padding:2px 8px;
+        border:1px solid currentColor; letter-spacing:.1em; flex-shrink:0;
+      }
+      .mem-floor-tag {
+        font-size:7px; color:rgba(17,17,17,.4); background:rgba(17,17,17,.06);
+        padding:2px 6px; flex-shrink:0; letter-spacing:.06em;
+      }
+
+      .mem-card-title {
+        font-family:'Fraunces',serif; font-style:italic; font-size:13.5px;
+        color:var(--bk); font-weight:400; line-height:1.45; margin-bottom:7px;
+      }
+      .mem-card.is-legend .mem-card-title { font-size:15.5px; }
+
+      .mem-card-content { font-size:11px; color:rgba(17,17,17,.65); line-height:1.7; margin-bottom:9px; }
+
+      .mem-card-tags { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+      .mem-emo-tag {
+        font-size:7px; padding:2px 8px; border:1px solid currentColor;
+        letter-spacing:.06em;
+      }
+
+      /* legend引用块 */
+      .mem-quote-bar {
+        border-left:3px solid var(--bk); padding:7px 11px; margin-bottom:8px;
+        font-family:'Fraunces',serif; font-style:italic;
+        font-size:13px; color:var(--bk); line-height:1.6; background:rgba(17,17,17,.03);
+      }
+      .mem-card.is-legend .mem-quote-bar { border-color:var(--pk); }
+
+      /* ═══ NICKNAMES ═══ */
+      .nick-section { padding:14px 14px 0; }
+      .nick-bubble-container { position:relative; min-height:220px; margin-bottom:12px; overflow:hidden; }
+
+      /* 最新昵称 banner — 细边框 */
+      .nick-banner {
+        margin:0 14px 14px; padding:12px 14px;
+        border:1.5px solid var(--bk); background:#fff;
+        position:relative; overflow:hidden;
+        box-shadow:var(--sh-sm);
+      }
+      .nick-banner::before { content:'#'; position:absolute; right:10px; top:-8px; font-size:62px; font-weight:700; color:rgba(17,17,17,.04); line-height:1; pointer-events:none; }
+      .nick-banner-label { font-size:7px; letter-spacing:.2em; color:rgba(17,17,17,.3); margin-bottom:4px; font-weight:700; }
+      .nick-banner-text { font-family:'Fraunces',serif; font-style:italic; font-size:14.5px; color:var(--bk); line-height:1.5; }
+      .nick-banner .nb-tag { position:absolute; top:0; right:0; background:var(--pk); color:var(--bk); font-size:6.5px; font-weight:700; padding:3px 8px; letter-spacing:.1em; }
+
+      /* 昵称气泡 — 细边框ins风 */
+      .nick-bubble {
+        position:absolute; cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        transition:transform .18s; user-select:none;
+        border-radius:50%;
+      }
+      .nick-bubble:active { transform:scale(0.9) !important; }
+
+      /* 气泡弹层 — 带尖角，细边框 */
+      #nickPopup {
+        position:fixed; z-index:900;
+        background:#fff; border:1.5px solid var(--bk);
+        width:240px; max-height:280px; overflow-y:auto; scrollbar-width:none;
+        box-shadow:4px 4px 0 var(--pk);
+        animation:_popIn .18s cubic-bezier(.22,1,.36,1);
+      }
+      #nickPopup::-webkit-scrollbar { display:none; }
+      /* 尖角 */
+      #nickPopup::before {
+        content:''; position:absolute;
+        width:0; height:0; border-style:solid;
+        border-width:0 8px 10px 8px;
+        border-color:transparent transparent var(--bk) transparent;
+      }
+      #nickPopup::after {
+        content:''; position:absolute;
+        width:0; height:0; border-style:solid;
+        border-width:0 7px 9px 7px;
+        border-color:transparent transparent #fff transparent;
+      }
+      #nickPopup.tip-up::before { top:-10px; left:50%; transform:translateX(-50%); }
+      #nickPopup.tip-up::after  { top:-8px;  left:50%; transform:translateX(-50%); }
+      #nickPopup.tip-down::before { bottom:-10px; left:50%; transform:translateX(-50%) rotate(180deg); top:auto; }
+      #nickPopup.tip-down::after  { bottom:-8px; left:50%; transform:translateX(-50%) rotate(180deg); top:auto; }
+
+      @keyframes _popIn {
+        from { opacity:0; transform:scale(0.92) translateY(-4px); }
+        to   { opacity:1; transform:scale(1)    translateY(0); }
+      }
+      .np-header {
+        padding:10px 13px 8px; border-bottom:1.5px solid var(--bk);
+        position:sticky; top:0; background:#fff; z-index:1;
+        display:flex; align-items:flex-start; justify-content:space-between;
+      }
+      .np-name { font-family:'Fraunces',serif; font-style:italic; font-size:16px; color:var(--bk); }
+      .np-meta { font-size:7px; color:rgba(17,17,17,.35); margin-top:2px; letter-spacing:.06em; }
+      .np-close { background:none; border:none; cursor:pointer; font-size:10px; color:rgba(17,17,17,.3); padding:0; }
+      .np-body { padding:6px 13px 12px; }
+      .np-item {
+        padding:7px 0; border-bottom:1px solid rgba(17,17,17,.08);
+        display:flex; gap:9px; align-items:baseline;
+      }
+      .np-item:last-child { border:none; }
+      .np-floor { font-size:7.5px; background:var(--bk); color:#fff; padding:1px 5px; flex-shrink:0; }
+      .np-content { font-size:11px; color:rgba(17,17,17,.7); line-height:1.6; }
+
+      /* ═══ FAVORITES ═══ */
+      .fav-section { padding:14px 14px 0; }
+      .fav-folder-scroll { display:flex; gap:6px; overflow-x:auto; padding-bottom:10px; margin-bottom:4px; }
+      .fav-folder-scroll::-webkit-scrollbar { display:none; }
+      .fav-folder-chip {
+        flex-shrink:0; display:inline-flex; align-items:center; gap:5px;
+        background:#fff; border:1.5px solid rgba(17,17,17,.2);
+        padding:5px 12px; cursor:pointer; font-size:10px;
+        color:rgba(17,17,17,.6); transition:all .15s; white-space:nowrap;
+      }
+      .fav-folder-chip.on { background:var(--bk); border-color:var(--bk); color:var(--pk); }
+      .fav-folder-chip i { font-size:9px; }
+      .fav-add-chip {
+        flex-shrink:0; display:inline-flex; align-items:center; gap:4px;
+        background:transparent; border:1.5px dashed rgba(17,17,17,.2);
+        padding:5px 12px; cursor:pointer; font-size:10px; color:rgba(17,17,17,.3);
+        transition:all .15s; white-space:nowrap;
+      }
+      .fav-add-chip:hover { border-color:var(--bk); color:var(--bk); }
+      .fav-cards { display:flex; flex-direction:column; gap:9px; padding:4px 0 0; }
+      .fav-dialog-card { background:#fff; border:1.5px solid var(--bk); overflow:hidden; }
+      .fdc-header {
+        padding:9px 13px 7px; display:flex; align-items:center; justify-content:space-between;
+        border-bottom:1px solid rgba(17,17,17,.1); background:rgba(17,17,17,.02);
+      }
+      .fdc-meta { display:flex; align-items:center; gap:6px; }
+      .fdc-icon {
+        width:20px; height:20px; background:var(--bk);
+        display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--pk);
+      }
+      .fdc-label { font-size:9.5px; color:rgba(17,17,17,.5); }
+      .fdc-floor { font-size:8.5px; color:rgba(17,17,17,.3); }
+      .fdc-del { width:20px; height:20px; background:transparent; border:none; cursor:pointer; color:rgba(17,17,17,.2); font-size:9px; transition:color .14s; display:flex; align-items:center; justify-content:center; }
+      .fdc-del:hover { color:var(--bk); }
+      .fdc-bubbles { padding:11px 13px; display:flex; flex-direction:column; gap:7px; }
+      .fb-row { display:flex; align-items:flex-start; gap:7px; }
+      .fb-row.r { flex-direction:row-reverse; }
+      .fb-av {
+        width:24px; height:24px; flex-shrink:0; border:1.5px solid var(--bk);
+        background:#f5f0eb; display:flex; align-items:center; justify-content:center;
+        font-size:9px; color:rgba(17,17,17,.35); overflow:hidden;
+      }
+      .fb-av img { width:100%; height:100%; object-fit:cover; display:block; }
+      .fb-body {
+        max-width:78%; background:rgba(17,17,17,.04); border:1px solid rgba(17,17,17,.1);
+        padding:7px 10px; font-size:11.5px; color:var(--bk); line-height:1.65;
+      }
+      .fb-row.r .fb-body { background:var(--pk3); border-color:rgba(249,168,212,.3); }
+      .fdc-note { padding:7px 13px 11px; font-size:9.5px; font-style:italic; color:rgba(17,17,17,.4); border-top:1px dashed rgba(17,17,17,.1); }
+      .fav-quote-card { background:#fff; border:1.5px solid var(--bk); padding:14px; position:relative; overflow:hidden; }
+      .fav-quote-card::before { content:'"'; position:absolute; top:-10px; left:8px; font-family:'Fraunces',serif; font-size:68px; font-weight:200; color:rgba(17,17,17,.05); line-height:1; pointer-events:none; }
+      .fqc-text { font-family:'Fraunces',serif; font-style:italic; font-size:14px; color:var(--bk); line-height:1.7; margin-bottom:10px; padding-top:4px; }
+      .fqc-attr { display:flex; align-items:center; justify-content:space-between; }
+      .fqc-who { display:flex; align-items:center; gap:5px; }
+      .fqc-av { width:19px; height:19px; border:1.5px solid var(--bk); overflow:hidden; flex-shrink:0; background:#f5f0eb; display:flex; align-items:center; justify-content:center; font-size:8px; color:rgba(17,17,17,.3); }
+      .fqc-av img { width:100%; height:100%; object-fit:cover; display:block; }
+      .fqc-name { font-size:9.5px; color:rgba(17,17,17,.45); }
+      .fqc-floor { font-size:8.5px; background:var(--bk); color:#fff; padding:1px 5px; }
+      .fqc-del { width:20px; height:20px; background:transparent; border:none; cursor:pointer; color:rgba(17,17,17,.2); font-size:9.5px; transition:color .14s; display:flex; align-items:center; justify-content:center; }
+      .fqc-del:hover { color:var(--bk); }
+      .fav-empty { text-align:center; padding:28px 20px; font-size:12px; color:rgba(17,17,17,.3); line-height:1.7; border:1.5px dashed rgba(17,17,17,.15); }
+
+      /* ═══ NICK DETAIL ═══ */
+      #vNick { z-index:30; background:var(--wh); }
+      .nick-tl { padding:14px 14px 80px; display:flex; flex-direction:column; gap:0; }
+      .ntl-item { display:flex; gap:13px; padding-bottom:20px; position:relative; }
+      .ntl-item::before { content:''; position:absolute; left:15px; top:32px; bottom:0; width:1.5px; background:rgba(17,17,17,.1); }
+      .ntl-item:last-child::before { display:none; }
+      .ntl-dot {
+        width:31px; height:31px; border:1.5px solid var(--bk); flex-shrink:0;
+        background:var(--pk); display:flex; align-items:center; justify-content:center;
+        font-family:'Fraunces',serif; font-size:11px; color:var(--bk);
+      }
+      .ntl-content { flex:1; min-width:0; padding-top:3px; }
+      .ntl-name { font-family:'Fraunces',serif; font-style:italic; font-size:16px; color:var(--bk); margin-bottom:3px; font-weight:400; }
+      .ntl-meta { font-size:8.5px; color:rgba(17,17,17,.35); margin-bottom:5px; letter-spacing:.06em; }
+      .ntl-ctx { font-size:11.5px; color:rgba(17,17,17,.65); line-height:1.65; border-left:3px solid var(--bk); padding:7px 11px; background:rgba(17,17,17,.03); }
+
+      /* ═══ OVERLAY ═══ */
+      .ov { position:fixed; inset:0; z-index:100; opacity:0; pointer-events:none; transition:opacity .24s; background:rgba(0,0,0,.6); }
+      .ov.on { opacity:1; pointer-events:auto; }
+      .ov-panel {
+        position:absolute; bottom:0; left:0; right:0; background:var(--wh);
+        border-top:3px solid var(--bk);
+        transform:translateY(100%); transition:transform .32s cubic-bezier(.22,1,.36,1);
+        max-height:82%; display:flex; flex-direction:column;
+      }
+      .ov.on .ov-panel { transform:translateY(0); }
+      .ov-handle { width:34px; height:3px; background:rgba(17,17,17,.15); margin:10px auto 0; flex-shrink:0; }
+      .ov-head {
+        padding:12px 18px 10px; display:flex; align-items:center; justify-content:space-between;
+        flex-shrink:0; border-bottom:1.5px solid var(--bk);
+      }
+      .ov-title { font-family:'Fraunces',serif; font-style:italic; font-size:16px; color:var(--bk); font-weight:400; }
+      .ov-close { width:26px; height:26px; border:1.5px solid rgba(17,17,17,.2); background:none; color:rgba(17,17,17,.4); cursor:pointer; font-size:10px; display:flex; align-items:center; justify-content:center; transition:all .14s; }
+      .ov-close:hover { border-color:var(--bk); color:var(--bk); }
+      .ov-body { flex:1; overflow-y:auto; padding:12px 16px 26px; }
+      .ov-body::-webkit-scrollbar { display:none; }
+
+      .char-opt { display:flex; align-items:center; gap:11px; padding:10px 12px; cursor:pointer; transition:background .14s; margin-bottom:3px; border:1.5px solid transparent; }
+      .char-opt:hover { background:rgba(249,168,212,.08); }
+      .char-opt.on { background:rgba(249,168,212,.1); border-color:rgba(249,168,212,.5); }
+      .co-av { width:38px; height:38px; flex-shrink:0; border:1.5px solid var(--bk); background:var(--wh2); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:14px; color:rgba(17,17,17,.35); }
+      .co-av img { width:100%; height:100%; object-fit:cover; display:block; }
+      .co-n { font-size:12.5px; font-weight:700; color:var(--bk); letter-spacing:.02em; }
+      .co-s { font-size:9px; color:rgba(17,17,17,.35); margin-top:2px; letter-spacing:.04em; }
+      .co-badge { margin-left:auto; font-size:7.5px; color:var(--bk); background:var(--pk); padding:2px 7px; font-weight:700; }
+      .chat-sub-list { margin:0 0 8px 49px; display:flex; flex-direction:column; gap:4px; }
+      .chat-sub-item { display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:pointer; transition:all .14s; border:1px solid transparent; }
+      .chat-sub-item:hover { background:rgba(249,168,212,.08); }
+      .chat-sub-item.on { background:rgba(249,168,212,.12); border-color:rgba(249,168,212,.4); }
+      .csi-dot { width:5px; height:5px; background:rgba(17,17,17,.25); flex-shrink:0; }
+      .csi-dot.on { background:var(--bk); }
+      .csi-name { font-size:11px; color:rgba(17,17,17,.7); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .csi-badge { font-size:7.5px; background:var(--pk); color:var(--bk); padding:1px 6px; font-weight:700; }
+
+      /* ═══ SETTINGS ═══ */
+      #ovSet .ov-panel { max-height:92%; }
+      .sg { margin-bottom:16px; }
+      .sg-lbl { font-size:7.5px; color:rgba(17,17,17,.35); letter-spacing:.16em; margin-bottom:7px; font-weight:700; text-transform:uppercase; }
+      .s-row { display:flex; align-items:center; gap:7px; margin-bottom:7px; }
+      .s-sel, .s-inp {
+        flex:1; background:#fff; border:1.5px solid rgba(17,17,17,.2);
+        padding:8px 12px; font-size:11.5px; color:var(--bk);
+        font-family:'Geist Mono',monospace; outline:none; transition:border-color .14s;
+      }
+      .s-sel:focus, .s-inp:focus { border-color:var(--bk); }
+      .s-inp-sm { width:72px; flex:none; }
+      .sb {
+        flex-shrink:0; background:#fff; border:1.5px solid rgba(17,17,17,.25);
+        padding:8px 14px; font-size:11.5px; color:var(--bk);
+        cursor:pointer; font-family:'Geist Mono',monospace; transition:all .15s; white-space:nowrap;
+      }
+      .sb:hover { background:rgba(17,17,17,.04); }
+      .sb.prime { background:var(--bk); color:#fff; border-color:var(--bk); box-shadow:var(--sh-sm); }
+      .sb.prime:hover { box-shadow:3px 3px 0 var(--pk); }
+      .sb:disabled { opacity:.35; cursor:not-allowed; box-shadow:none; }
+      .sb.ldg { position:relative; color:transparent; }
+      .sb.ldg::after { content:''; position:absolute; top:50%; left:50%; width:12px; height:12px; border:2px solid rgba(255,255,255,.2); border-top-color:#fff; transform:translate(-50%,-50%); animation:spin .7s linear infinite; }
+      @keyframes spin { to { transform:translate(-50%,-50%) rotate(360deg); } }
+
+      .ei-box { background:rgba(17,17,17,.04); border:1px solid rgba(17,17,17,.1); padding:12px 13px; margin-bottom:14px; }
+      .ei-row { display:flex; align-items:center; justify-content:space-between; font-size:10.5px; margin-bottom:5px; }
+      .ei-row:last-child { margin-bottom:0; }
+      .ei-lbl { color:rgba(17,17,17,.4); }
+      .ei-val { color:var(--bk); font-weight:700; }
+      .ei-ok { color:var(--ok); }
+      .ei-warn { color:var(--warn); }
+      .plog { background:#fff; border:1.5px solid rgba(17,17,17,.15); padding:9px 12px; font-size:10.5px; color:rgba(17,17,17,.6); min-height:36px; max-height:88px; overflow-y:auto; line-height:1.6; }
+      .plog::-webkit-scrollbar { display:none; }
+      .lok { color:var(--ok); }
+      .lerr { color:#ef4444; }
+      .linf { color:rgba(17,17,17,.4); }
+      .divl { height:1.5px; background:rgba(17,17,17,.1); margin:14px 0; }
+      .range-hint { font-size:9px; color:rgba(17,17,17,.35); margin-top:4px; line-height:1.5; }
+      .range-hint span { color:var(--bk); font-weight:700; }
+
+
+
+      /* ═══ TOAST ═══ */
+      #toast {
+        position:fixed; bottom:24px; left:50%;
+        transform:translateX(-50%) translateY(8px);
+        background:var(--bk); color:#fff;
+        font-size:10.5px; padding:6px 16px; white-space:nowrap;
+        z-index:9998; opacity:0; transition:all .22s;
+        pointer-events:none; border:1.5px solid rgba(255,255,255,.1);
+        letter-spacing:.06em; box-shadow:3px 3px 0 var(--pk);
+      }
+      #toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+
+      /* ═══ LOADING ═══ */
+      #ldo {
+        position:fixed; inset:0; background:var(--bk); z-index:9990;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        gap:14px; transition:opacity .4s;
+      }
+      #ldo.out { opacity:0; pointer-events:none; }
+      .lsp { width:1px; height:28px; background:var(--pk); animation:lspAnim .9s ease-in-out infinite alternate; transform-origin:bottom; }
+      @keyframes lspAnim { from{transform:scaleY(1)} to{transform:scaleY(3)} }
+      .ltx { font-size:8px; letter-spacing:.22em; color:rgba(255,255,255,.28); margin-top:4px; }
+      .ep { text-align:center; padding:26px; font-size:12px; color:rgba(17,17,17,.3); font-family:'Fraunces',serif; font-style:italic; line-height:1.7; }
+    </style>
+  </head>
+  <body>
+    <div id="ldo">
+      <div class="lsp"></div>
+      <div class="ltx">LOADING MEMORIES</div>
+    </div>
+    <div id="toast"></div>
+
+    <div id="app">
+      <!-- ══════════ MAIN VIEW ══════════ -->
+      <div class="view" id="vMain">
+
+        <!-- POSTER HEADER -->
+        <div class="poster-head" id="posterHead">
+          <!-- 胶片条 -->
+          <div class="ph-film ph-film-t">
+            <div class="ph-film-holes"><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div></div>
+            <div class="ph-film-text">MEMORY PALACE · 记忆宫殿 · TSUKI · RECORD · 001 · 002 · 003 · PAGE · &nbsp;MEMORY PALACE · 记忆宫殿 · TSUKI · RECORD · 001 · 002 · 003 · PAGE · &nbsp;</div>
+            <div class="ph-film-holes"><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div></div>
+          </div>
+          <div class="ph-film ph-film-b">
+            <div class="ph-film-holes"><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div></div>
+            <div class="ph-film-text" style="animation-direction:reverse">That summer · ▶ 001 · PAGE · SN:TSUKI · 记忆碎片收藏 · &nbsp;That summer · ▶ 001 · PAGE · SN:TSUKI · 记忆碎片收藏 · &nbsp;</div>
+            <div class="ph-film-holes"><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div><div class="ph-film-hole"></div></div>
+          </div>
+          <!-- 角落 -->
+          <div class="ph-corner ph-corner-tl"></div>
+          <div class="ph-corner ph-corner-tr"></div>
+          <div class="ph-corner ph-corner-bl"></div>
+          <div class="ph-corner ph-corner-br"></div>
+          <!-- 右侧编号 -->
+          <div class="ph-side-num">PERSONAL · 001</div>
+          <!-- 右上数据条 -->
+          <div class="ph-datarow">
+            <div class="ph-dataline hi">MEMORY PALACE</div>
+            <div class="ph-dataline" id="phDataFloor">FLOOR — / —</div>
+            <div class="ph-dataline" id="phDataCnt">MEM · 0</div>
+          </div>
+          <!-- 主内容 -->
+          <div class="ph-inner">
+            <div class="ph-left">
+              <div class="ph-tag">MEMORY PALACE · 记忆宫殿</div>
+              <div class="ph-title" id="phTitle">选择角色</div>
+              <div class="ph-sub" id="phSub">— tap to switch —</div>
+              <div class="ph-stats">
+                <div class="ph-stat"><div class="ph-stat-num" id="stP">0</div><div class="ph-stat-lbl">承诺</div></div>
+                <div class="ph-stat"><div class="ph-stat-num" id="stD">0</div><div class="ph-stat-lbl">细节</div></div>
+                <div class="ph-stat"><div class="ph-stat-num" id="stH">0</div><div class="ph-stat-lbl">习惯</div></div>
+                <div class="ph-stat"><div class="ph-stat-num" id="stC">0</div><div class="ph-stat-lbl">争执</div></div>
+              </div>
+            </div>
+            <div class="ph-right">
+              <div class="ph-portraits">
+                <div class="ph-av-user" id="phUserImg"><i class="fa-solid fa-user"></i></div>
+                <div class="ph-av-char" id="phCharImg"><i class="fa-solid fa-user"></i></div>
+              </div>
+              <div class="ph-names">
+                <span class="ph-n-user" id="phUserName">USER</span>
+                <span class="ph-n-char" id="phCharName">CHAR</span>
+              </div>
+            </div>
+          </div>
+          <!-- 选择徽章 + 设置 -->
+          <div class="ph-badge" onclick="openOv('ovChar')">
+            <i class="fa-solid fa-comment-dots ph-badge-icon"></i>
+            <span class="ph-badge-name" id="phChatName">点击选择角色与聊天</span>
+            <i class="fa-solid fa-chevron-right ph-badge-arr"></i>
+          </div>
+          <div class="ph-set-btn" onclick="openOv('ovSet')"><i class="fa-solid fa-sliders"></i></div>
+        </div>
+
+        <!-- NAV TABS -->
+        <div class="nav-tabs">
+          <button class="nav-tab active" onclick="switchTab('Timeline',this)">
+            <i class="fa-solid fa-wave-square"></i>时间轴
+          </button>
+          <button class="nav-tab" onclick="switchTab('Archive',this)">
+            <i class="fa-solid fa-layer-group"></i>档案库
+          </button>
+          <button class="nav-tab" onclick="switchTab('Nicknames',this)">
+            <i class="fa-solid fa-heart"></i>昵称
+          </button>
+          <button class="nav-tab" onclick="switchTab('Favorites',this)">
+            <i class="fa-solid fa-bookmark"></i>收藏
+          </button>
+        </div>
+
+        <!-- TAB PANELS -->
+        <div class="scroll-body" id="scrollBody">
+
+          <!-- TIMELINE -->
+          <div id="tabTimeline">
+            <div class="emo-section">
+              <div class="sec-label">
+                <div class="sec-label-text">Emotion Timeline</div>
+                <div class="sec-label-line"></div>
+                <div class="sec-label-num" id="emoTotal">0</div>
+              </div>
+              <div class="emo-card">
+                <div class="emo-card-top">
+                  <div>
+                    <div class="emo-card-label">EMOTION CURVE</div>
+                    <div class="emo-card-title">情绪时间轴</div>
+                  </div>
+                  <div class="emo-card-meta">
+                    <div class="emo-card-range" id="emoRange">—</div>
+                    <div class="emo-card-total" id="emoMemCnt">0 条记忆</div>
+                  </div>
+                </div>
+                <div class="emo-svg-wrap">
+                  <svg id="emoSvg" viewBox="0 0 320 56" preserveAspectRatio="none"></svg>
+                </div>
+                <div class="emo-legend" id="emoLegend"></div>
+                <div class="emo-pills" id="emoPills"></div>
+              </div>
+
+              <!-- 4个统计卡片 — 各有个性 -->
+              <div class="stat-grid">
+                <div class="sc-promise" onclick="goDetail('promise')">
+                  <div class="sc-deco">♥</div>
+                  <div class="sc-tag">PROMISE</div>
+                  <div class="sc-num" id="stP2">0</div>
+                  <div class="sc-lbl">承诺</div>
+                </div>
+                <div class="sc-detail" onclick="goDetail('detail')">
+                  <div class="sc-tag">DETAIL</div>
+                  <div class="sc-num" id="stD2">0</div>
+                  <div class="sc-lbl">在意细节</div>
+                </div>
+                <div class="sc-habit" onclick="goDetail('habit')">
+                  <div class="sc-deco">HABIT</div>
+                  <div class="sc-tag">HABIT</div>
+                  <div class="sc-num" id="stH2">0</div>
+                  <div class="sc-lbl">小习惯</div>
+                </div>
+                <div class="sc-conflict" onclick="goDetail('conflict')">
+                  <div class="sc-badge">CONFLICT</div>
+                  <div class="sc-tag">BICKER</div>
+                  <div class="sc-num" id="stC2">0</div>
+                  <div class="sc-lbl">小打小闹</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARCHIVE -->
+          <div id="tabArchive" style="display:none">
+            <div class="archive-section">
+              <div class="sec-label" style="margin-bottom:14px">
+                <div class="sec-label-text">Memory Archive</div>
+                <div class="sec-label-line"></div>
+              </div>
+              <div class="archive-grid" id="archiveGrid"></div>
+            </div>
+          </div>
+
+          <!-- NICKNAMES -->
+          <div id="tabNicknames" style="display:none">
+            <div class="nick-section">
+              <div class="sec-label" style="margin-bottom:12px">
+                <div class="sec-label-text">Nickname Log</div>
+                <div class="sec-label-line"></div>
+              </div>
+            </div>
+            <div class="nick-banner" id="nickBanner" style="display:none">
+              <div class="nick-banner-label">LATEST NICKNAME</div>
+              <div class="nick-banner-text" id="nickBannerText">—</div>
+            </div>
+            <div class="nick-section" style="padding-top:0">
+              <div class="nick-bubble-container" id="nickGrid">
+                <div class="ep" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">暂无昵称记录</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAVORITES -->
+          <div id="tabFavorites" style="display:none">
+            <div class="fav-section">
+              <div class="sec-label" style="margin-bottom:10px">
+                <div class="sec-label-text">Favorites</div>
+                <div class="sec-label-line"></div>
+              </div>
+              <div class="fav-folder-scroll" id="favFolders"></div>
+              <div class="fav-cards" id="favCards"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /vMain -->
+
+      <!-- DETAIL VIEW -->
+      <div class="view hidden" id="vDetail">
+        <div class="detail-header">
+          <div class="detail-back" onclick="goBack()"><i class="fa-solid fa-chevron-left"></i></div>
+          <div class="detail-title" id="detailTitle">—</div>
+          <div class="detail-count" id="detailCount">0 条</div>
+        </div>
+        <div class="scroll-body">
+          <div class="mem-list" id="memList"></div>
+        </div>
+      </div>
+
+      <!-- NICK DETAIL -->
+      <div class="view hidden" id="vNick">
+        <div class="detail-header">
+          <div class="detail-back" onclick="goBack()"><i class="fa-solid fa-chevron-left"></i></div>
+          <div class="detail-title" id="nickDetailTitle">—</div>
+          <div class="detail-count" id="nickDetailCount">0 次</div>
+        </div>
+        <div class="scroll-body">
+          <div class="nick-tl" id="nickTl"></div>
+        </div>
+      </div>
+    </div>
+    <!-- /app -->
+
+    <!-- CHAR+CHAT OVERLAY -->
+    <div class="ov" id="ovChar" onclick="ovBgClick(event,'ovChar')">
+      <div class="ov-panel" onclick="sp(event)">
+        <div class="ov-handle"></div>
+        <div class="ov-head">
+          <span class="ov-title">选择角色与聊天</span>
+          <button class="ov-close" onclick="closeOv('ovChar')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="ov-body" id="charBody"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS OVERLAY -->
+    <div class="ov" id="ovSet" onclick="ovBgClick(event,'ovSet')">
+      <div class="ov-panel" onclick="sp(event)">
+        <div class="ov-handle"></div>
+        <div class="ov-head">
+          <span class="ov-title">设置 · 记忆提取</span>
+          <button class="ov-close" onclick="closeOv('ovSet')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="ov-body">
+          <div class="ei-box">
+            <div class="ei-row"><span class="ei-lbl">角色</span><span class="ei-val" id="eiChar">—</span></div>
+            <div class="ei-row"><span class="ei-lbl">聊天</span><span class="ei-val" id="eiChat">—</span></div>
+            <div class="ei-row"><span class="ei-lbl">已提取楼层</span><span class="ei-val" id="eiFloors">尚未提取</span></div>
+            <div class="ei-row"><span class="ei-lbl">下次起始楼层</span><span class="ei-val" id="eiNext">F1</span></div>
+            <div class="ei-row"><span class="ei-lbl">记忆总数</span><span class="ei-val" id="eiCnt">0 条</span></div>
+          </div>
+
+          <div class="sg">
+            <div class="sg-lbl">提取模式</div>
+            <div class="s-row">
+              <select class="s-sel" id="extMode" onchange="updateRangeUI()">
+                <option value="cont">连续提取（自动追踪楼层）</option>
+                <option value="latest">最新 N 条</option>
+                <option value="manual">手动指定楼层范围</option>
+              </select>
+            </div>
+            <div id="hintCont">
+              <div class="s-row" style="margin-top:6px">
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap">每次提取</span>
+                <input class="s-inp" id="contStep" type="number" min="10" max="500" value="50" style="flex:none;width:80px;text-align:center"/>
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap">楼层</span>
+              </div>
+              <div class="range-hint">首次从 <span>F1</span> 开始，每次点击自动向后推进。</div>
+            </div>
+            <div id="hintLatest" style="display:none">
+              <div class="s-row" style="margin-top:6px">
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap">提取最新</span>
+                <input class="s-inp" id="latestN" type="number" min="10" max="500" value="50" style="flex:none;width:80px;text-align:center"/>
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap">条消息</span>
+              </div>
+              <div class="range-hint">从最新消息往前数 N 条。<span>每次从最新楼层重新算。</span></div>
+            </div>
+            <div id="hintManual" style="display:none">
+              <div class="s-row" style="margin-top:6px">
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap">从 F</span>
+                <input class="s-inp s-inp-sm" id="manFrom" type="number" min="1" value="1"/>
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap">到 F</span>
+                <input class="s-inp s-inp-sm" id="manTo" type="number" min="1" value="100"/>
+              </div>
+              <div class="range-hint">手动范围可重复提取，<span>不更新自动追踪楼层。</span></div>
+            </div>
+          </div>
+
+          <div class="sg">
+            <div class="sg-lbl">提取侧重</div>
+            <select class="s-sel" id="extFocus">
+              <option value="full">全面提取（承诺/细节/习惯/争执/昵称）</option>
+              <option value="event">重要事件为主</option>
+              <option value="emotion">情绪波动为主</option>
+            </select>
+          </div>
+
+          <div class="s-row" style="margin-bottom:12px">
+            <button class="sb prime" id="extBtn" onclick="doExtract()" style="flex:1">
+              <i class="fa-solid fa-sparkles" style="margin-right:4px;font-size:10px"></i>开始提取记忆
+            </button>
+           
+          </div>
+            <!-- 清空模块选择 -->
+<div class="sg">
+  <div class="sg-lbl">选择要清空的模块</div>
+  <div id="clearModules" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="emotion" checked style="accent-color:var(--pk);width:14px;height:14px;"> 情绪时间轴（emotion 标签）
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="promise" checked style="accent-color:var(--pk);width:14px;height:14px;"> 承诺
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="detail" checked style="accent-color:var(--pk);width:14px;height:14px;"> 在意的细节
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="habit" checked style="accent-color:var(--pk);width:14px;height:14px;"> 小习惯
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="conflict" checked style="accent-color:var(--pk);width:14px;height:14px;"> 小打小闹
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="nickname" checked style="accent-color:var(--pk);width:14px;height:14px;"> 昵称
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;">
+      <input type="checkbox" value="favorites" checked style="accent-color:var(--pk);width:14px;height:14px;"> 收藏夹
+    </label>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button class="sb prime" onclick="clearSelected()" style="flex:1">
+      <i class="fa-solid fa-trash" style="margin-right:4px;font-size:10px"></i>清空所选模块
+    </button>
+    <button class="sb" onclick="toggleAllModules()" title="全选/全不选">
+      <i class="fa-solid fa-check-double"></i>
+    </button>
+  </div>
+</div>
+          <div class="plog" id="extLog">— 就绪 —</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         SCRIPTS
+    ═══════════════════════════════════ -->
+    <script>
+      'use strict';
+
+      /* ═══ IDB ═══ */
+      const DBNAME = 'tsukiphonepromax';
+      const STORES = {
+        config:{ keyPath:'id' }, chars:{ keyPath:'id' }, users:{ keyPath:'id' },
+        worldbook:null, chats:{ keyPath:'id' },
+        messages:{ keyPath:['chatId','floor'] }, theaters:{ keyPath:'id' },
+        theater_messages:{ keyPath:['theaterId','floor'] },
+        theater_summaries:{ keyPath:'id' },
+        memories:{ keyPath:'id' }, mem_favorites:{ keyPath:'id' },
+      };
+      let _db = null;
+
+      function openDB() {
+        // 优先等待 db-schema.js 完成 schema 同步，拿到完整连接
+        if (_db) return Promise.resolve(_db);
+        if (window.tsukiDbReady) {
+          return window.tsukiDbReady.then(db => { _db = db; return db; });
+        }
+        // 兜底：db-schema.js 未加载，裸开（只读，不升级版本）
+        return new Promise((res, rej) => {
+          const p = indexedDB.open(DBNAME);
+          p.onsuccess = e => { _db = e.target.result; res(_db); };
+          p.onerror = e => rej(e.target.error);
+        });
+      }
+      // 仅在 db-schema.js 未注入时才挂载（不覆盖 db-schema 的版本）
+      if (typeof window.openDb !== 'function') {
+        window.openDb = () => openDB();
+      }
+
+      async function gAll(s) {
+        const db = await openDB();
+        return new Promise((r,j) => {
+          const q = db.transaction(s,'readonly').objectStore(s).getAll();
+          q.onsuccess = () => r(q.result || []);
+          q.onerror = e => j(e.target.error);
+        });
+      }
+      async function gOne(s,k) {
+        const db = await openDB();
+        return new Promise((r,j) => {
+          const q = db.transaction(s,'readonly').objectStore(s).get(k);
+          q.onsuccess = () => r(q.result || null);
+          q.onerror = e => j(e.target.error);
+        });
+      }
+      async function pOne(s,o) {
+        const db = await openDB();
+        return new Promise((r,j) => {
+          const q = db.transaction(s,'readwrite').objectStore(s).put(o);
+          q.onsuccess = () => r();
+          q.onerror = e => j(e.target.error);
+        });
+      }
+      async function dOne(s,k) {
+        const db = await openDB();
+        return new Promise((r,j) => {
+          const q = db.transaction(s,'readwrite').objectStore(s).delete(k);
+          q.onsuccess = () => r();
+          q.onerror = e => j(e.target.error);
+        });
+      }
+      async function getMaxFloor(chatId) {
+        const db = await openDB();
+        return new Promise(r => {
+          try {
+            const st = db.transaction('messages','readonly').objectStore('messages');
+            const rng = IDBKeyRange.bound([chatId,0],[chatId,Infinity]);
+            const req = st.openCursor(rng,'prev');
+            req.onsuccess = ev => { const c = ev.target.result; r(c ? c.value.floor : 0); };
+            req.onerror = () => r(0);
+          } catch(e) { r(0); }
+        });
+      }
+
+      /* ═══ STATE ═══ */
+      let S = {
+        chars:[], chats:[], users:[],
+        char:null, chat:null, user:null,
+        mems:[], favs:{}, activeFav:'',
+        nextFloor:1,
+      };
+
+      /* ═══ INIT ═══ */
+      async function init() {
+        // 等待 db-schema.js 完成（最多8秒），避免 schema 升级阻塞
+        if (window.tsukiDbReady) {
+          try {
+            await Promise.race([
+              window.tsukiDbReady,
+              new Promise((_,rej) => setTimeout(() => rej(new Error('DB timeout')), 8000))
+            ]);
+          } catch(e) {
+            console.warn('[Memory Palace] DB ready timeout, proceeding anyway:', e.message);
+          }
+        }
+        try {
+          await openDB();
+          [S.chars, S.chats, S.users] = await Promise.all([gAll('chars'),gAll('chats'),gAll('users')]);
+          if (S.chars.length) await selChar(S.chars[0].id, null);
+          else renderEmpty();
+        } catch(e) {
+          console.error('[Memory Palace] init error:', e);
+          renderEmpty();
+        }
+        document.getElementById('ldo').classList.add('out');
+        document.addEventListener('click', closeNickPopup);
+      }
+
+      function renderEmpty() {
+        renderPoster(); renderEmo([]); renderArchive([]); renderNicks([]); renderFav();
+      }
+
+      /* ═══ SELECT CHAR ═══ */
+      async function selChar(charId, chatId) {
+        S.char = S.chars.find(c => c.id === charId) || null;
+        if (!S.char) { renderEmpty(); return; }
+        const cc = S.chats.filter(c => c.charIds?.includes(charId))
+          .sort((a,b) => (b.updatedAt||0)-(a.updatedAt||0));
+        if (chatId) S.chat = cc.find(c => c.id === chatId) || cc[0] || null;
+        else S.chat = cc[0] || null;
+        S.user = S.users.find(u => u.id === S.char.bindId) || S.users[0] || null;
+        await loadData();
+        renderAll();
+        closeOv('ovChar');
+      }
+
+      async function loadData() {
+        if (!S.char || !S.chat) { S.mems = []; S.favs = {}; return; }
+        const [allMems, allFavs] = await Promise.all([gAll('memories'),gAll('mem_favorites')]);
+        S.mems = allMems.filter(m => m.charId === S.char.id && m.chatId === S.chat.id);
+        const mineFavs = allFavs.filter(f => f.charId === S.char.id && f.chatId === S.chat.id);
+        S.favs = {};
+        mineFavs.forEach(f => {
+          if (!S.favs[f.folder]) S.favs[f.folder] = [];
+          S.favs[f.folder].push(f);
+        });
+        if (!S.activeFav || !S.favs[S.activeFav]) S.activeFav = Object.keys(S.favs)[0] || '';
+        const maxExtracted = S.mems.reduce((mx,m) => Math.max(mx, m.extractedFloors?.max||0), 0);
+        S.nextFloor = maxExtracted ? maxExtracted+1 : 1;
+      }
+
+      /* ═══ RENDER ALL ═══ */
+      function renderAll() {
+        renderPoster(); renderEmo(S.mems); renderArchive(S.mems);
+        renderNicks(S.mems); renderFav(); updateSettingsInfo();
+      }
+
+      /* ═══ POSTER ═══ */
+      function renderPoster() {
+        const ch = S.char, u = S.user, ct = S.chat;
+        document.getElementById('phTitle').textContent = ch?.name || '选择角色';
+        document.getElementById('phSub').textContent = ct
+          ? ct.customName || ct.title || ct.name || ct.id || '—'
+          : '— tap to switch —';
+        const cname = ct ? ct.customName||ct.title||ct.name||ct.id||'未命名' : '点击选择角色与聊天';
+        document.getElementById('phChatName').textContent = cname;
+        document.getElementById('phCharName').textContent = ch?.name?.slice(0,8)||'CHAR';
+        document.getElementById('phUserName').textContent = u?.name?.slice(0,8)||'USER';
+        setCircle('phCharImg', ch?.avatar, 'fa-user');
+        setCircle('phUserImg', u?.avatar, 'fa-user');
+        const ef = S.mems.length ? S.mems.reduce((a,m) => ({
+          min:Math.min(a.min, m.extractedFloors?.min??Infinity),
+          max:Math.max(a.max, m.extractedFloors?.max??0)
+        }), {min:Infinity,max:0}) : null;
+        const flEl = document.getElementById('phDataFloor');
+        if (flEl) flEl.textContent = ef&&ef.max ? `FLOOR ${ef.min} / ${ef.max}` : 'FLOOR — / —';
+        const cntEl = document.getElementById('phDataCnt');
+        if (cntEl) cntEl.textContent = `MEM · ${S.mems.length}`;
+        // 全部4个分类计数器同步
+        const cnt = cat => S.mems.filter(m => m.category===cat).length;
+        ['stP','stP2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=cnt('promise'); });
+        ['stD','stD2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=cnt('detail'); });
+        ['stH','stH2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=cnt('habit'); });
+        ['stC','stC2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=cnt('conflict'); });
+      }
+      function setCircle(id, src, icon) {
+        const el = document.getElementById(id); if (!el) return;
+        el.innerHTML = src
+          ? `<img src="${esc(src)}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`
+          : `<i class="fa-solid ${icon}"></i>`;
+      }
+
+      /* ═══ EMOTION SVG ═══ */
+      const ELV = { sweet:0.86, warm:0.72, tense:0.42, angry:0.25, complex:0.55, neutral:0.5 };
+      const ECOL = {
+        sweet:'#f0a0b5', warm:'#f5b87a', tense:'#88b0e8',
+        angry:'#e87878', complex:'#b0a0d4', neutral:'rgba(190,150,165,0.45)'
+      };
+      const EMO_LABELS = {
+        sweet:'甜蜜', warm:'温暖', tense:'紧张', angry:'争执', complex:'复杂', neutral:'平稳'
+      };
+      const ECOL2 = {
+        sweet:'rgba(249,168,212,0.12)', warm:'rgba(249,168,212,0.08)',
+        tense:'rgba(17,17,17,0.06)', angry:'rgba(17,17,17,0.08)',
+        complex:'rgba(17,17,17,0.05)', neutral:'rgba(17,17,17,0.03)'
+      };
+
+      function renderEmo(mems) {
+        const svg = document.getElementById('emoSvg');
+        const lgd = document.getElementById('emoLegend');
+        const pills = document.getElementById('emoPills');
+        svg.innerHTML=''; lgd.innerHTML=''; pills.innerHTML='';
+        document.getElementById('emoTotal').textContent = mems.length||'0';
+        document.getElementById('emoMemCnt').textContent = mems.length+'条记忆';
+
+        const W=320, H=56, P=6, N=20;
+        if (!mems.length) {
+          const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+          l.setAttribute('x1',0); l.setAttribute('y1',H/2);
+          l.setAttribute('x2',W); l.setAttribute('y2',H/2);
+          l.setAttribute('stroke','rgba(210,155,175,0.18)');
+          l.setAttribute('stroke-width','1.5'); l.setAttribute('stroke-dasharray','4,5');
+          svg.appendChild(l);
+          document.getElementById('emoRange').textContent='—'; return;
+        }
+        const sorted = [...mems].sort((a,b)=>(a.floor||0)-(b.floor||0));
+        const minF = sorted[0].floor||0, maxF = sorted[sorted.length-1].floor||1;
+        document.getElementById('emoRange').textContent = `F${minF} — F${maxF}`;
+        const bkts = Array.from({length:N},()=>({sum:0,cnt:0,emo:'neutral'}));
+        sorted.forEach(m => {
+          const idx = Math.min(N-1,Math.floor((((m.floor||0)-minF)/(maxF-minF+1))*N));
+          bkts[idx].sum += ELV[m.emotion]||0.5; bkts[idx].cnt++;
+          if (m.emotion&&m.emotion!=='neutral') bkts[idx].emo=m.emotion;
+        });
+        const pts = bkts.map((b,i) => ({
+          x: P+((W-P*2)/(N-1))*i,
+          y: P+(H-P*2)*(1-(b.cnt?b.sum/b.cnt:0.5)),
+          emo:b.emo, col:ECOL[b.emo]||ECOL.neutral, cnt:b.cnt
+        }));
+        const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+        const lg = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+        lg.id='eg'; lg.setAttribute('x1','0'); lg.setAttribute('y1','0');
+        lg.setAttribute('x2','1'); lg.setAttribute('y2','0');
+        pts.forEach((p,i) => {
+          const s = document.createElementNS('http://www.w3.org/2000/svg','stop');
+          s.setAttribute('offset',`${((i/(N-1))*100).toFixed(1)}%`);
+          s.setAttribute('stop-color',p.col); s.setAttribute('stop-opacity','0.55');
+          lg.appendChild(s);
+        });
+        defs.appendChild(lg); svg.appendChild(defs);
+        function cr(ps) {
+          let d=`M${ps[0].x},${ps[0].y}`;
+          for (let i=0;i<ps.length-1;i++) {
+            const a=ps[Math.max(0,i-1)],b=ps[i],c=ps[i+1],dd=ps[Math.min(ps.length-1,i+2)];
+            const c1x=b.x+(c.x-a.x)/6, c1y=b.y+(c.y-a.y)/6;
+            const c2x=c.x-(dd.x-b.x)/6, c2y=c.y-(dd.y-b.y)/6;
+            d+=` C${c1x},${c1y} ${c2x},${c2y} ${c.x},${c.y}`;
+          }
+          return d;
+        }
+        const pd=cr(pts);
+        const fd=pd+` L${pts[pts.length-1].x},${H} L${pts[0].x},${H} Z`;
+        const fill=document.createElementNS('http://www.w3.org/2000/svg','path');
+        fill.setAttribute('d',fd); fill.setAttribute('fill','url(#eg)'); svg.appendChild(fill);
+        const line=document.createElementNS('http://www.w3.org/2000/svg','path');
+        line.setAttribute('d',pd); line.setAttribute('fill','none');
+        line.setAttribute('stroke','url(#eg)'); line.setAttribute('stroke-width','2');
+        line.setAttribute('stroke-linecap','round'); svg.appendChild(line);
+        pts.forEach(p => {
+          if (!p.cnt) return;
+          if (p.y<P+(H-P*2)*0.3||p.y>P+(H-P*2)*0.72) {
+            const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+            c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r','2.5');
+            c.setAttribute('fill',p.col); c.setAttribute('stroke','white');
+            c.setAttribute('stroke-width','1.5'); svg.appendChild(c);
+          }
+        });
+        [0,Math.floor(N/4),Math.floor(N/2),Math.floor((3*N)/4),N-1].forEach(i => {
+          const sp=document.createElement('span'); sp.className='emo-lbl';
+          sp.textContent='F'+Math.round(minF+(maxF-minF)*(i/(N-1)));
+          lgd.appendChild(sp);
+        });
+        const ecounts={};
+        mems.forEach(m => { if(m.emotion) ecounts[m.emotion]=(ecounts[m.emotion]||0)+1; });
+        Object.entries(ecounts).sort((a,b)=>b[1]-a[1]).slice(0,5).forEach(([emo,cnt]) => {
+          const pill=document.createElement('span'); pill.className='emo-pill';
+          const col=ECOL[emo]||ECOL.neutral;
+          pill.style.color=col; pill.style.borderColor=col;
+          pill.style.background=ECOL2[emo]||'rgba(190,150,165,0.08)';
+          pill.textContent=`${EMO_LABELS[emo]||emo} ×${cnt}`;
+          pills.appendChild(pill);
+        });
+      }
+
+      /* ═══ ARCHIVE — 4张个性卡片 ═══ */
+      const CATS = [
+        { id:'promise',  name:'承诺',    sub:'双方做出的约定',    col:'#f9a8d4', ic:'fa-handshake' },
+        { id:'detail',   name:'在意的细节', sub:'用户透露的喜好特征', col:'#111',    ic:'fa-heart'     },
+        { id:'habit',    name:'小习惯',  sub:'角色自身行为习惯',   col:'#f9a8d4', ic:'fa-leaf'      },
+        { id:'conflict', name:'小打小闹', sub:'日常争执与小摩擦',   col:'#111',    ic:'fa-bolt'      },
+      ];
+
+      function renderArchive(mems) {
+        const grid = document.getElementById('archiveGrid');
+        grid.innerHTML = '';
+
+        // ── 承诺卡 — 全黑粉阴影 ──
+        (function() {
+          const cat = CATS[0], its = mems.filter(m => m.category === cat.id);
+          const card = document.createElement('div');
+          card.className = 'arc-promise';
+          if (its.length) card.onclick = () => goDetail(cat.id);
+          const prevHTML = its.length
+            ? its.slice(0,3).map(it=>`<div class="arc-item"><span class="arc-item-dot">▶</span>${esc(it.title)}</div>`).join('')
+            : `<div class="arc-empty">暂无承诺记录</div>`;
+          card.innerHTML = `
+            <div class="arc-head"><div class="arc-hl">
+              <div class="arc-icon"><i class="fa-solid ${cat.ic}"></i></div>
+              <div><div class="arc-name">${cat.name}</div><div class="arc-sub">${cat.sub}</div></div>
+            </div><div class="arc-cnt">${its.length}</div></div>
+            <div class="arc-body">${prevHTML}${its.length>3?`<div class="arc-more">+${its.length-3} MORE →</div>`:''}</div>
+            <div class="arc-deco">${its.length||'0'}</div>`;
+          grid.appendChild(card);
+        })();
+
+        // ── 细节卡 — 白底黑侧边收据风 ──
+        (function() {
+          const cat = CATS[1], its = mems.filter(m => m.category === cat.id);
+          const card = document.createElement('div');
+          card.className = 'arc-detail';
+          if (its.length) card.onclick = () => goDetail(cat.id);
+          const prevHTML = its.length
+            ? its.slice(0,4).map(it=>`<div class="arc-item"><span class="arc-item-f">F${it.floor||0}</span>${esc(it.title)}</div>`).join('')
+            : `<div class="arc-empty">暂无细节记录</div>`;
+          card.innerHTML = `
+            <div class="arc-side">
+              <div class="arc-side-num">${its.length}</div>
+              <div class="arc-side-lbl">DETAIL · REC</div>
+              <div class="arc-side-icon"><i class="fa-solid ${cat.ic}"></i></div>
+            </div>
+            <div class="arc-main">
+              <div class="arc-hd"><span class="arc-name">${cat.name}</span><span class="arc-sub">${cat.sub}</span></div>
+              ${prevHTML}${its.length>4?`<div class="arc-more">+${its.length-4} ITEMS</div>`:''}
+            </div>`;
+          grid.appendChild(card);
+        })();
+
+        // ── 习惯卡 — 粉底胶带黑顶 ──
+        (function() {
+          const cat = CATS[2], its = mems.filter(m => m.category === cat.id);
+          const card = document.createElement('div');
+          card.className = 'arc-habit';
+          if (its.length) card.onclick = () => goDetail(cat.id);
+          const prevHTML = its.length
+            ? `<div class="arc-items">${its.slice(0,3).map(it=>`<div class="arc-item">${esc(it.title)}</div>`).join('')}</div>`
+            : `<div class="arc-empty">小习惯 · 暂无记录</div>`;
+          card.innerHTML = `
+            <div class="arc-tape"></div>
+            <div class="arc-head"><div class="arc-name">${cat.name}</div><div class="arc-badge">${its.length} REC</div></div>
+            <div class="arc-body">
+              <div class="arc-sub">${cat.sub}</div>
+              <div class="arc-cnt">${its.length}</div>
+              ${prevHTML}${its.length>3?`<div class="arc-more">+${its.length-3} MORE →</div>`:''}
+            </div>`;
+          grid.appendChild(card);
+        })();
+
+        // ── 争执卡 — 斜纹底旗角 ──
+        (function() {
+          const cat = CATS[3], its = mems.filter(m => m.category === cat.id);
+          const card = document.createElement('div');
+          card.className = 'arc-conflict';
+          if (its.length) card.onclick = () => goDetail(cat.id);
+          const prevHTML = its.length
+            ? its.slice(0,3).map(it=>`<div class="arc-item"><span class="arc-item-f">F${it.floor||0}</span>${esc(it.title)}</div>`).join('')
+            : `<div class="arc-empty">相安无事 · 暂无记录</div>`;
+          card.innerHTML = `
+            <div class="arc-flag"></div>
+            <span style="position:absolute;top:6px;right:3px;font-size:6px;font-weight:700;color:#fff;transform:rotate(45deg)">BICK</span>
+            <div class="arc-head">
+              <div class="arc-icon"><i class="fa-solid ${cat.ic}"></i></div>
+              <div class="arc-info"><div class="arc-name">${cat.name}</div><div class="arc-sub">${cat.sub}</div></div>
+              <div class="arc-cnt">${its.length}</div>
+            </div>
+            <div class="arc-body">${prevHTML}${its.length>3?`<div class="arc-more">+${its.length-3} RECORDS</div>`:''}</div>`;
+          grid.appendChild(card);
+        })();
+      }
+
+      /* ═══ DETAIL — 细边框ins风格卡片 ═══ */
+      function goDetail(catId) {
+        const cat = CATS.find(c => c.id === catId);
+        const its = S.mems.filter(m => m.category === catId);
+        document.getElementById('detailTitle').textContent = cat?.name || catId;
+        document.getElementById('detailCount').textContent = its.length + '条';
+        const list = document.getElementById('memList');
+        list.innerHTML = '';
+        if (!its.length) {
+          list.innerHTML = '<div class="ep">暂无记录</div>';
+          showView('vDetail'); return;
+        }
+        // legend优先
+        const sorted = [...its].sort((a,b) => {
+          const rank = {legend:0,rare:1,common:2};
+          return (rank[a.rarity]||2)-(rank[b.rarity]||2);
+        });
+        sorted.forEach((it,idx) => {
+          const ec = ECOL[it.emotion] || ECOL.neutral;
+          const eb = ECOL2[it.emotion] || ECOL2.neutral;
+          const card = document.createElement('div');
+          const rarityMap = { legend:'LEGEND', rare:'RARE', common:'COMMON' };
+          const rarityLabel = rarityMap[it.rarity] || 'COMMON';
+
+          // legend用粉色顶条，rare用黑条，common无
+          let topBarStyle = '';
+          if (it.rarity==='legend') topBarStyle = 'background:var(--pk)';
+          else if (it.rarity==='rare') topBarStyle = 'background:var(--bk)';
+
+          card.className = 'mem-card' + (it.rarity==='legend'?' is-legend':it.rarity==='rare'?' is-rare':'');
+
+          const contentSlice = it.rarity==='common'
+            ? (it.content||'').slice(0,100)+((it.content||'').length>100?'…':'')
+            : it.content||'';
+
+          // 情绪颜色映射到黑粉系
+          const emoColMap = {
+            sweet:'var(--pk)', warm:'#f9a8d4', tense:'rgba(17,17,17,0.5)',
+            angry:'rgba(17,17,17,0.8)', complex:'rgba(17,17,17,0.4)', neutral:'rgba(17,17,17,0.25)'
+          };
+          const emoBg = it.emotion==='sweet'||it.emotion==='warm' ? 'rgba(249,168,212,0.08)' : 'rgba(17,17,17,0.04)';
+          const emoC = emoColMap[it.emotion] || 'rgba(17,17,17,0.3)';
+
+          card.innerHTML = `
+            ${topBarStyle ? `<div class="mem-card-top-bar" style="${topBarStyle}"></div>` : ''}
+            <div class="mem-card-body">
+              <div class="mem-card-bg-num">${idx+1}</div>
+              <div class="mem-card-meta-row">
+                <span class="mem-rarity-badge" style="color:${it.rarity==='legend'?'var(--pk)':'rgba(17,17,17,0.5)'};border-color:${it.rarity==='legend'?'var(--pk)':'rgba(17,17,17,0.2)'};">${rarityLabel}</span>
+                <span class="mem-floor-tag">F${it.floor||0}</span>
+              </div>
+              ${it.rarity==='legend'
+                ? `<div class="mem-quote-bar">${esc(it.title||'无题')}</div>
+                   ${contentSlice?'<div class="mem-card-content">'+esc(contentSlice)+'</div>':''}`
+                : `<div class="mem-card-title">${esc(it.title||'无题')}</div>
+                   ${contentSlice?'<div class="mem-card-content">'+esc(contentSlice)+'</div>':''}`
+              }
+              <div class="mem-card-tags">
+                <span class="mem-emo-tag" style="color:${emoC};border-color:${emoC};background:${emoBg};">${EMO_LABELS[it.emotion]||it.emotion||'—'}</span>
+              </div>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+        showView('vDetail');
+      }
+
+      /* ═══ NICKNAMES — 随机碰撞布局气泡 ═══ */
+      let _activeNickBubble = null;
+
+      function renderNicks(mems) {
+        const container = document.getElementById('nickGrid');
+        const banner = document.getElementById('nickBanner');
+        container.innerHTML = '';
+        const old = document.getElementById('nickPopup');
+        if (old) old.remove();
+        _activeNickBubble = null;
+
+        const nicks = mems.filter(m => m.category === 'nickname');
+        if (!nicks.length) {
+          container.innerHTML = '<div class="ep" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">暂无昵称记录</div>';
+          if (banner) banner.style.display = 'none';
+          return;
+        }
+
+        // 分组
+        const grp = {};
+        nicks.forEach(n => {
+          if (!grp[n.title]) grp[n.title] = [];
+          grp[n.title].push(n);
+        });
+
+        // 最新昵称 banner
+        const latest = [...nicks].sort((a,b) => (b.floor||0)-(a.floor||0))[0];
+        if (latest && banner) {
+          banner.style.display = '';
+          document.getElementById('nickBannerText').textContent = '「' + latest.title + '」';
+        }
+
+        const entries = Object.entries(grp).sort((a,b) => b[1].length - a[1].length);
+        const hues = [340,200,160,260,30,300,80,170,220,0];
+
+        // 气泡大小由昵称字数 + 出现次数决定
+        const bubbles = entries.map(([name, items], i) => {
+          const charLen = [...name].length; // 支持中文字符
+          // 基础：字数1~2 → 52px，3~4 → 64px，5+ → 74px，再叠加出现次数
+          const baseSize = charLen <= 2 ? 52 : charLen <= 4 ? 64 : 74;
+          const sz = Math.min(90, baseSize + Math.floor(items.length * 3));
+          return { name, items, hue: hues[i % hues.length], sz };
+        });
+
+        // ── 随机碰撞布局 ──
+        // 容器尺寸：宽 = 屏幕宽-28px padding，高 = 动态
+        const W = container.parentElement.clientWidth - 28;
+        const rows = Math.ceil(bubbles.length / 4);
+        const minH = Math.max(220, rows * 100);
+        container.style.minHeight = minH + 'px';
+
+        // 简单随机放置，检测重叠并重试
+        const placed = [];
+        const MARGIN = 6;
+        const MAX_TRIES = 60;
+
+        function overlaps(x, y, sz) {
+          for (const p of placed) {
+            const dx = x - p.x, dy = y - p.y;
+            const minDist = (sz + p.sz) / 2 + MARGIN;
+            if (Math.sqrt(dx*dx + dy*dy) < minDist) return true;
+          }
+          return false;
+        }
+
+        bubbles.forEach(b => {
+          let x, y, placed_ok = false;
+          for (let t = 0; t < MAX_TRIES; t++) {
+            x = b.sz/2 + MARGIN + Math.random() * Math.max(0, W - b.sz - MARGIN*2);
+            y = b.sz/2 + MARGIN + Math.random() * Math.max(0, minH - b.sz - MARGIN*2);
+            if (!overlaps(x, y, b.sz)) { placed_ok = true; break; }
+          }
+          // 若仍重叠，就按序排列
+          if (!placed_ok) {
+            const row = Math.floor(placed.length / 4);
+            const col2 = placed.length % 4;
+            x = b.sz/2 + col2 * (W/4);
+            y = b.sz/2 + row * 96;
+          }
+          placed.push({ x, y, sz: b.sz });
+          b._x = x; b._y = y;
+        });
+
+        // 实际容器高度
+        const maxY = Math.max(...placed.map(p => p.y + p.sz/2 + MARGIN));
+        container.style.minHeight = Math.max(minH, maxY + 8) + 'px';
+
+        // 渲染气泡 — ins细边框风格
+        // 奇偶交替：粉底/白底，以增加视觉错落
+        bubbles.forEach((b, i) => {
+          const { name, items, sz, _x, _y } = b;
+          const bubble = document.createElement('div');
+          bubble.className = 'nick-bubble';
+          const isPink = i % 2 === 0;
+          bubble.style.cssText = [
+            `width:${sz}px`, `height:${sz}px`,
+            `left:${_x - sz/2}px`, `top:${_y - sz/2}px`,
+            `background:${isPink ? 'var(--pk)' : '#fff'}`,
+            `border:1.5px solid var(--bk)`,
+            `box-shadow:${isPink ? '2px 2px 0 var(--bk)' : '2px 2px 0 var(--pk)'}`,
+          ].join(';');
+
+          const fontSize = sz <= 56 ? 10 : sz <= 68 ? 11 : 12;
+          const textColor = isPink ? 'var(--bk)' : 'var(--bk)';
+          const cntColor = isPink ? 'rgba(17,17,17,0.45)' : 'var(--pk)';
+          bubble.innerHTML = `
+            <div style="text-align:center;padding:0 5px;">
+              <div style="font-family:'Fraunces',serif;font-style:italic;font-size:${fontSize}px;color:${textColor};line-height:1.25;max-width:${sz-12}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400;">${esc(name)}</div>
+              <div style="font-size:6.5px;color:${cntColor};margin-top:3px;letter-spacing:.06em;">×${items.length}</div>
+            </div>
+          `;
+
+          bubble.addEventListener('click', e => {
+            e.stopPropagation();
+            toggleNickPopup(bubble, name, items, 0);
+          });
+          container.appendChild(bubble);
+        });
+      }
+
+      function toggleNickPopup(anchor, name, items, hue) {
+        const existing = document.getElementById('nickPopup');
+        if (existing && _activeNickBubble === anchor) {
+          existing.remove(); _activeNickBubble = null; return;
+        }
+        if (existing) existing.remove();
+        _activeNickBubble = anchor;
+
+        const popup = document.createElement('div');
+        popup.id = 'nickPopup';
+        const sorted = [...items].sort((a,b) => (a.floor||0)-(b.floor||0));
+
+        // 黑色顶条
+        const topBar = document.createElement('div');
+        topBar.style.cssText = 'height:3px;background:var(--bk);';
+        popup.appendChild(topBar);
+
+        // 头部
+        const hdr = document.createElement('div');
+        hdr.className = 'np-header';
+        hdr.innerHTML = `
+          <div>
+            <div class="np-name">「${esc(name)}」</div>
+            <div class="np-meta">出现 ${items.length} 次 · 首见 F${sorted[0]?.floor||'?'}</div>
+          </div>
+          <button class="np-close" onclick="closeNickPopup()"><i class="fa-solid fa-xmark"></i></button>
+        `;
+        popup.appendChild(hdr);
+
+        // 内容
+        const body = document.createElement('div');
+        body.className = 'np-body';
+        body.innerHTML = sorted.map(it => `
+          <div class="np-item">
+            <span class="np-floor">F${it.floor||'?'}</span>
+            <span class="np-content">${esc(it.content||it.title)}</span>
+          </div>
+        `).join('');
+        popup.appendChild(body);
+
+        document.body.appendChild(popup);
+        popup.addEventListener('click', e => e.stopPropagation());
+
+// 先挂到屏幕外拿真实高度
+        const popW = 240;
+        popup.style.position = 'fixed';
+        popup.style.top = '-9999px';
+        popup.style.left = '-9999px';
+        popup.style.width = popW + 'px';
+        document.body.appendChild(popup);
+        popup.addEventListener('click', function(e) { e.stopPropagation(); });
+
+        const realH = popup.offsetHeight;
+        const rect = anchor.getBoundingClientRect();
+        const spaceAbove = rect.top;
+
+        let top;
+        if (spaceAbove >= realH + 14) {
+          top = rect.top - realH - 14;
+          popup.classList.add('tip-down');
+        } else {
+          top = rect.bottom + 14;
+          popup.classList.add('tip-up');
+        }
+
+        let left = rect.left + rect.width / 2 - popW / 2;
+        if (left < 8) left = 8;
+        if (left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
+
+        const tipLeft = rect.left + rect.width / 2 - left;
+        const clampedTipLeft = Math.max(16, Math.min(tipLeft, popW - 16));
+
+        popup.style.top = top + 'px';
+        popup.style.left = left + 'px';
+
+        const tipStyle = document.createElement('style');
+        tipStyle.textContent = `
+          #nickPopup.tip-up::before { left:${clampedTipLeft - 8}px !important; transform:none !important; }
+          #nickPopup.tip-up::after  { left:${clampedTipLeft - 7}px !important; transform:none !important; }
+          #nickPopup.tip-down::before { left:${clampedTipLeft - 8}px !important; transform:rotate(180deg) !important; transform-origin:50% 50%; }
+          #nickPopup.tip-down::after  { left:${clampedTipLeft - 7}px !important; transform:rotate(180deg) !important; transform-origin:50% 50%; }
+        `;
+        document.head.appendChild(tipStyle);
+        popup._tipStyle = tipStyle;
+      }
+
+            function closeNickPopup() {
+        const p = document.getElementById('nickPopup');
+        if (p) {
+          if (p._tipStyle) p._tipStyle.remove();
+          p.remove();
+          _activeNickBubble = null;
+        }
+      }
+
+      /* ═══ FAVORITES ═══ */
+      function renderFav() {
+        const fe = document.getElementById('favFolders');
+        const fc = document.getElementById('favCards');
+        fe.innerHTML = ''; fc.innerHTML = '';
+        const names = Object.keys(S.favs);
+        names.forEach(n => {
+          const c = document.createElement('div');
+          c.className = 'fav-folder-chip' + (n===S.activeFav?' on':'');
+          c.innerHTML = `<i class="fa-solid fa-folder"></i>${esc(n)}<span style="font-size:8px;opacity:0.55;">(${S.favs[n].length})</span>`;
+          c.onclick = () => { S.activeFav=n; renderFav(); };
+          fe.appendChild(c);
+        });
+        const add = document.createElement('div');
+        add.className = 'fav-add-chip';
+        add.innerHTML = `<i class="fa-solid fa-plus"></i>新建`;
+        add.onclick = () => {
+          const n = prompt('新建收藏夹名称：');
+          if (n && !S.favs[n]) { S.favs[n]=[]; S.activeFav=n; renderFav(); }
+        };
+        fe.appendChild(add);
+        if (!names.length) {
+          fc.innerHTML = '<div class="fav-empty">AI 提取记忆时会自动收藏重要对话片段<br><span style="font-size:10px;">完成提取后此处会出现收藏内容</span></div>';
+          return;
+        }
+        const its = S.favs[S.activeFav] || [];
+        if (!its.length) { fc.innerHTML='<div class="fav-empty">这个文件夹还是空的</div>'; return; }
+        its.forEach(fav => renderFavCard(fav, fc));
+      }
+
+      function renderFavCard(fav, container) {
+        const cav=S.char?.avatar||'', uav=S.user?.avatar||'';
+        const cn=S.char?.name||'角色', un=S.user?.name||'用户';
+        const card = document.createElement('div');
+        if (fav.type==='dialog' && Array.isArray(fav.messages)) {
+          card.className='fav-dialog-card';
+          let bubs='<div class="fdc-bubbles">';
+          fav.messages.forEach(m => {
+            const isu = m.senderRole==='user';
+            const av=isu?uav:cav;
+            bubs+=`<div class="fb-row${isu?' r':''}">
+              <div class="fb-av">${av?`<img src="${esc(av)}"/>`:'<i class="fa-solid fa-user"></i>'}</div>
+              <div class="fb-body">${esc(typeof m.content==='string'?m.content:JSON.stringify(m.content))}</div>
+            </div>`;
+          });
+          bubs+='</div>';
+          card.innerHTML=`
+            <div class="fdc-header">
+              <div class="fdc-meta">
+                <div class="fdc-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                <span class="fdc-label">对话片段</span>
+                <span class="fdc-floor">· F${fav.floorRange||'?'}</span>
+              </div>
+              <button class="fdc-del" onclick="delFav(event,'${fav.id}')"><i class="fa-solid fa-xmark"></i></button>
+            </div>${bubs}
+            ${fav.note?`<div class="fdc-note">${esc(fav.note)}</div>`:''}`;
+        } else if (fav.type==='quote') {
+          card.className='fav-quote-card';
+          const av=fav.senderRole==='user'?uav:cav;
+          const nm=fav.senderRole==='user'?un:cn;
+          card.innerHTML=`
+            <div class="fqc-text">${esc(fav.content||'')}</div>
+            <div class="fqc-attr">
+              <div class="fqc-who">
+                <div class="fqc-av">${av?`<img src="${esc(av)}"/>`:'<i class="fa-solid fa-user"></i>'}</div>
+                <span class="fqc-name">${esc(nm)}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="fqc-floor">F${fav.floor||'?'}</span>
+                <button class="fqc-del" onclick="delFav(event,'${fav.id}')"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            </div>`;
+        } else {
+          card.className='fav-quote-card';
+          card.innerHTML=`
+            <div class="fqc-text">${esc(fav.title||'—')}</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-family:'Fraunces',serif;font-style:italic;">${esc(fav.content||'')}</div>
+            <div class="fqc-attr">
+              <span class="fqc-floor">F${fav.floor||'?'}</span>
+              <button class="fqc-del" onclick="delFav(event,'${fav.id}')"><i class="fa-solid fa-xmark"></i></button>
+            </div>`;
+        }
+        container.appendChild(card);
+      }
+
+      async function delFav(e, id) {
+        e.stopPropagation();
+        await dOne('mem_favorites', id);
+        await loadData(); renderFav(); toast('已移除收藏');
+      }
+
+      /* ═══ SETTINGS INFO ═══ */
+      function updateSettingsInfo() {
+        const ch=S.char, ct=S.chat;
+        document.getElementById('eiChar').textContent = ch?.name||'—';
+        document.getElementById('eiChat').textContent = ct?ct.customName||ct.title||ct.name||ct.id||'—':'—';
+        document.getElementById('eiCnt').textContent = S.mems.length+'条';
+        const ef = S.mems.reduce((a,m) => ({
+          min:Math.min(a.min, m.extractedFloors?.min??Infinity),
+          max:Math.max(a.max, m.extractedFloors?.max??0)
+        }), {min:Infinity,max:0});
+        const flEl = document.getElementById('eiFloors');
+        const nxEl = document.getElementById('eiNext');
+        if (ef.max>0) {
+          flEl.textContent=`F${ef.min} — F${ef.max}`; flEl.className='ei-val ei-ok';
+          nxEl.textContent=`F${ef.max+1}`; nxEl.className='ei-val ei-ok';
+        } else {
+          flEl.textContent='尚未提取'; flEl.className='ei-val ei-warn';
+          nxEl.textContent='F1'; nxEl.className='ei-val';
+        }
+        updateRangeUI();
+      }
+
+      function updateRangeUI() {
+        const mode=document.getElementById('extMode').value;
+        document.getElementById('hintCont').style.display=mode==='cont'?'':'none';
+        document.getElementById('hintLatest').style.display=mode==='latest'?'':'none';
+        document.getElementById('hintManual').style.display=mode==='manual'?'':'none';
+      }
+
+      /* ═══ EXTRACTION — 委托给 MemoryAPI.js ═══ */
+      async function doExtract() {
+        if (!S.char || !S.chat) { toast('请先选择角色与聊天'); return; }
+        if (typeof window.MemoryAPI === 'undefined') {
+          toast('MemoryAPI.js 未加载'); return;
+        }
+
+        const btn = document.getElementById('extBtn');
+        const log = document.getElementById('extLog');
+        btn.disabled = true; btn.classList.add('ldg');
+        log.innerHTML = '';
+        const L = (t, c='linf') => {
+          log.innerHTML += `<div class="${c}">${t}</div>`;
+          log.scrollTop = log.scrollHeight;
+        };
+
+        try {
+          const mode = document.getElementById('extMode').value;
+          const focus = document.getElementById('extFocus').value;
+          const step = parseInt(document.getElementById('contStep').value)||50;
+          const latestN = parseInt(document.getElementById('latestN').value)||50;
+          const manFrom = parseInt(document.getElementById('manFrom').value)||1;
+          const manTo = parseInt(document.getElementById('manTo').value)||100;
+
+          const result = await window.MemoryAPI.extract({
+            char: S.char, chat: S.chat, user: S.user,
+            mode, focus, step, latestN, manFrom, manTo,
+            nextFloor: S.nextFloor,
+            onLog: L,
+          });
+
+          // 更新追踪楼层
+          if (!result.isManual) S.nextFloor = result.nextFloor;
+
+          await loadData(); renderAll(); updateSettingsInfo();
+          toast(`提取完成 · ${result.savedMemories} 条记忆 · ${result.savedFavorites} 条收藏`);
+        } catch(e) {
+          console.error(e); L('错误：'+e.message, 'lerr');
+        }
+        btn.disabled = false; btn.classList.remove('ldg');
+      }
+
+      async function clearMems() {
+        if (!S.char || !S.chat) { toast('请先选择角色'); return; }
+        if (!confirm('清除该角色在此聊天的所有记忆？此操作不可撤销。')) return;
+        const all = await gAll('memories');
+        for (const m of all.filter(m => m.charId===S.char.id && m.chatId===S.chat.id))
+          await dOne('memories', m.id);
+        S.mems = []; S.nextFloor = 1;
+        renderAll(); updateSettingsInfo(); toast('已清除全部记忆');
+      }
+      
+      /* ═══ 分模块清空 ═══ */
+function toggleAllModules() {
+  const boxes = document.querySelectorAll('#clearModules input[type=checkbox]');
+  const allChecked = [...boxes].every(b => b.checked);
+  boxes.forEach(b => b.checked = !allChecked);
+}
+
+async function clearSelected() {
+  if (!S.char || !S.chat) { toast('请先选择角色'); return; }
+  const boxes = [...document.querySelectorAll('#clearModules input[type=checkbox]')].filter(b => b.checked);
+  if (!boxes.length) { toast('请至少选择一个模块'); return; }
+
+  const labels = boxes.map(b => b.closest('label').textContent.trim()).join('、');
+  if (!confirm(`确认清空：${labels}？此操作不可撤销。`)) return;
+
+  const selected = boxes.map(b => b.value);
+  let count = 0;
+
+  // 清空 memories（按 category 过滤，emotion 归入所有有情绪标签的记忆）
+  const memCategories = selected.filter(v => v !== 'favorites' && v !== 'emotion');
+  // emotion 作为特殊处理：删除所有该角色+聊天的记忆里 emotion 字段不为 neutral 的
+  // 实际更常见的需求是按分类清，emotion 勾选时就清所有分类，所以这里把 emotion 等同于"全分类"
+  const clearAllMems = selected.includes('emotion');
+
+  const allMems = await gAll('memories');
+  const myMems = allMems.filter(m => m.charId === S.char.id && m.chatId === S.chat.id);
+
+  for (const m of myMems) {
+    const shouldDelete = clearAllMems || memCategories.includes(m.category);
+    if (shouldDelete) { await dOne('memories', m.id); count++; }
+  }
+
+  // 清空 mem_favorites
+  if (selected.includes('favorites')) {
+    const allFavs = await gAll('mem_favorites');
+    for (const f of allFavs.filter(f => f.charId === S.char.id && f.chatId === S.chat.id)) {
+      await dOne('mem_favorites', f.id); count++;
+    }
+  }
+
+  await loadData(); renderAll(); updateSettingsInfo();
+  toast(`已清空 ${count} 条数据`);
+}
+
+      /* ═══ CHAR SELECTOR ═══ */
+      function renderCharSel() {
+        const body = document.getElementById('charBody');
+        body.innerHTML = '';
+        if (!S.chars.length) { body.innerHTML='<div class="ep">数据库中未找到角色</div>'; return; }
+        S.chars.forEach(char => {
+          const chatsForChar = S.chats.filter(c => c.charIds?.includes(char.id))
+            .sort((a,b) => (b.updatedAt||0)-(a.updatedAt||0));
+          const el = document.createElement('div');
+          el.className = 'char-opt'+(S.char?.id===char.id?' on':'');
+          el.innerHTML = `
+            <div class="co-av">${char.avatar?`<img src="${esc(char.avatar)}">`:'<i class="fa-solid fa-user"></i>'}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="co-n">${esc(char.name||'未命名')}</div>
+              <div class="co-s">${esc(char.remark||char.id)} · ${chatsForChar.length}个聊天</div>
+            </div>
+            ${S.char?.id===char.id&&!chatsForChar.length?'<span class="co-badge">当前</span>':''}
+          `;
+          body.appendChild(el);
+          if (chatsForChar.length) {
+            const subList = document.createElement('div');
+            subList.className = 'chat-sub-list';
+            chatsForChar.forEach(chat => {
+              const isActive = S.char?.id===char.id && S.chat?.id===chat.id;
+              const subItem = document.createElement('div');
+              subItem.className = 'chat-sub-item'+(isActive?' on':'');
+              const chatName = chat.customName||chat.title||chat.name||chat.id||'未命名';
+              const memCnt = isActive ? S.mems.filter(m=>m.chatId===chat.id).length : 0;
+              subItem.innerHTML = `
+                <div class="csi-dot${isActive?' on':''}"></div>
+                <span class="csi-name">${esc(chatName)}</span>
+                ${isActive?`<span class="csi-badge">当前 · ${memCnt}条</span>`:''}
+              `;
+              subItem.onclick = async () => await selChar(char.id, chat.id);
+              subList.appendChild(subItem);
+            });
+            body.appendChild(subList);
+          } else {
+            el.onclick = async () => await selChar(char.id, null);
+          }
+        });
+      }
+
+      /* ═══ TABS ═══ */
+      function switchTab(tab, btn) {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        ['Timeline','Archive','Nicknames','Favorites'].forEach(t => {
+          document.getElementById('tab'+t).style.display='none';
+        });
+        document.getElementById('tab'+tab).style.display='';
+        if (tab === 'Nicknames') {
+          // 重新布局气泡（容器宽度可能变化）
+          setTimeout(() => renderNicks(S.mems), 50);
+        }
+      }
+
+      /* ═══ VIEW STACK ═══ */
+      let viewStack = ['vMain'];
+      function showView(id) {
+        const current = viewStack[viewStack.length-1];
+        if (current===id) return;
+        document.getElementById(current).classList.add('back-hidden');
+        document.getElementById(current).classList.remove('hidden');
+        const target = document.getElementById(id);
+        target.classList.remove('hidden'); target.classList.remove('back-hidden');
+        viewStack.push(id);
+        document.getElementById('scrollBody')?.scrollTo(0,0);
+      }
+      function goBack() {
+        if (viewStack.length<=1) return;
+        const current = viewStack.pop();
+        document.getElementById(current).classList.add('hidden');
+        document.getElementById(current).classList.remove('back-hidden');
+        const prev = viewStack[viewStack.length-1];
+        document.getElementById(prev).classList.remove('back-hidden');
+        document.getElementById(prev).classList.remove('hidden');
+      }
+
+      /* ═══ OVERLAY ═══ */
+      function openOv(id) { if(id==='ovChar') renderCharSel(); document.getElementById(id).classList.add('on'); }
+      function closeOv(id) { document.getElementById(id).classList.remove('on'); }
+      function ovBgClick(e,id) { if(e.target===document.getElementById(id)) closeOv(id); }
+      function sp(e) { e.stopPropagation(); }
+
+      /* ═══ TOAST ═══ */
+      let _tt;
+      function toast(m) {
+        const el=document.getElementById('toast');
+        el.textContent=m; el.classList.add('on');
+        clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('on'),2600);
+      }
+
+      /* ═══ UTILS ═══ */
+      function esc(s) {
+        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+
+      /* ═══ BOOT ═══ */
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <!-- ═══ MEMORY → CHAR WORLDBOOK SYNC ═══ -->
+    <script>
+    /* ══════════════════════════════════════════════════════════════
+       记忆宫殿 → 角色世界书同步模块
+       点击顶部角色头像 (phCharImg)，将当前 char+chat 的全部记忆
+       数据（六大模块，全量不精简）组装成优先级 999 的条目，
+       upsert 到 chars store 中对应角色的 char.worldbook 数组里。
+       条目新增 chatId 字段，默认 enabled:false，keys:''。
+    ══════════════════════════════════════════════════════════════ */
+    (function () {
+      'use strict';
+
+      /* ── Banner UI ─────────────────────────────────────────── */
+      let _bannerTimer = null;
+
+      function _ensureBanner() {
+        if (document.getElementById('memorySyncBanner')) return;
+        const el = document.createElement('div');
+        el.id = 'memorySyncBanner';
+        el.style.cssText = [
+          'position:fixed','top:0','left:0','right:0','z-index:99999',
+          'transform:translateY(-100%)','transition:transform .3s cubic-bezier(0.22,1,0.36,1)',
+          'pointer-events:none',
+        ].join(';');
+        el.innerHTML = `
+          <div id="msbInner" style="
+            display:flex;align-items:center;gap:10px;
+            padding:10px 16px 10px 14px;
+            background:#111111;border-bottom:2px solid #f9a8d4;
+            font-family:'Geist Mono','PingFang SC',monospace;
+          ">
+            <div id="msbIcon" style="
+              flex-shrink:0;width:22px;height:22px;
+              border:1.5px solid rgba(255,255,255,.22);
+              display:flex;align-items:center;justify-content:center;
+              font-size:11px;color:#f9a8d4;
+            ">—</div>
+            <div style="flex:1;min-width:0;">
+              <div id="msbLabel" style="font-size:7px;letter-spacing:.2em;color:rgba(255,255,255,.28);margin-bottom:2px;font-weight:700;">CHAR WORLDBOOK SYNC</div>
+              <div id="msbMsg"   style="font-size:11px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 130px);"></div>
+            </div>
+            <div id="msbSub" style="font-size:8px;color:rgba(255,255,255,.28);flex-shrink:0;letter-spacing:.05em;text-align:right;line-height:1.5;"></div>
+          </div>
+          <div style="height:2px;background:rgba(249,168,212,.12);">
+            <div id="msbBarFill" style="height:100%;background:#f9a8d4;width:0%;transition:width .45s ease;"></div>
+          </div>`;
+        document.body.appendChild(el);
+      }
+
+      function _bannerShow(msg, sub, progress, state) {
+        _ensureBanner();
+        const banner = document.getElementById('memorySyncBanner');
+        const icon   = document.getElementById('msbIcon');
+        const msgEl  = document.getElementById('msbMsg');
+        const subEl  = document.getElementById('msbSub');
+        const fill   = document.getElementById('msbBarFill');
+        const inner  = document.getElementById('msbInner');
+
+        msgEl.textContent = msg;
+        subEl.innerHTML   = (sub || '').replace(/\n/g, '<br>');
+        fill.style.width  = (progress || 0) + '%';
+
+        const COLORS = {
+          running: { icon:'—', ic:'#f9a8d4', bc:'#f9a8d4', bar:'#f9a8d4' },
+          ok:      { icon:'✔', ic:'#4ade80', bc:'#4ade80', bar:'#4ade80' },
+          err:     { icon:'✘', ic:'#f87171', bc:'#f87171', bar:'#f87171' },
+        };
+        const c = COLORS[state] || COLORS.running;
+        icon.textContent           = c.icon;
+        icon.style.color           = c.ic;
+        icon.style.borderColor     = 'rgba(255,255,255,.22)';
+        inner.style.borderBottomColor = c.bc;
+        fill.style.background      = c.bar;
+
+        banner.style.transform     = 'translateY(0)';
+        banner.style.pointerEvents = 'auto';
+
+        clearTimeout(_bannerTimer);
+        if (state === 'ok' || state === 'err') {
+          _bannerTimer = setTimeout(() => {
+            banner.style.transform     = 'translateY(-100%)';
+            banner.style.pointerEvents = 'none';
+            const av = document.getElementById('phCharImg');
+            if (av) av.style.outline = '';
+          }, 3000);
+        }
+      }
+
+      /* ── 情绪标签中文映射 ───────────────────────────────────── */
+      const EMO_ZH = {
+        sweet:'甜蜜', warm:'温暖', tense:'紧张',
+        angry:'争执', complex:'复杂', neutral:'平稳',
+      };
+
+      /* ── 稀有度标签 ─────────────────────────────────────────── */
+      const RARITY_ZH = {
+        legend:'[极重要]',
+        rare:  '[较重要]',
+        common:'[日常]',
+        '':    '[日常]',
+      };
+
+      /* ── 昵称评级说明 ───────────────────────────────────────── */
+      function _nickRatingLabel(item) {
+        /* 出现频率用 rarity 近似；没有单独 count 字段时用 rarity 推断 */
+        const rarity  = item.rarity  || 'common';
+        const emotion = item.emotion || 'neutral';
+        const floor   = item.floor   != null ? `F${item.floor}` : '?';
+        const emoZh   = EMO_ZH[emotion] || emotion;
+        const rarZh   = RARITY_ZH[rarity] || '[日常]';
+        return `${rarZh} · 情感色彩:${emoZh} · 首见楼层:${floor}`;
+      }
+
+      /* ── 全量格式化单条记忆 ─────────────────────────────────── */
+      function _fmtMem(m, idx) {
+        const floor   = m.floor   != null ? `F${m.floor}`   : 'F?';
+        const emo     = EMO_ZH[m.emotion] || m.emotion || '—';
+        const rarity  = RARITY_ZH[m.rarity] || '[日常]';
+        const content = (m.content || '').trim();
+        return [
+          `  ${idx + 1}. ${rarity} [${floor}] ${m.title || '(无标题)'}`,
+          `     情感:${emo}`,
+          content ? `     ${content}` : '',
+        ].filter(Boolean).join('\n');
+      }
+
+      /* ── 全量格式化昵称条目（含评级+解释）────────────────────── */
+      function _fmtNick(m, idx) {
+        const floor   = m.floor   != null ? `F${m.floor}`   : 'F?';
+        const rating  = _nickRatingLabel(m);
+        const content = (m.content || '').trim();
+        return [
+          `  ${idx + 1}. 「${m.title || '?'}」  ${rating}`,
+          content ? `     使用情境: ${content}` : '',
+        ].filter(Boolean).join('\n');
+      }
+
+      /* ── 全量格式化收藏条目 ─────────────────────────────────── */
+      function _fmtFav(f, idx) {
+        if (f.type === 'dialog') {
+          const msgs = (f.messages || []).map(msg => {
+            const floorTag = msg.floor != null ? `[F${msg.floor}]` : '';
+            const role     = msg.senderRole === 'user' ? '用户' : '角色';
+            return `     ${floorTag}[${role}] ${msg.content || ''}`;
+          }).join('\n');
+          return [
+            `  ${idx + 1}. [对话片段] 文件夹:${f.folder || '默认'}`,
+            f.note ? `     备注: ${f.note}` : '',
+            msgs,
+          ].filter(Boolean).join('\n');
+        } else {
+          const floorTag = f.floor != null ? `[F${f.floor}]` : '';
+          const role     = f.senderRole === 'user' ? '用户' : '角色';
+          return [
+            `  ${idx + 1}. [金句] ${floorTag}[${role}] ${f.content || ''}`,
+            f.note ? `     备注: ${f.note}` : '',
+          ].filter(Boolean).join('\n');
+        }
+      }
+
+      /* ── 组装世界书条目完整内容（全量，无精简）────────────────── */
+      function _buildContent(char, chat, mems, favs) {
+        const charName = char?.name  || '角色';
+        const userName = (S.user?.name) || '用户';
+        const chatName = chat?.customName || chat?.title || chat?.name || chat?.id || '未命名聊天';
+        const now      = new Date().toLocaleString('zh-CN', { hour12:false });
+
+        const promises  = mems.filter(m => m.category === 'promise');
+        const details   = mems.filter(m => m.category === 'detail');
+        const habits    = mems.filter(m => m.category === 'habit');
+        const conflicts = mems.filter(m => m.category === 'conflict');
+        const nicknames = mems.filter(m => m.category === 'nickname');
+
+        /* 情绪时间轴：全部有 emotion 字段的记忆，按楼层排序 */
+        const emoMems = [...mems]
+          .filter(m => m.emotion && m.emotion !== 'neutral')
+          .sort((a, b) => (a.floor || 0) - (b.floor || 0));
+
+        /* 情绪分布统计 */
+        const emoCount = {};
+        mems.forEach(m => {
+          if (m.emotion) emoCount[m.emotion] = (emoCount[m.emotion] || 0) + 1;
+        });
+        const emoStat = Object.entries(emoCount)
+          .sort((a, b) => b[1] - a[1])
+          .map(([e, n]) => `${EMO_ZH[e]||e}×${n}`)
+          .join(' / ') || '暂无';
+
+        /* 收藏夹展开 */
+        const allFavs = Object.values(favs || {}).flat();
+
+        /* 楼层范围 */
+        const floors = mems.map(m => m.floor || 0).filter(Boolean);
+        const floorMin = floors.length ? Math.min(...floors) : '?';
+        const floorMax = floors.length ? Math.max(...floors) : '?';
+
+        /* 分模块行数统计 */
+        const secStat = [
+          `承诺×${promises.length}`,
+          `细节×${details.length}`,
+          `习惯×${habits.length}`,
+          `争执×${conflicts.length}`,
+          `昵称×${nicknames.length}`,
+          `收藏×${allFavs.length}`,
+        ].join(' · ');
+
+        const lines = [];
+
+        lines.push(`# 记忆宫殿辅助注入 — ${charName} × ${userName}`);
+        lines.push(`聊天室: ${chatName}`);
+        lines.push(`同步时间: ${now}`);
+        lines.push(`楼层范围: F${floorMin} — F${floorMax} · 总记忆: ${mems.length} 条`);
+        lines.push(`分布: ${secStat}`);
+        lines.push('');
+
+        /* ── 情绪时间轴 ── */
+        lines.push(`## [情绪时间轴]  共 ${emoMems.length} 条有情绪波动的记忆`);
+        lines.push(`情绪分布统计: ${emoStat}`);
+        if (emoMems.length) {
+          emoMems.forEach((m, i) => {
+            const fl  = m.floor != null ? `F${m.floor}` : 'F?';
+            const emo = EMO_ZH[m.emotion] || m.emotion;
+            lines.push(`  ${i+1}. [${fl}][${emo}] ${m.title || ''}  —  ${(m.content||'').trim()}`);
+          });
+        } else {
+          lines.push('  (暂无非平稳情绪记录)');
+        }
+        lines.push('');
+
+        /* ── 承诺约定 ── */
+        lines.push(`## [承诺约定]  共 ${promises.length} 条`);
+        if (promises.length) {
+          promises.forEach((m, i) => lines.push(_fmtMem(m, i)));
+        } else {
+          lines.push('  (暂无)');
+        }
+        lines.push('');
+
+        /* ── 在意的细节 ── */
+        lines.push(`## [在意的细节]  共 ${details.length} 条`);
+        if (details.length) {
+          details.forEach((m, i) => lines.push(_fmtMem(m, i)));
+        } else {
+          lines.push('  (暂无)');
+        }
+        lines.push('');
+
+        /* ── 小习惯 ── */
+        lines.push(`## [小习惯]  共 ${habits.length} 条`);
+        if (habits.length) {
+          habits.forEach((m, i) => lines.push(_fmtMem(m, i)));
+        } else {
+          lines.push('  (暂无)');
+        }
+        lines.push('');
+
+        /* ── 小打小闹 ── */
+        lines.push(`## [小打小闹]  共 ${conflicts.length} 条`);
+        if (conflicts.length) {
+          conflicts.forEach((m, i) => lines.push(_fmtMem(m, i)));
+        } else {
+          lines.push('  (暂无)');
+        }
+        lines.push('');
+
+        /* ── 昵称称呼（全量 + 评级 + 情境说明）── */
+        lines.push(`## [昵称称呼]  共 ${nicknames.length} 条`);
+        lines.push('  评级说明: [极重要]=标志性称呼/高频/强情感  [较重要]=有记录意义  [日常]=偶发/日常称呼');
+        if (nicknames.length) {
+          nicknames.forEach((m, i) => lines.push(_fmtNick(m, i)));
+        } else {
+          lines.push('  (暂无)');
+        }
+        lines.push('');
+
+        /* ── 收藏夹 ── */
+        lines.push(`## [收藏夹]  共 ${allFavs.length} 条`);
+        if (allFavs.length) {
+          allFavs.forEach((f, i) => lines.push(_fmtFav(f, i)));
+        } else {
+          lines.push('  (暂无)');
+        }
+        
+        lines.push('# 记忆宫殿辅助注入结束');
+
+        return lines.join('\n');
+      }
+      
+      /* ── 写入 char.worldbook（upsert）────────────────────────── */
+      async function _upsertCharWorldbook(char, chat, mems, favs) {
+        /* 读取最新的 char 对象（避免覆盖其他字段） */
+        const db      = await openDB();
+        const freshChar = await new Promise((res, rej) => {
+          const q = db.transaction('chars', 'readonly').objectStore('chars').get(char.id);
+          q.onsuccess = () => res(q.result || null);
+          q.onerror   = e => rej(e.target.error);
+        });
+        if (!freshChar) throw new Error('chars store 中找不到该角色: ' + char.id);
+
+        /* 确保 worldbook 字段存在且为数组 */
+        if (!Array.isArray(freshChar.worldbook)) freshChar.worldbook = [];
+
+        const entryId = 'mem_palace__' + char.id + '__' + chat.id;
+        const content = _buildContent(char, chat, mems, favs);
+
+        const newEntry = {
+          id:        entryId,
+          title:     '[记忆宫殿] ' + (char.name || '角色') + ' · ' + (chat.customName || chat.title || chat.id || '聊天'),
+          content:   content,
+          keys:      '',        /* 无关键词，不触发 */
+          priority:  1314999,
+          enabled:   false,     /* 默认关闭 */
+          type:      'post',
+          isKeyword: false,
+          chatId:    chat.id,   /* 新增字段：绑定 chatId */
+          _syncedAt: Date.now(),
+        };
+
+        const idx = freshChar.worldbook.findIndex(e => e.id === entryId);
+        if (idx >= 0) {
+          freshChar.worldbook[idx] = newEntry;
+        } else {
+          /* 优先级最高，插到最前 */
+          freshChar.worldbook.unshift(newEntry);
+        }
+
+        /* 写回 chars store */
+        await new Promise((res, rej) => {
+          const q = db.transaction('chars', 'readwrite').objectStore('chars').put(freshChar);
+          q.onsuccess = () => res();
+          q.onerror   = e => rej(e.target.error);
+        });
+
+        return idx >= 0 ? 'updated' : 'created';
+      }
+
+      /* ── 头像点击主流程 ───────────────────────────────────────── */
+      async function onCharAvatarClick() {
+        if (!S.char || !S.chat) {
+          toast('请先选择角色与聊天');
+          return;
+        }
+        if (!S.mems || S.mems.length === 0) {
+          toast('当前聊天暂无记忆数据');
+          return;
+        }
+
+        const av = document.getElementById('phCharImg');
+        if (av) av.style.outline = '2px solid #f9a8d4';
+
+        _bannerShow('正在读取记忆数据...', S.mems.length + ' 条', 15, 'running');
+        await new Promise(r => setTimeout(r, 60));
+
+        _bannerShow('正在组装条目内容...', '全量·六大模块·楼层标记', 45, 'running');
+        await new Promise(r => setTimeout(r, 40));
+
+        _bannerShow('正在写入角色世界书...', 'chars.worldbook · P.999', 75, 'running');
+        await new Promise(r => setTimeout(r, 40));
+
+        try {
+          const result = await _upsertCharWorldbook(S.char, S.chat, S.mems, S.favs);
+
+          const verb     = result === 'updated' ? '已更新' : '已新增';
+          const chatName = S.chat.customName || S.chat.title || S.chat.id || '聊天';
+          const allFavsLen = Object.values(S.favs || {}).flat().length;
+
+          _bannerShow(
+            verb + ' — ' + (S.char.name || '角色') + ' · ' + chatName,
+            `✔  P.999 · disabled · ${S.mems.length} 条记忆 · ${allFavsLen} 条收藏`,
+            100,
+            'ok'
+          );
+
+          console.group('[MemorySync] 角色世界书写入完成');
+          console.log('操作:', result, '  charId:', S.char.id, '  chatId:', S.chat.id);
+          console.log('记忆总数:', S.mems.length, '  收藏总数:', allFavsLen);
+          console.groupEnd();
+
+        } catch (err) {
+          _bannerShow(
+            '写入失败 — ' + (err?.message || String(err)),
+            '⚠  请检查控制台',
+            100,
+            'err'
+          );
+          console.error('[MemorySync] 写入错误:', err);
+          if (av) av.style.outline = '';
+        }
+      }
+
+      /* ── 绑定点击事件 ────────────────────────────────────────── */
+      function _bind() {
+        const av = document.getElementById('phCharImg');
+        if (!av) { console.warn('[MemorySync] phCharImg 未找到'); return; }
+        av.style.cursor = 'pointer';
+        av.addEventListener('click', function (e) {
+          e.stopPropagation();
+          onCharAvatarClick();
+        });
+        console.log('[MemorySync] 角色头像点击事件已绑定 → chars.worldbook');
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _bind);
+      } else {
+        _bind();
+      }
+
+    })();
+    </script>
+
+    <!-- ① DB Schema 同步（最先加载，确保所有 store 存在） -->
+    <script src="db-schema.js"></script>
+    <!-- ② TsukiTheme 需要 getDbAsync，在此定义桥接函数 -->
+    <script>
+      // getDbAsync：TsukiTheme.js 依赖此函数读取主题配置
+      // 等待 db-schema 完成后，从 config store 读取 main_config
+      window.getDbAsync = async function() {
+        try {
+          const db = await (window.tsukiDbReady || Promise.reject('db-schema not loaded'));
+          return new Promise((res, rej) => {
+            try {
+              const tx = db.transaction('config', 'readonly');
+              const req = tx.objectStore('config').get('main_config');
+              req.onsuccess = () => res(req.result || {});
+              req.onerror = () => res({});
+            } catch(e) { res({}); }
+          });
+        } catch(e) {
+          return {};
+        }
+      };
+    </script>
+    <!-- ③ TsukiTheme（壁纸 + CSS 注入） -->
+    <script src="TsukiTheme.js"></script>
+    <!-- ④ 独立 API 模块 -->
+    <script src="MemoryAPI.js"></script>
+    <!-- ⑤ PromptHelper（可选，如有则自动复用其历史格式化能力） -->
+    <script src="PromptHelper.js"></script>
+    <!-- ⑥ TsukiBridge（日志转发，须最后加载） -->
+    <script src="TsukiBridge.js"></script>
+  </body>
+</html>

@@ -82,7 +82,15 @@
     return r;
   }
   function genCode(){
-    const raw=[navigator.userAgent,screen.width+'x'+screen.height,screen.colorDepth,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone].join('|');
+    /* 仅使用不随浏览器更新变化的稳定硬件/地区信息，去除 UserAgent */
+    const raw=[
+      screen.width+'x'+screen.height,
+      screen.colorDepth,
+      navigator.language,
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+      navigator.hardwareConcurrency||0,
+      navigator.platform||''
+    ].join('|');
     let h=5381;for(let i=0;i<raw.length;i++)h=((h<<5)+h)^raw.charCodeAt(i);
     h=Math.abs(h);const L='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';
     for(let i=0;i<6;i++){c+=L[h%L.length];h=Math.floor(h/L.length)||(h+1);}
@@ -226,9 +234,54 @@
   }
 
   function initTimer(){
-    /* 监听用户交互，有动作就重置idle */
-    ['mousemove','mousedown','keydown','touchstart','scroll','wheel','click']
-      .forEach(e=>document.addEventListener(e,resetIdle,{passive:true}));
+    const _events=['mousemove','mousedown','keydown','touchstart','scroll','wheel','click'];
+
+    /* 在指定 document 上绑定所有交互事件 */
+    function _bindDoc(doc){
+      _events.forEach(e=>doc.addEventListener(e,resetIdle,{passive:true}));
+    }
+
+    /* 主页面 */
+    _bindDoc(document);
+
+    /* 对每个已加载的同域 iframe 也绑定；对尚未加载的 iframe 等 load 后再绑定 */
+    function _bindIframes(){
+      document.querySelectorAll('iframe').forEach(f=>{
+        try{
+          const fd=f.contentDocument||f.contentWindow?.document;
+          if(fd&&fd.readyState!=='uninitialized'){
+            _bindDoc(fd);
+          } else {
+            f.addEventListener('load',()=>{
+              try{
+                const d=f.contentDocument||f.contentWindow?.document;
+                if(d)_bindDoc(d);
+              }catch(err){}
+            },{once:true});
+          }
+        }catch(err){
+          /* 跨域 iframe 无法访问，退而用 focus/blur 兜底 */
+          f.addEventListener('mouseenter',resetIdle,{passive:true});
+        }
+      });
+    }
+    _bindIframes();
+
+    /* window 获得焦点（从 iframe 切回主页面）也重置 */
+    window.addEventListener('focus',resetIdle,{passive:true});
+
+    /* 若页面后续动态插入 iframe，也自动绑定 */
+    if(window.MutationObserver){
+      new MutationObserver(muts=>{
+        muts.forEach(m=>m.addedNodes.forEach(n=>{
+          if(n.nodeName==='IFRAME'){
+            n.addEventListener('load',()=>{
+              try{const d=n.contentDocument||n.contentWindow?.document;if(d)_bindDoc(d);}catch(err){}
+            },{once:true});
+          }
+        }));
+      }).observe(document.body,{childList:true,subtree:true});
+    }
 
     /* 页面切换到后台立刻暂停，切回来重置5秒倒计时 */
     document.addEventListener('visibilitychange',()=>{

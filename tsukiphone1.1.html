@@ -10563,5 +10563,259 @@
     <script src="TsukiInner.js"></script>
     <script src="TsukiVoicePlay.js"></script>
     <script src="TsukiTranslate.js"></script>
+    <!-- ═══ MEMORY PALACE · AUTO WORLDBOOK SWITCH ═══ -->
+<!-- 引入位置：tsukiphone1_1.html 末尾，TsukiBridge.js 之前 -->
+<script>
+(function () {
+  'use strict';
+
+  const TAG = '[MemPalaceSwitch]';
+
+  /* ══ Banner ════════════════════════════════════════════════ */
+  let _bt = null;
+
+  function _ensureBanner() {
+    if (document.getElementById('mpsBanner')) return;
+    const el = document.createElement('div');
+    el.id = 'mpsBanner';
+    el.style.cssText = [
+      'position:fixed','top:0','left:0','right:0','z-index:99999',
+      'transform:translateY(-100%)',
+      'transition:transform .3s cubic-bezier(0.22,1,0.36,1)',
+      'pointer-events:none',
+    ].join(';');
+    /* 双边框结构：外层 border-top + 内层 border-bottom */
+    el.innerHTML = `
+      <div id="mpsBannerShell" style="
+        border-top: 2px solid #111;
+        background: #111;
+        border-bottom: 1.5px solid rgba(255,255,255,.1);
+        font-family:'Geist Mono','PingFang SC',monospace;
+      ">
+        <!-- 内层双边框线 -->
+        <div style="
+          border-top:1px solid rgba(255,255,255,.08);
+          border-bottom:1px solid rgba(255,255,255,.08);
+          display:flex;align-items:center;gap:10px;
+          padding:9px 16px 9px 12px;
+        ">
+          <div id="mpsIcon" style="
+            flex-shrink:0;width:20px;height:20px;
+            border:1px solid rgba(255,255,255,.2);
+            outline:1px solid rgba(255,255,255,.06);
+            outline-offset:2px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:9px;color:#d4ff4d;letter-spacing:0;
+          ">—</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:6.5px;letter-spacing:.22em;color:rgba(255,255,255,.25);margin-bottom:1px;font-weight:700;">MEMORY PALACE · WORLDBOOK</div>
+            <div id="mpsMsg" style="font-size:11px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+          </div>
+          <div id="mpsSub" style="
+            font-size:8px;color:rgba(255,255,255,.3);
+            flex-shrink:0;text-align:right;line-height:1.6;
+            letter-spacing:.04em;
+          "></div>
+        </div>
+        <!-- 底部进度条 -->
+        <div style="height:1.5px;background:rgba(255,255,255,.06);">
+          <div id="mpsBar" style="height:100%;width:100%;background:#d4ff4d;transition:opacity .4s ease;"></div>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+  }
+
+  function _bannerShow(msg, sub, state) {
+    _ensureBanner();
+    const banner = document.getElementById('mpsBanner');
+    const icon   = document.getElementById('mpsIcon');
+    const msgEl  = document.getElementById('mpsMsg');
+    const subEl  = document.getElementById('mpsSub');
+    const bar    = document.getElementById('mpsBar');
+    const shell  = document.getElementById('mpsBannerShell');
+
+    msgEl.textContent       = msg;
+    subEl.innerHTML         = (sub || '').replace(/\n/g, '<br>');
+
+    const STATES = {
+      running: { icon:'—', ic:'#d4ff4d', topBorder:'#d4ff4d', bar:'#d4ff4d' },
+      ok:      { icon:'✔', ic:'#43d9a0', topBorder:'#43d9a0', bar:'#43d9a0' },
+      err:     { icon:'✘', ic:'#ff6b6b', topBorder:'#ff6b6b', bar:'#ff6b6b' },
+    };
+    const c = STATES[state] || STATES.running;
+    icon.textContent          = c.icon;
+    icon.style.color          = c.ic;
+    icon.style.borderColor    = 'rgba(255,255,255,.2)';
+    icon.style.outlineColor   = 'rgba(255,255,255,.06)';
+    shell.style.borderTopColor = c.topBorder;
+    bar.style.background      = c.bar;
+    bar.style.opacity         = '1';
+
+    banner.style.transform    = 'translateY(0)';
+    banner.style.pointerEvents = 'auto';
+
+    clearTimeout(_bt);
+    if (state === 'ok' || state === 'err') {
+      /* 成功后 bar 淡出 */
+      setTimeout(() => { if (bar) bar.style.opacity = '0'; }, 400);
+      _bt = setTimeout(() => {
+        banner.style.transform     = 'translateY(-100%)';
+        banner.style.pointerEvents = 'none';
+      }, 3200);
+    }
+  }
+
+  /* ══ IDB 裸操作（不依赖 dbGet/dbPut，自己开连接） ══════════ */
+  const DBNAME = 'tsukiphonepromax';
+  let _db = null;
+
+  function _openDB() {
+    if (_db) return Promise.resolve(_db);
+    /* 优先复用 tsukichat.js 暴露的 openDb */
+    if (typeof window.openDb === 'function') {
+      return window.openDb().then(db => { _db = db; return db; });
+    }
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(DBNAME);
+      r.onsuccess = e => { _db = e.target.result; res(_db); };
+      r.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  function _idbGet(store, key) {
+    return _openDB().then(db => new Promise((res, rej) => {
+      const q = db.transaction(store, 'readonly').objectStore(store).get(key);
+      q.onsuccess = () => res(q.result || null);
+      q.onerror   = e => rej(e.target.error);
+    }));
+  }
+
+  function _idbPut(store, obj) {
+    return _openDB().then(db => new Promise((res, rej) => {
+      const q = db.transaction(store, 'readwrite').objectStore(store).put(obj);
+      q.onsuccess = () => res();
+      q.onerror   = e => rej(e.target.error);
+    }));
+  }
+
+  /* ══ 核心逻辑 ═══════════════════════════════════════════════ */
+  async function switchMemPalaceEntry(chatId) {
+    console.group(`${TAG} 切换记忆宫殿条目 chatId=${chatId}`);
+
+    /* 1. 读 chat → 拿 charId */
+    const chat = await _idbGet('chats', chatId);
+    if (!chat) {
+      console.warn(`${TAG} chat 不存在，跳过`);
+      console.groupEnd();
+      return;
+    }
+    const charId = Array.isArray(chat.charIds) && chat.charIds.length
+      ? chat.charIds[0]
+      : null;
+    if (!charId) {
+      console.warn(`${TAG} chat.charIds 为空，跳过`);
+      console.groupEnd();
+      return;
+    }
+
+    /* 2. 读 char → 拿 worldbook */
+    const char = await _idbGet('chars', charId);
+    if (!char) {
+      console.warn(`${TAG} char 不存在，跳过`);
+      console.groupEnd();
+      return;
+    }
+    if (!Array.isArray(char.worldbook) || !char.worldbook.length) {
+      console.log(`${TAG} char.worldbook 为空，无需处理`);
+      console.groupEnd();
+      return;
+    }
+
+    /* 3. 找出所有记忆宫殿条目（id 以 mem_palace__ 开头） */
+    const targetId  = 'mem_palace__' + charId + '__' + chatId;
+    const allPalace = char.worldbook.filter(e => (e.id || '').startsWith('mem_palace__'));
+
+    if (!allPalace.length) {
+      console.log(`${TAG} 未找到任何记忆宫殿条目，跳过`);
+      console.groupEnd();
+      return;
+    }
+
+    /* 4. 互斥切换：当前 chatId 的开，其余的关 */
+    let openedTitle = '';
+    let closedCount = 0;
+    let hasTarget   = false;
+
+    char.worldbook.forEach(entry => {
+      if (!(entry.id || '').startsWith('mem_palace__')) return;
+      if (entry.id === targetId) {
+        entry.enabled = true;
+        openedTitle   = entry.title || targetId;
+        hasTarget     = true;
+        console.log(`${TAG} 开启: ${entry.id}`);
+      } else {
+        if (entry.enabled) closedCount++;
+        entry.enabled = false;
+        console.log(`${TAG} 关闭: ${entry.id}`);
+      }
+    });
+
+    if (!hasTarget) {
+      console.log(`${TAG} 当前聊天尚无记忆宫殿条目，只执行关闭其他（${closedCount} 条）`);
+    }
+
+    /* 5. 写回 chars store */
+    await _idbPut('chars', char);
+    console.log(`${TAG} 写回完成`);
+    console.groupEnd();
+
+    /* 6. Banner 提示 */
+    if (hasTarget) {
+      _bannerShow(
+        '记忆注入已激活',
+        `${openedTitle.replace('[记忆宫殿] ', '')}\n` +
+        (closedCount > 0 ? `已关闭 ${closedCount} 条其他聊天的条目` : '无其他条目需关闭'),
+        'ok'
+      );
+    } else if (closedCount > 0) {
+      _bannerShow(
+        '记忆注入已关闭',
+        `当前聊天暂无记忆条目\n已关闭 ${closedCount} 条其他聊天的条目`,
+        'ok'
+      );
+    }
+    /* 无任何变化时不弹 banner */
+  }
+
+  /* ══ 挂钩 showChatView ══════════════════════════════════════ */
+  function _hookShowChatView() {
+    const _orig = window.showChatView;
+    window.showChatView = function (chatId) {
+      /* 先执行原函数，不阻塞 UI */
+      const ret = _orig ? _orig.apply(this, arguments) : undefined;
+      /* 异步执行切换，延迟一帧确保 IDB 数据已就绪 */
+      setTimeout(() => {
+        switchMemPalaceEntry(chatId).catch(err => {
+          console.error(`${TAG} 切换失败:`, err);
+          _bannerShow('记忆条目切换失败', '⚠  ' + (err?.message || String(err)), 'err');
+        });
+      }, 80);
+      return ret;
+    };
+    console.log(`${TAG} showChatView 钩子已挂载`);
+  }
+
+  /* ══ 启动 ══════════════════════════════════════════════════ */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      /* 等主脚本的 showChatView 定义好之后再挂钩 */
+      setTimeout(_hookShowChatView, 200);
+    });
+  } else {
+    setTimeout(_hookShowChatView, 200);
+  }
+
+})();
+</script>
   </body>
 </html>
