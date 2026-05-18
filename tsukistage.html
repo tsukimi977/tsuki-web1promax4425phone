@@ -201,27 +201,25 @@
       ═══════════════════════════════ */
       #p-create {
         background: var(--paper);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       }
 
       .char-grid {
         flex: 1;
+        min-height: 0; /* 关键：让 flex 子项可以正确收缩并触发 overflow-y: auto */
         overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(10,10,10,0.12) transparent;
+        scrollbar-width: none;
         padding: 6px 14px 14px;
         display: grid;
         grid-template-columns: 1fr 1fr;
+        grid-auto-rows: 160px; /* 固定每行高度，卡片不压缩，超出自然滚动 */
         gap: 10px;
-        /* 固定行高，防止角色多时卡片被压缩 */
-        align-content: start;
-        min-height: 0;
+        align-content: start; /* 内容从顶部开始排列，不拉伸填满 */
       }
       .char-grid::-webkit-scrollbar {
-        width: 3px;
-      }
-      .char-grid::-webkit-scrollbar-thumb {
-        background: rgba(10,10,10,0.15);
-        border-radius: 2px;
+        display: none;
       }
 
       .char-card {
@@ -231,6 +229,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center; /* 内容垂直居中，在固定高度格子里好看 */
         gap: 8px;
         cursor: pointer;
         user-select: none;
@@ -244,9 +243,6 @@
           0 1px 0 rgba(255, 255, 255, 0.7) inset;
         position: relative;
         overflow: hidden;
-        /* 固定高度，防止角色多时被压缩 */
-        min-height: 118px;
-        flex-shrink: 0;
       }
       .char-card::before {
         content: '';
@@ -288,11 +284,21 @@
         justify-content: center;
         color: white;
         font-size: 22px;
-        background-size: cover;
-        background-position: center;
+        /* overflow 不设 hidden，避免裁切子元素 .char-check */
+        overflow: visible;
         position: relative;
         box-shadow: -3px 3px 6px rgba(0, 0, 0, 0.15);
         transform: rotate(-3deg);
+      }
+      /* 专用图片层，负责裁切头像，不影响 .char-check 溢出显示 */
+      .char-card-av-img {
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        overflow: hidden;
       }
       .char-card.selected .char-card-av {
         box-shadow:
@@ -560,21 +566,14 @@
       .theater-list {
         flex: 1;
         overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(10,10,10,0.12) transparent;
+        scrollbar-width: none;
         padding: 6px 14px 14px;
         display: flex;
         flex-direction: column;
         gap: 12px;
-        /* 防止列表项被压缩 */
-        min-height: 0;
       }
       .theater-list::-webkit-scrollbar {
-        width: 3px;
-      }
-      .theater-list::-webkit-scrollbar-thumb {
-        background: rgba(10,10,10,0.15);
-        border-radius: 2px;
+        display: none;
       }
 
       .t-card {
@@ -583,82 +582,17 @@
         padding: 14px 14px 12px;
         cursor: pointer;
         user-select: none;
-        transition: transform 0.18s, opacity 0.18s;
+        transition: transform 0.18s;
         position: relative;
         overflow: hidden;
+        flex-shrink: 0;
         box-shadow:
           0 2px 14px -4px rgba(10, 10, 10, 0.08),
           0 1px 0 rgba(255, 255, 255, 0.8) inset;
-        /* 固定高度，防止剧场多时被压缩 */
-        min-height: 128px;
-        flex-shrink: 0;
       }
       .t-card:active {
         transform: scale(0.984);
       }
-
-      /* 长按删除覆盖层 */
-      .t-card.press-holding {
-        transform: scale(0.97);
-        box-shadow:
-          0 0 0 2.5px rgba(255, 107, 107, 0.5),
-          0 2px 14px -4px rgba(10, 10, 10, 0.12);
-      }
-      .t-delete-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 107, 107, 0.92);
-        border-radius: 22px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        opacity: 0;
-        transition: opacity 0.18s;
-        z-index: 10;
-        pointer-events: none;
-      }
-      .t-card.confirm-delete .t-delete-overlay {
-        opacity: 1;
-        pointer-events: all;
-      }
-      .t-delete-overlay i {
-        font-size: 22px;
-        color: white;
-      }
-      .t-delete-overlay span {
-        font-family: 'Geist Mono', monospace;
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        color: rgba(255,255,255,0.9);
-      }
-      .t-delete-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 4px;
-      }
-      .t-del-cancel, .t-del-confirm {
-        padding: 6px 16px;
-        border: none;
-        border-radius: 10px;
-        font-family: 'Geist Mono', monospace;
-        font-size: 9.5px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        cursor: pointer;
-        transition: 0.15s;
-      }
-      .t-del-cancel {
-        background: rgba(255,255,255,0.25);
-        color: white;
-      }
-      .t-del-confirm {
-        background: white;
-        color: #ff4d4d;
-      }
-      .t-del-cancel:active { opacity: 0.7; }
-      .t-del-confirm:active { transform: scale(0.96); }
       .t-card::before {
         content: '';
         position: absolute;
@@ -830,6 +764,8 @@
         margin-left: -8px;
         background-size: cover;
         background-position: center;
+        background-repeat: no-repeat;
+        overflow: hidden;
         transition: 0.2s;
         position: relative;
         z-index: 1;
@@ -841,6 +777,14 @@
       .s-av:hover {
         z-index: 2;
         transform: scale(1.07);
+      }
+      /* 省略号占位头像 */
+      .s-av.s-av-ellipsis {
+        background: rgba(255, 255, 255, 0.13);
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.05em;
       }
       .s-av.user-av {
         background: conic-gradient(from 180deg, #ffb8d1, #ff9a5a, #c7b8ff, #ffb8d1);
@@ -993,6 +937,25 @@
         color: rgba(255, 255, 255, 0.2);
         text-align: right;
         letter-spacing: 0.15em;
+      }
+      .prologue-foot-edit {
+        cursor: pointer;
+        transition: color 0.18s;
+      }
+      .prologue-foot-edit:hover {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .prologue-inner.prologue-editing .prologue-foot-edit {
+        color: var(--accent-lime);
+      }
+      .prologue-inner.prologue-editing .prologue-text {
+        outline: none;
+        border-radius: 6px;
+        background: rgba(212, 255, 77, 0.05);
+        border: 1px solid rgba(212, 255, 77, 0.2);
+        padding: 6px 8px;
+        margin: -6px -8px;
+        cursor: text;
       }
 
       /* stage message bubble */
@@ -1510,6 +1473,10 @@
         background: linear-gradient(135deg, #e8e8ec, #d4d4d8);
         color: var(--ink-3);
       }
+      #p-stage.day-mode .s-av.s-av-ellipsis {
+        background: #e8e8ec;
+        color: var(--mute);
+      }
       #p-stage.day-mode .s-av.user-av {
         background: conic-gradient(from 180deg, #ffb8d1, #ff9a5a, #c7b8ff, #ffb8d1);
       }
@@ -1538,6 +1505,16 @@
       }
       #p-stage.day-mode .prologue-foot {
         color: var(--mute);
+      }
+      #p-stage.day-mode .prologue-foot-edit:hover {
+        color: var(--ink-3);
+      }
+      #p-stage.day-mode .prologue-inner.prologue-editing .prologue-foot-edit {
+        color: var(--ink);
+      }
+      #p-stage.day-mode .prologue-inner.prologue-editing .prologue-text {
+        background: rgba(10, 10, 10, 0.04);
+        border-color: rgba(10, 10, 10, 0.18);
       }
       #p-stage.day-mode .s-empty {
         color: var(--mute);
@@ -2044,6 +2021,87 @@
         background: rgba(250, 91, 213, 0.12);
         color: var(--accent-pink);
       }
+      .ss-chat-badge.type-private {
+        background: rgba(91, 124, 250, 0.12);
+        color: var(--accent-blue);
+        font-size: 7px;
+      }
+      .ss-chat-badge.type-group {
+        background: rgba(67, 217, 160, 0.12);
+        color: var(--accent-mint);
+        font-size: 7px;
+      }
+
+      /* offline card in history bubble */
+      .offline-card {
+        background: rgba(91, 124, 250, 0.06);
+        border: 1px solid rgba(91, 124, 250, 0.18);
+        border-radius: 10px 6px 10px 6px;
+        padding: 10px 12px;
+        margin: 2px 0;
+        font-family: 'Geist Mono', monospace;
+        position: relative;
+      }
+      .offline-card-tag {
+        font-size: 8px;
+        color: var(--accent-blue);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .offline-card-title {
+        font-size: 11px;
+        color: rgba(255,255,255,0.82);
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .offline-card-meta {
+        font-size: 8.5px;
+        color: var(--s-mute);
+        letter-spacing: 0.05em;
+      }
+      .offline-card-del {
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        background: rgba(255,107,107,0.1);
+        color: rgba(255,107,107,0.6);
+        border: none;
+        border-radius: 6px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        padding: 2px 7px;
+        cursor: pointer;
+        transition: 0.15s;
+        letter-spacing: 0.05em;
+      }
+      .offline-card-del:hover {
+        background: rgba(255,107,107,0.2);
+        color: #ff6b6b;
+      }
+      .offline-del-btn {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255,107,107,0.1);
+        color: rgba(255,107,107,0.7);
+        border: none;
+        border-radius: 5px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        padding: 2px 6px;
+        cursor: pointer;
+        margin-left: 6px;
+        vertical-align: middle;
+        transition: 0.15s;
+        letter-spacing: 0.05em;
+      }
+      .offline-del-btn:hover {
+        background: rgba(255,107,107,0.22);
+        color: #ff6b6b;
+      }
       .ss-chat-av {
         width: 36px;
         height: 36px;
@@ -2247,6 +2305,16 @@
         background: linear-gradient(135deg, #d4d4d8, #e8e8ec);
         color: var(--ink-3);
       }
+      .stage-settings-bg.day .offline-card {
+        background: rgba(91, 124, 250, 0.04);
+        border-color: rgba(91, 124, 250, 0.14);
+      }
+      .stage-settings-bg.day .offline-card-title {
+        color: var(--ink);
+      }
+      .stage-settings-bg.day .offline-card-meta {
+        color: var(--mute);
+      }
       .stage-settings-bg.day .ss-stepper-btn {
         background: rgba(10, 10, 10, 0.06);
         color: var(--ink-3);
@@ -2286,6 +2354,69 @@
       .stage-settings-bg.day .history-tag {
         color: var(--accent-blue);
       }
+
+      /* ── Day mode: Tab 0 总结面板文字修复 ── */
+      .stage-settings-bg.day .auto-sum-toggle-label {
+        color: var(--ink) !important;
+      }
+      .stage-settings-bg.day .auto-sum-toggle {
+        background: var(--paper-2);
+        border-color: var(--line);
+      }
+      .stage-settings-bg.day .sum-manual-row {
+        background: var(--paper-2);
+        border-color: var(--line);
+      }
+      .stage-settings-bg.day .sum-manual-btn {
+        background: linear-gradient(135deg, rgba(91, 124, 250, 0.12), rgba(67, 217, 160, 0.1));
+        border-color: rgba(91, 124, 250, 0.2);
+        color: var(--ink-2);
+      }
+      .stage-settings-bg.day .sum-manual-input {
+        background: var(--card);
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .stage-settings-bg.day .sum-manual-max-label {
+        color: var(--mute);
+      }
+      .stage-settings-bg.day .sum-prompt-textarea {
+        background: var(--paper-2);
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .stage-settings-bg.day .sum-prompt-reset {
+        background: var(--paper-2);
+        border-color: var(--line);
+        color: var(--mute);
+      }
+      .stage-settings-bg.day #tsukiSummaryFloorStatus {
+        color: var(--mute);
+      }
+      .stage-settings-bg.day .sfs-done { color: #2a9e6a; }
+      .stage-settings-bg.day .sfs-pending { color: #b06800; }
+      /* ss-count-label 在自动总结那行的"触发楼层数"文字 */
+      .stage-settings-bg.day .ss-summary-row .ss-count-label {
+        color: var(--ink-3) !important;
+      }
+      /* 手动总结说明小字 */
+      .stage-settings-bg.day #ssTab0 [style*="s-mute"],
+      .stage-settings-bg.day #ssTab0 > div:last-of-type {
+        color: var(--mute) !important;
+      }
+
+      /* ── Day mode: Tab 2 剧场配置文字修复 ── */
+      .stage-settings-bg.day .ss-render-label {
+        color: var(--ink-2) !important;
+      }
+      .stage-settings-bg.day .ss-render-desc {
+        color: var(--mute) !important;
+      }
+      /* 暗色模式下这些新 class 的默认色 */
+      .ss-render-label { color: var(--s-text); }
+      .ss-render-desc { color: var(--s-mute); }
+      .ss-manual-desc { color: var(--s-mute); }
+      .stage-settings-bg.day .ss-manual-desc { color: var(--mute) !important; }
     </style>
     <style id="tsuki-dynamic-style"></style>
   </head>
@@ -2428,25 +2559,78 @@
           </div>
         </div>
 
-        <!-- Tab 0: Auto Summary -->
+        <!-- Tab 0: Summary Panel (3 sections) -->
         <div class="ss-body active" id="ssTab0">
-          <div class="ss-sec">摘要设置</div>
-          <div class="ss-summary-row">
-            <button class="ss-summary-btn" id="ssSummarize">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-              自动总结
-            </button>
+
+          <!-- ① 提示词 -->
+          <div class="ss-sec">总结提示词</div>
+          <div class="sum-prompt-wrap" style="margin-bottom:12px">
+            <textarea class="sum-prompt-textarea" id="sumPromptTA" placeholder="输入自定义总结提示词…"></textarea>
+            <button class="sum-prompt-reset" id="sumPromptReset">恢复默认</button>
+          </div>
+
+          <!-- ② 自动总结 + 楼层设置 -->
+          <div class="ss-sec">自动总结</div>
+          <div class="auto-sum-toggle">
+            <div class="auto-sum-toggle-label">
+              <i class="fa-solid fa-robot" style="font-size:11px;margin-right:6px;opacity:0.7"></i>自动总结监控
+            </div>
+            <div class="auto-sum-switch" id="autoSumSwitch"></div>
+          </div>
+          <div class="ss-summary-row" style="margin-bottom:4px">
+            <div class="ss-count-label" style="font-size:11px;color:var(--s-text)">触发楼层数</div>
             <div class="ss-count-wrap">
-              <div class="ss-count-label">条数</div>
               <div class="ss-count-stepper">
-                <button class="ss-stepper-btn" id="ssCountDec">−</button>
-                <div class="ss-count-num" id="ssCountNum">15</div>
-                <button class="ss-stepper-btn" id="ssCountInc">+</button>
+                <button class="ss-stepper-btn" id="ssAutoCountDec">−</button>
+                <input
+                  class="ss-count-num"
+                  id="ssAutoCountNum"
+                  type="number"
+                  min="1"
+                  max="999"
+                  value="15"
+                  style="width:44px;background:none;border:none;text-align:center;color:white;font-family:'Geist Mono',monospace;font-size:13px;font-weight:600;outline:none;-moz-appearance:textfield;"
+                />
+                <button class="ss-stepper-btn" id="ssAutoCountInc">+</button>
               </div>
             </div>
           </div>
-          <div class="ss-sec">总结结果</div>
-          <div class="ss-summary-result" id="ssSummaryResult"></div>
+          <div id="tsukiSummaryFloorStatus" style="margin-bottom:10px">
+            <span class="sfs-pending">加载中…</span>
+          </div>
+
+          <!-- ③ 手动总结 -->
+          <div class="ss-sec">手动总结</div>
+          <div class="sum-manual-row">
+            <button class="sum-manual-btn" id="sumManualBtn">
+              <i class="fa-solid fa-scissors"></i>
+              立即总结
+            </button>
+            <div class="sum-manual-count-wrap">
+              <input class="sum-manual-input" id="tsukiManualFloorCount" type="number" min="1" value="15" max="999" />
+              <span class="sum-manual-max-label" id="tsukiManualFloorMax">/ 0</span>
+            </div>
+          </div>
+          <div class="ss-manual-desc" style="font-size:8.5px;padding:0 2px 4px;line-height:1.5">
+            从最早的未总结楼层开始，总结指定条数。
+          </div>
+
+          <!-- ③b 指定楼层范围总结 -->
+          <div class="sum-manual-row" style="margin-top:4px">
+            <button class="sum-manual-btn" id="sumRangeBtn" style="background:linear-gradient(135deg,rgba(250,91,213,0.3),rgba(91,124,250,0.25));border-color:rgba(250,91,213,0.28)">
+              <i class="fa-solid fa-arrows-left-right-to-line"></i>
+              范围总结
+            </button>
+            <div class="sum-manual-count-wrap" style="gap:3px">
+              <input class="sum-manual-input" id="tsukiRangeFrom" type="number" min="1" value="1" placeholder="起" style="width:38px" />
+              <span class="sum-manual-max-label">—</span>
+              <input class="sum-manual-input" id="tsukiRangeTo" type="number" min="1" value="15" placeholder="止" style="width:38px" />
+            </div>
+          </div>
+          <div class="ss-manual-desc" style="font-size:8.5px;padding:0 2px 8px;line-height:1.5">
+            总结指定楼层范围内所有未总结的消息。
+          </div>
+
         </div>
 
         <!-- Tab 1: Chat Link -->
@@ -2475,7 +2659,7 @@
         <div class="ss-body" id="ssTab2">
           <div class="ss-sec">渲染模式</div>
           <div class="ss-summary-row" style="justify-content: space-between">
-            <div class="ss-count-label" style="font-size: 11px; color: var(--s-text)">沉浸式分段渲染</div>
+            <div class="ss-count-label ss-render-label" style="font-size: 11px;">沉浸式分段渲染</div>
             <div
               class="ss-count-stepper"
               id="renderModeToggle"
@@ -2492,9 +2676,40 @@
               ON
             </div>
           </div>
-          <div style="font-size: 9px; color: var(--s-mute); margin-top: -5px; padding: 0 4px; line-height: 1.4">
+          <div class="ss-render-desc" style="font-size: 9px; margin-top: -5px; padding: 0 4px; line-height: 1.4">
             ON: 旁白与对话自动分离成不同样式的气泡。<br />
             OFF: 强制合并所有内容到一个气泡（纯剧本模式）。
+          </div>
+
+          <div class="ss-sec" style="margin-top:18px">危险操作</div>
+          <button id="ssClearMsgsBtn" style="
+            width:100%;height:38px;
+            background:rgba(255,159,67,0.08);
+            border:1px solid rgba(255,159,67,0.25);
+            border-radius:12px 8px 12px 8px;
+            color:rgba(255,159,67,0.85);
+            font-family:'Geist Mono',monospace;
+            font-size:9.5px;font-weight:600;letter-spacing:0.1em;
+            cursor:pointer;transition:0.18s;margin-bottom:8px;
+            display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="fa-solid fa-broom"></i>
+            仅清空聊天记录
+          </button>
+          <button id="ssNukeBtn" style="
+            width:100%;height:38px;
+            background:rgba(255,107,107,0.08);
+            border:1px solid rgba(255,107,107,0.25);
+            border-radius:12px 8px 12px 8px;
+            color:rgba(255,107,107,0.85);
+            font-family:'Geist Mono',monospace;
+            font-size:9.5px;font-weight:600;letter-spacing:0.1em;
+            cursor:pointer;transition:0.18s;
+            display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="fa-solid fa-trash-can"></i>
+            删除当前剧场所有数据
+          </button>
+          <div style="font-size:8px;color:var(--s-mute);padding:5px 2px 0;line-height:1.4">
+            删除当前剧场的全部消息、总结记录及剧场本身，方便重新调试。不可撤销。
           </div>
         </div>
         <!-- Insert bar fixed at sheet bottom — outside scrolling ss-body -->
@@ -2540,6 +2755,9 @@
         </div>
       </div>
     </div>
+    
+    <script src="db-schema.js"></script>
+    
 
     <script>
       /* ══════════════════════════════════════════════════════════
@@ -2566,8 +2784,12 @@
           probe.onsuccess = () => {
             const cur = probe.result;
             const ver = cur.version;
-            const ok = cur.objectStoreNames.contains('theaters') && cur.objectStoreNames.contains('theater_messages');
+            const ok = cur.objectStoreNames.contains('theaters') &&
+                       cur.objectStoreNames.contains('theater_messages') &&
+                       cur.objectStoreNames.contains('theater_summaries');
             if (ok) {
+              // 监听 versionchange：其他页面需要升级时主动释放连接
+              cur.onversionchange = () => { _db = null; cur.close(); };
               _db = cur;
               resolve(_db);
               return;
@@ -2576,6 +2798,7 @@
             const req = indexedDB.open('tsukiphonepromax', ver + 1);
             req.onupgradeneeded = e => addStageStores(e.target.result);
             req.onsuccess = () => {
+              req.result.onversionchange = () => { _db = null; req.result.close(); };
               _db = req.result;
               resolve(_db);
             };
@@ -2593,6 +2816,10 @@
         if (!db.objectStoreNames.contains('theater_messages')) {
           const tm = db.createObjectStore('theater_messages', { keyPath: ['theaterId', 'floor'] });
           tm.createIndex('by_theater', 'theaterId');
+        }
+        if (!db.objectStoreNames.contains('theater_summaries')) {
+          const su = db.createObjectStore('theater_summaries', { keyPath: 'id' });
+          su.createIndex('by_theater', 'theaterId');
         }
       }
 
@@ -2626,27 +2853,6 @@
           const req = db.transaction(store, 'readonly').objectStore(store).index(idx).getAll(val);
           req.onsuccess = () => res(req.result || []);
           req.onerror = () => rej(req.error);
-        });
-      };
-      const dbDelete = async (store, key) => {
-        const db = await openDb();
-        return new Promise((res, rej) => {
-          const req = db.transaction(store, 'readwrite').objectStore(store).delete(key);
-          req.onsuccess = () => res();
-          req.onerror = () => rej(req.error);
-        });
-      };
-      const dbDeleteByIndex = async (store, idx, val) => {
-        const db = await openDb();
-        return new Promise((res, rej) => {
-          const tx = db.transaction(store, 'readwrite');
-          const req = tx.objectStore(store).index(idx).openCursor(IDBKeyRange.only(val));
-          req.onsuccess = e => {
-            const cursor = e.target.result;
-            if (cursor) { cursor.delete(); cursor.continue(); }
-          };
-          tx.oncomplete = () => res();
-          tx.onerror = () => rej(tx.error);
         });
       };
 
@@ -2730,11 +2936,13 @@
           card.className = 'char-card';
           card.dataset.cid = c.id;
           const avStyle = c.avatar
-            ? `background-image:url('${c.avatar}');background-size:cover;background-position:center;`
+            ? `background-image:url('${c.avatar}');`
             : '';
           const avIcon = c.avatar ? '' : '<i class="fa-solid fa-user-astronaut"></i>';
           card.innerHTML = `
-          <div class="char-card-av" style="${avStyle}">${avIcon}
+          <div class="char-card-av">
+            <div class="char-card-av-img" style="${avStyle}"></div>
+            ${avIcon}
             <div class="char-check"><i class="fa-solid fa-check"></i></div>
           </div>
           <div class="char-card-name">${c.name || '未命名'}</div>
@@ -2885,7 +3093,7 @@
               : Math.floor(age / 86400000) + '天前';
 
         card.innerHTML = `
-        <div class="t-starmap">${buildStarMapSVG(chars, users)}</div>
+        <div class="t-starmap">${buildStarMapSVG(chars, users, theater.id)}</div>
         <div class="t-footer">
           <div class="t-meta">
             <span>${chars.map(c => c.name).join(' · ') || '?'}</span>
@@ -2896,96 +3104,8 @@
             <i class="fa-solid fa-layer-group" style="font-size:7px"></i>
             F·${theater.lastFloor || 0}
           </div>
-        </div>
-        <div class="t-delete-overlay">
-          <i class="fa-solid fa-trash-can"></i>
-          <span>删除此剧场？</span>
-          <div class="t-delete-actions">
-            <button class="t-del-cancel">取消</button>
-            <button class="t-del-confirm">删除</button>
-          </div>
         </div>`;
-
-        // ── 长按删除逻辑（兼顾 touch + mouse）──
-        let pressTimer = null;
-        let isPressing = false;
-        let moved = false;
-
-        const startPress = () => {
-          moved = false;
-          isPressing = true;
-          pressTimer = setTimeout(() => {
-            if (!moved) {
-              card.classList.add('confirm-delete');
-            }
-          }, 550);
-        };
-        const cancelPress = () => {
-          isPressing = false;
-          clearTimeout(pressTimer);
-          card.classList.remove('press-holding');
-        };
-        const markMoved = () => { moved = true; cancelPress(); };
-
-        card.addEventListener('touchstart', startPress, { passive: true });
-        card.addEventListener('touchend', cancelPress);
-        card.addEventListener('touchmove', markMoved, { passive: true });
-        card.addEventListener('mousedown', startPress);
-        card.addEventListener('mouseup', cancelPress);
-        card.addEventListener('mouseleave', cancelPress);
-
-        // 点击进入剧场（未在删除确认状态时）
-        card.addEventListener('click', (e) => {
-          if (card.classList.contains('confirm-delete')) return;
-          if (moved) return;
-          openTheater(theater);
-        });
-
-        // 取消删除
-        card.querySelector('.t-del-cancel').addEventListener('click', (e) => {
-          e.stopPropagation();
-          card.classList.remove('confirm-delete');
-        });
-
-        // 确认删除
-        card.querySelector('.t-del-confirm').addEventListener('click', async (e) => {
-          e.stopPropagation();
-          try {
-            // 删除剧场本体
-            await dbDelete('theaters', theater.id);
-            // 删除该剧场下所有消息（theater_messages keyPath = [theaterId, floor]）
-            const db = await openDb();
-            await new Promise((res, rej) => {
-              const tx = db.transaction('theater_messages', 'readwrite');
-              const s = tx.objectStore('theater_messages');
-              const range = IDBKeyRange.bound([theater.id, -Infinity], [theater.id, Infinity]);
-              const req = s.openCursor(range);
-              req.onsuccess = e => {
-                const cur = e.target.result;
-                if (cur) { cur.delete(); cur.continue(); }
-              };
-              tx.oncomplete = res;
-              tx.onerror = () => rej(tx.error);
-            });
-          } catch (err) {
-            console.warn('[Stage] 删除剧场失败', err);
-          }
-          card.style.transition = 'opacity 0.22s, transform 0.22s';
-          card.style.opacity = '0';
-          card.style.transform = 'scale(0.92)';
-          setTimeout(() => {
-            card.remove();
-            // 如果列表空了，重新渲染 empty state
-            const list = document.getElementById('theaterList');
-            if (!list.querySelector('.t-card')) {
-              list.innerHTML = `<div class="empty-state">
-                <i class="fa-solid fa-masks-theater"></i>
-                <p>暂无剧场 — 前往新建</p></div>`;
-              document.getElementById('nav1').classList.remove('has-content');
-            }
-          }, 220);
-        });
-
+        card.addEventListener('click', () => openTheater(theater));
         return card;
       }
 
@@ -3048,9 +3168,13 @@
       }
 
       /* ── Star Map SVG ── */
-      function buildStarMapSVG(chars, users) {
+      // svgId: 每张卡唯一标识，用于隔离 SVG 内部 defs ID，防止多卡片 ID 全局污染
+      function buildStarMapSVG(chars, users, svgId) {
+        // 生成唯一前缀；若调用方没传则用随机数兜底
+        const uid = (svgId || Math.random().toString(36).slice(2, 8)).replace(/[^a-z0-9]/gi, '_');
+
         const W = 300,
-          H = 90;
+          H = 92;
         const CHAR_X = 42,
           USER_X = W - 42,
           NODE_R = 16;
@@ -3064,6 +3188,7 @@
           uList.push(u);
         });
 
+        // Y positions：头像垂直居中分布，上下各留 18px
         const getYs = (n, pad = 18) => {
           if (n === 1) return [H / 2];
           const step = (H - pad * 2) / (n - 1);
@@ -3074,16 +3199,33 @@
 
         let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="b"/>
+          <filter id="glow_${uid}"><feGaussianBlur stdDeviation="1.5" result="b"/>
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>`;
         uList.forEach(
           (_, i) =>
-            (s += `<linearGradient id="ug${i}" x1="0" y1="0" x2="1" y2="1">
+            (s += `<linearGradient id="ug_${uid}_${i}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#ffb8d1"/>
                 <stop offset="100%" stop-color="#c7b8ff"/>
               </linearGradient>`),
         );
+        // 所有 clipPath 必须在 defs 里定义才有效
+        chars.forEach((c, i) => {
+          if (c.avatar) {
+            const cx = CHAR_X, cy = cYs[i];
+            s += `<clipPath id="cavclip_${uid}_${i}">
+              <rect x="${cx - NODE_R}" y="${cy - NODE_R}" width="${NODE_R * 2}" height="${NODE_R * 2}" rx="8"/>
+            </clipPath>`;
+          }
+        });
+        uList.forEach((u, i) => {
+          if (u.avatar) {
+            const cx = USER_X, cy = uYs[i];
+            s += `<clipPath id="uavclip_${uid}_${i}">
+              <rect x="${cx - NODE_R}" y="${cy - NODE_R}" width="${NODE_R * 2}" height="${NODE_R * 2}" rx="8"/>
+            </clipPath>`;
+          }
+        });
         s += `</defs>`;
 
         // background star dots
@@ -3094,20 +3236,20 @@
 
         // connection paths + animated dots
         chars.forEach((c, i) => {
-          const uid = users[i]?.id;
-          const ui = uid != null ? (userMap.get(uid) ?? 0) : uList.length ? 0 : -1;
+          const uidRef = users[i]?.id;
+          const ui = uidRef != null ? (userMap.get(uidRef) ?? 0) : uList.length ? 0 : -1;
           if (ui < 0) return;
           const x1 = CHAR_X + NODE_R,
             y1 = cYs[i];
           const x2 = USER_X - NODE_R,
             y2 = uYs[ui];
           const mx = (x1 + x2) / 2;
-          const pid = `p${i}`;
+          const pid = `p_${uid}_${i}`;
           const dur = 2.2 + i * 0.35;
           s += `<path id="${pid}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"
                 stroke="rgba(10,10,10,0.18)" stroke-width="1.2" fill="none"
                 stroke-dasharray="3.5 3"/>
-              <circle r="2.2" fill="rgba(10,10,10,0.35)" filter="url(#glow)">
+              <circle r="2.2" fill="rgba(10,10,10,0.35)" filter="url(#glow_${uid})">
                 <animateMotion dur="${dur}s" repeatCount="indefinite">
                   <mpath href="#${pid}"/>
                 </animateMotion>
@@ -3119,23 +3261,19 @@
           const cx = CHAR_X,
             cy = cYs[i];
           const initials = (c.name || '?').slice(0, 2);
-          const fill = '#1a1a1a';
           s += `<rect x="${cx - NODE_R}" y="${cy - NODE_R}" width="${NODE_R * 2}" height="${NODE_R * 2}"
-                rx="8" fill="${fill}"/>`;
+                rx="8" fill="#1a1a1a"/>`;
           if (c.avatar) {
-            const cid = `cavclip${i}`;
-            s += `<clipPath id="${cid}"><rect x="${cx - NODE_R}" y="${cy - NODE_R}"
-                  width="${NODE_R * 2}" height="${NODE_R * 2}" rx="8"/></clipPath>
-                <image href="${c.avatar}" x="${cx - NODE_R}" y="${cy - NODE_R}"
-                  width="${NODE_R * 2}" height="${NODE_R * 2}" clip-path="url(#${cid})"/>`;
+            s += `<image href="${c.avatar}"
+                  x="${cx - NODE_R}" y="${cy - NODE_R}"
+                  width="${NODE_R * 2}" height="${NODE_R * 2}"
+                  preserveAspectRatio="xMidYMid slice"
+                  clip-path="url(#cavclip_${uid}_${i})"/>`;
           } else {
             s += `<text x="${cx}" y="${cy + 4}" fill="rgba(255,255,255,0.75)"
                   font-size="10" font-family="Geist,sans-serif" font-weight="600"
                   text-anchor="middle">${initials}</text>`;
           }
-          s += `<text x="${cx}" y="${cy + NODE_R + 13}" fill="rgba(10,10,10,0.45)"
-                font-size="7.5" font-family="Geist Mono,monospace"
-                text-anchor="middle">${(c.name || '').slice(0, 5)}</text>`;
         });
 
         // user nodes
@@ -3145,21 +3283,18 @@
               cy = uYs[i];
             const initials = (u.name || '?').slice(0, 2);
             s += `<rect x="${cx - NODE_R}" y="${cy - NODE_R}" width="${NODE_R * 2}" height="${NODE_R * 2}"
-                  rx="8" fill="url(#ug${i})"/>`;
+                  rx="8" fill="url(#ug_${uid}_${i})"/>`;
             if (u.avatar) {
-              const uid2 = `uavclip${i}`;
-              s += `<clipPath id="${uid2}"><rect x="${cx - NODE_R}" y="${cy - NODE_R}"
-                    width="${NODE_R * 2}" height="${NODE_R * 2}" rx="8"/></clipPath>
-                  <image href="${u.avatar}" x="${cx - NODE_R}" y="${cy - NODE_R}"
-                    width="${NODE_R * 2}" height="${NODE_R * 2}" clip-path="url(#${uid2})"/>`;
+              s += `<image href="${u.avatar}"
+                    x="${cx - NODE_R}" y="${cy - NODE_R}"
+                    width="${NODE_R * 2}" height="${NODE_R * 2}"
+                    preserveAspectRatio="xMidYMid slice"
+                    clip-path="url(#uavclip_${uid}_${i})"/>`;
             } else {
               s += `<text x="${cx}" y="${cy + 4}" fill="rgba(10,10,10,0.7)"
                     font-size="10" font-family="Geist,sans-serif" font-weight="600"
                     text-anchor="middle">${initials}</text>`;
             }
-            s += `<text x="${cx}" y="${cy + NODE_R + 13}" fill="rgba(10,10,10,0.45)"
-                  font-size="7.5" font-family="Geist Mono,monospace"
-                  text-anchor="middle">${(u.name || '').slice(0, 5)}</text>`;
           });
         } else {
           // No user placeholder
@@ -3203,6 +3338,16 @@
           toggleStageTheme();
         }
 
+        // 初始化总结面板
+        window._tsukiS = S;
+        initSummaryPanel();
+        if (window.TsukiSummary) {
+          window.TsukiSummary.updateSummaryFloorStatus(theater.id);
+          // 如果上次自动总结开关是开着的，重新启动监控
+          const cfg = window.TsukiSummary.loadSummaryCfg();
+          if (cfg.autoEnabled) window.TsukiSummary.startAutoWatch(S);
+        }
+
         // mark nav3 active
         document.getElementById('nav2').classList.add('has-content');
       }
@@ -3215,20 +3360,34 @@
         // ── left col: char avatars ──
         const charAvRow = document.getElementById('sCharAvRow');
         charAvRow.innerHTML = '';
-        chars.forEach(c => {
-          const av = document.createElement('div');
-          av.className = 's-av';
-          if (c.avatar) {
-            av.style.backgroundImage = `url('${c.avatar}')`;
-            av.style.backgroundSize = 'cover';
-            av.style.backgroundPosition = 'center';
-          } else av.innerHTML = '<i class="fa-solid fa-user-astronaut" style="font-size:11px"></i>';
-          charAvRow.appendChild(av);
+        const MAX_CHAR_AV = 3;
+        chars.forEach((c, idx) => {
+          if (idx < MAX_CHAR_AV) {
+            const av = document.createElement('div');
+            av.className = 's-av';
+            if (c.avatar) {
+              av.style.backgroundImage = `url('${c.avatar}')`;
+              av.style.backgroundSize = 'cover';
+              av.style.backgroundPosition = 'center';
+              av.style.backgroundRepeat = 'no-repeat';
+            } else av.innerHTML = '<i class="fa-solid fa-user-astronaut" style="font-size:11px"></i>';
+            charAvRow.appendChild(av);
+          } else if (idx === MAX_CHAR_AV) {
+            // 省略号占位：浅灰底
+            const av = document.createElement('div');
+            av.className = 's-av s-av-ellipsis';
+            av.textContent = '···';
+            charAvRow.appendChild(av);
+          }
         });
 
-        // char names label (clickable → settings)
+        // char names label：宽度跟随头像行实际宽度
         const namesEl = document.getElementById('sCharNames');
         namesEl.textContent = chars.map(c => c.name).join(' · ') || '—';
+        // 头像行宽度 = 第一个36px + 后续每个(36-8)px overlap
+        const avCount = Math.min(chars.length, MAX_CHAR_AV + 1); // 最多4个（含省略号）
+        const avRowWidth = avCount > 0 ? 36 + (avCount - 1) * 28 : 36;
+        namesEl.style.width = avRowWidth + 'px';
 
         // ── center: theater title ──
         const titleEl = document.getElementById('sTheaterTitle');
@@ -3291,9 +3450,7 @@
         wrap.innerHTML = '';
         S.roles = [];
 
-        // chars first
-        S.chars.forEach(c => S.roles.push({ type: 'char', id: c.id, name: c.name, avatar: c.avatar || null }));
-        // unique users
+        // unique users first
         const seen = new Set();
         S.users.forEach(u => {
           if (u && !seen.has(u.id)) {
@@ -3301,8 +3458,10 @@
             S.roles.push({ type: 'user', id: u.id, name: u.name, avatar: u.avatar || null });
           }
         });
-        // narrator (always last)
+        // narrator second
         S.roles.push({ type: 'narrator', id: 'narrator', name: '旁白', avatar: null });
+        // chars after
+        S.chars.forEach(c => S.roles.push({ type: 'char', id: c.id, name: c.name, avatar: c.avatar || null }));
 
         if (!S.roles.length) {
           S.activeRoleIdx = -1;
@@ -3366,24 +3525,73 @@
           area.innerHTML = `<div class="s-empty"><i class="fa-solid fa-circle-exclamation"></i><p>消息加载失败</p></div>`;
           return;
         }
-
         msgs.sort((a, b) => a.floor - b.floor);
 
-        if (!msgs.length) {
+        // 读取当前剧场的所有总结记录
+        let summaries = [];
+        if (window.TsukiSummary) {
+          try { summaries = await window.TsukiSummary.getSummariesByTheater(S.theater.id); } catch (e) {}
+        }
+
+        // 构建"被哪条总结覆盖"的映射：floor → summaryRecord
+        const floorToSummary = new Map();
+        for (const s of summaries) {
+          for (let f = s.floorStart; f <= s.floorEnd; f++) {
+            floorToSummary.set(f, s);
+          }
+        }
+
+        // 记录已经渲染过文件夹的 summaryId，避免重复插入
+        const renderedSummaries = new Set();
+
+        let hasContent = false;
+        for (const m of msgs) {
+          const summary = floorToSummary.get(m.floor);
+
+          if (summary) {
+            // 该楼层被某条总结覆盖
+            if (!renderedSummaries.has(summary.id)) {
+              // 第一次遇到这段总结范围 → 插入文件夹气泡
+              renderedSummaries.add(summary.id);
+              if (window.TsukiSummary) {
+                const folderEl = window.TsukiSummary.buildSummaryFolderBubble({
+                  floor: summary.floorStart,
+                  type: 'summary_bubble',
+                  summaryId: summary.id,
+                  floorStart: summary.floorStart,
+                  floorEnd: summary.floorEnd,
+                  floorCount: summary.floorCount,
+                  content: summary.summaryText,
+                  theaterId: S.theater.id,
+                });
+                area.appendChild(folderEl);
+                hasContent = true;
+              }
+            }
+            // 无论如何跳过原始消息渲染（已被总结归档）
+            continue;
+          }
+
+          // 普通消息正常渲染（过滤掉旧式 summary_bubble 写入的楼层残留）
+          if (m.type === 'summary_bubble') continue;
+
+          const el = buildMsgEl(m);
+          if (el) { area.appendChild(el); hasContent = true; }
+        }
+
+        if (!hasContent) {
           area.innerHTML = `<div class="s-empty"><i class="fa-solid fa-masks-theater"></i><p>幕布尚未拉开</p></div>`;
           return;
         }
-
-        msgs.forEach(m => {
-          const el = buildMsgEl(m);
-          if (el) area.appendChild(el);
-        });
         area.scrollTop = area.scrollHeight;
       }
 
       function buildMsgEl(msg) {
-        if (msg.type === 'prologue') return buildPrologueEl(msg.content);
+        if (msg.type === 'prologue') return buildPrologueEl(msg);
         if (msg.type === 'history') return buildHistoryBubble(msg);
+        if (msg.type === 'summary_bubble') {
+          return window.TsukiSummary ? window.TsukiSummary.buildSummaryFolderBubble(msg) : buildSummaryBubble(msg);
+        }
         if (msg.type === 'summary' || msg.isSummary) return buildSummaryBubble(msg);
         if (msg.isNarrator || msg.sender === 'narrator') return buildNarratorBubble(msg);
 
@@ -3399,14 +3607,26 @@
             avatar = u.avatar;
           }
         } else {
+          // 优先使用存库时保存的 displayName（整体模式下为拼接名如"陆时 · 陆言"）
+          if (msg.displayName) {
+            name = msg.displayName;
+          } else {
+            const cid = msg.charId || (Array.isArray(msg.charIds) ? msg.charIds[0] : null);
+            const c = (cid ? S.chars.find(c => c.id === cid) : null) || S.chars[0];
+            if (c) name = c.name;
+          }
+          // 头像始终用第一个 char
           const cid = msg.charId || (Array.isArray(msg.charIds) ? msg.charIds[0] : null);
           const c = (cid ? S.chars.find(c => c.id === cid) : null) || S.chars[0];
-          if (c) {
-            name = c.name;
-            avatar = c.avatar;
-          }
+          if (c) avatar = c.avatar;
         }
-        return buildBubble(msg, name, avatar, isUser);
+
+        // 重渲染时补做换行处理（整体模式存的是纯文本，需转 <br>）
+        const renderMsg = { ...msg };
+        if (typeof renderMsg.content === 'string' && !renderMsg.content.includes('<br') && !renderMsg.content.includes('<div')) {
+          renderMsg.content = renderMsg.content.replace(/\r?\n/g, '<br>');
+        }
+        return buildBubble(renderMsg, name, avatar, isUser);
       }
 
       function buildNarratorBubble(msg) {
@@ -3473,7 +3693,7 @@
         return wrap;
       }
 
-      function buildPrologueEl(content) {
+      function buildPrologueEl(msg) {
         const el = document.createElement('div');
         el.className = 'prologue';
         el.innerHTML = `
@@ -3482,9 +3702,38 @@
             <i class="fa-solid fa-sparkles" style="font-size:9px"></i>
             序幕 · Prologue
           </div>
-          <div class="prologue-text">${content}</div>
-          <div class="prologue-foot">— 幕启</div>
+          <div class="prologue-text">${msg.content}</div>
+          <div class="prologue-foot prologue-foot-edit" title="点击编辑开场白">— 幕启</div>
         </div>`;
+
+        const inner = el.querySelector('.prologue-inner');
+        const body = el.querySelector('.prologue-text');
+        const foot = el.querySelector('.prologue-foot-edit');
+
+        foot.addEventListener('click', () => {
+          if (inner.classList.contains('prologue-editing')) {
+            // 保存
+            const newContent = body.innerText.trim();
+            msg.content = newContent;
+            body.contentEditable = 'false';
+            inner.classList.remove('prologue-editing');
+            foot.textContent = '— 幕启';
+            dbPut('theater_messages', msg).catch(e => console.error('序幕保存失败', e));
+          } else {
+            // 进入编辑
+            body.contentEditable = 'true';
+            body.focus();
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(body);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            inner.classList.add('prologue-editing');
+            foot.textContent = '✓ 保存';
+          }
+        });
+
         return el;
       }
 
@@ -3709,7 +3958,7 @@
       const settingsBg = document.getElementById('settingsBg');
       const ssClose = document.getElementById('ssClose');
 
-      // open on sCharNames click (disabled)
+      // open on sCharNames click
       document.getElementById('sCharNames').addEventListener('click', openSettings);
 
       function openSettings() {
@@ -3718,6 +3967,9 @@
         settingsBg.classList.toggle('day', isDay);
         settingsBg.classList.add('open');
         loadChatLinks();
+        if (window.TsukiSummary && S.theater) {
+          window.TsukiSummary.updateSummaryFloorStatus(S.theater.id);
+        }
       }
 
       function closeSettings() {
@@ -3743,92 +3995,297 @@
         });
       });
 
-      // ── summary count stepper ──
-      let summaryCount = 15;
-      document.getElementById('ssCountInc').addEventListener('click', () => {
-        summaryCount = Math.min(100, summaryCount + 5);
-        document.getElementById('ssCountNum').textContent = summaryCount;
-      });
-      document.getElementById('ssCountDec').addEventListener('click', () => {
-        summaryCount = Math.max(5, summaryCount - 5);
-        document.getElementById('ssCountNum').textContent = summaryCount;
-      });
-
-      // ── auto summary ──
-      document.getElementById('ssSummarize').addEventListener('click', async () => {
+      // ── 仅清空聊天记录（保留剧场和总结） ──
+      document.getElementById('ssClearMsgsBtn').addEventListener('click', async () => {
         if (!S.theater) return;
-        const btn = document.getElementById('ssSummarize');
-        const resultEl = document.getElementById('ssSummaryResult');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 总结中…';
-        resultEl.classList.add('show');
-        resultEl.textContent = '正在读取消息…';
+        const title = S.theater.title || S.theater.id;
+        if (!confirm(`清空剧场「${title}」的所有聊天消息和总结记录？\n剧场本身会保留，可以重新开始聊天。\n此操作不可撤销。`)) return;
+
         try {
-          let msgs = await dbGetByIndex('theater_messages', 'by_theater', S.theater.id);
-          msgs = msgs
-            .filter(m => m.type !== 'prologue' && m.type !== 'history' && !m.isSummary)
-            .sort((a, b) => a.floor - b.floor);
-          const last = msgs.slice(-summaryCount);
-          if (!last.length) {
-            resultEl.textContent = '暂无消息可总结。';
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 自动总结';
-            return;
+          const db = await openDb();
+          const tid = S.theater.id;
+
+          // 清空 theater_messages
+          await new Promise((res, rej) => {
+            const tx = db.transaction('theater_messages', 'readwrite');
+            const req = tx.objectStore('theater_messages').index('by_theater').openCursor(IDBKeyRange.only(tid));
+            req.onsuccess = e => {
+              const cursor = e.target.result;
+              if (cursor) { cursor.delete(); cursor.continue(); }
+            };
+            tx.oncomplete = res;
+            tx.onerror = rej;
+          });
+
+          // 清空 theater_summaries
+          if (db.objectStoreNames.contains('theater_summaries')) {
+            await new Promise((res, rej) => {
+              const tx = db.transaction('theater_summaries', 'readwrite');
+              const req = tx.objectStore('theater_summaries').index('by_theater').openCursor(IDBKeyRange.only(tid));
+              req.onsuccess = e => {
+                const cursor = e.target.result;
+                if (cursor) { cursor.delete(); cursor.continue(); }
+              };
+              tx.oncomplete = res;
+              tx.onerror = rej;
+            });
           }
 
-          // Build readable summary lines
-          const lines = last
-            .map(m => {
-              let rname;
-              if (m.isNarrator || m.sender === 'narrator') {
-                rname = '[旁白]';
-              } else if (m.isUser || m.sender === 'user') {
-                const u = S.users.find(u => u && u.id === m.charId) || S.users.find(Boolean);
-                rname = u?.name || 'User';
-              } else {
-                const c = S.chars.find(c => c.id === m.charId) || S.chars[0];
-                rname = c?.name || '?';
-              }
-              const txt = typeof m.content === 'string' ? m.content : '';
-              return `${rname}: ${txt.slice(0, 80)}${txt.length > 80 ? '…' : ''}`;
-            })
-            .join('\n');
-
-          resultEl.textContent = lines;
-
-          // ── also insert as a summary bubble into the stage area ──
-          const floor = await getNextFloor(S.theater.id);
-          const summaryMsg = {
-            theaterId: S.theater.id,
-            floor,
-            type: 'summary',
-            isUser: false,
-            isNarrator: false,
-            isSummary: true,
-            charId: null,
-            charIds: [],
-            sender: 'system',
-            content: lines,
-            srcCount: last.length,
-            timestamp: Date.now(),
-          };
-          await dbPut('theater_messages', summaryMsg);
+          // 重置 theater 的 lastFloor
+          S.theater.lastFloor = 0;
           S.theater.updatedAt = Date.now();
-          S.theater.lastFloor = floor;
           await dbPut('theaters', S.theater);
 
-          const area = document.getElementById('sArea');
-          area.querySelector('.s-empty')?.remove();
-          area.appendChild(buildSummaryBubble(summaryMsg));
-          area.scrollTop = area.scrollHeight;
-          updateFloor(floor);
+          console.log(`%c[Stage] 剧场 ${tid} 聊天记录已清空`, 'color:#ff9f43;font-weight:bold');
+          document.getElementById('settingsBg').classList.remove('open');
+          await renderMessages();
+          updateFloor(0);
+          if (window.TsukiSummary) {
+            window.TsukiSummary.stopAutoWatch();
+            window.TsukiSummary.updateSummaryFloorStatus(tid);
+          }
         } catch (e) {
-          resultEl.textContent = '总结失败：' + e.message;
-        } finally {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 自动总结';
+          console.error('[Stage] 清空失败:', e);
+          alert('清空失败：' + e.message);
         }
       });
+
+      // ── 删除当前剧场所有数据 ──
+      document.getElementById('ssNukeBtn').addEventListener('click', async () => {
+        if (!S.theater) return;
+        const title = S.theater.title || S.theater.id;
+        if (!confirm(`⚠️ 确认删除剧场「${title}」的全部数据？\n包括所有消息、总结记录和剧场本身。\n此操作不可撤销。`)) return;
+
+        try {
+          const db = await openDb();
+          const tid = S.theater.id;
+
+          // 删除 theater_messages
+          await new Promise((res, rej) => {
+            const tx = db.transaction('theater_messages', 'readwrite');
+            const range = IDBKeyRange.bound([tid, 0], [tid, Infinity]);
+            const req = tx.objectStore('theater_messages').index('by_theater').openCursor(IDBKeyRange.only(tid));
+            req.onsuccess = e => {
+              const cursor = e.target.result;
+              if (cursor) { cursor.delete(); cursor.continue(); }
+            };
+            tx.oncomplete = res;
+            tx.onerror = rej;
+          });
+
+          // 删除 theater_summaries
+          if (db.objectStoreNames.contains('theater_summaries')) {
+            await new Promise((res, rej) => {
+              const tx = db.transaction('theater_summaries', 'readwrite');
+              const req = tx.objectStore('theater_summaries').index('by_theater').openCursor(IDBKeyRange.only(tid));
+              req.onsuccess = e => {
+                const cursor = e.target.result;
+                if (cursor) { cursor.delete(); cursor.continue(); }
+              };
+              tx.oncomplete = res;
+              tx.onerror = rej;
+            });
+          }
+
+          // 删除 theaters 记录
+          await dbPut('theaters', { id: tid, _deleted: true }); // 先置位
+          await new Promise((res, rej) => {
+            const tx = db.transaction('theaters', 'readwrite');
+            tx.objectStore('theaters').delete(tid);
+            tx.oncomplete = res;
+            tx.onerror = rej;
+          });
+
+          console.log(`%c[Stage] 剧场 ${tid} 已全部清除`, 'color:#ff6b6b;font-weight:bold');
+          alert(`剧场「${title}」已删除，将返回剧场列表。`);
+
+          // 重置状态，跳回列表页
+          S.theater = null;
+          S.chars = [];
+          S.users = [];
+          S.roles = [];
+          if (window.TsukiSummary) window.TsukiSummary.stopAutoWatch();
+          document.getElementById('settingsBg').classList.remove('open');
+          await loadTheaterList();
+          goPanel(1);
+        } catch (e) {
+          console.error('[Stage] 删除剧场失败:', e);
+          alert('删除失败：' + e.message);
+        }
+      });
+
+      /* ══════════════════════════════════════════════════════════
+         12b. TsukiSummary — 总结设置面板绑定
+      ══════════════════════════════════════════════════════════ */
+
+      // 暴露 S 给 TsukiSummary.js 使用
+      window._tsukiS = S;
+
+      function initSummaryPanel() {
+        if (!window.TsukiSummary) {
+          console.warn('[Stage] TsukiSummary.js 未加载，总结功能不可用');
+          return;
+        }
+        // 防重复绑定：只初始化一次，后续只刷新 UI 状态
+        if (initSummaryPanel._bound) {
+          // 已绑定过，只刷新开关状态和配置显示
+          const cfg = window.TsukiSummary.loadSummaryCfg();
+          const autoSwitch = document.getElementById('autoSumSwitch');
+          if (autoSwitch) {
+            autoSwitch.classList.toggle('on', !!cfg.autoEnabled);
+          }
+          const promptTA = document.getElementById('sumPromptTA');
+          if (promptTA && !promptTA.value) promptTA.value = cfg.prompt || window.TsukiSummary.DEFAULT_SUMMARY_PROMPT;
+          return;
+        }
+        initSummaryPanel._bound = true;
+        const TS = window.TsukiSummary;
+        const cfg = TS.loadSummaryCfg();
+
+        // ── ① 提示词 ──
+        const promptTA = document.getElementById('sumPromptTA');
+        const promptReset = document.getElementById('sumPromptReset');
+        if (promptTA) {
+          promptTA.value = cfg.prompt || TS.DEFAULT_SUMMARY_PROMPT;
+          promptTA.addEventListener('input', () => {
+            TS.saveSummaryCfg({ prompt: promptTA.value });
+            console.log('[TsukiSummary] 提示词已更新（前50字）:', promptTA.value.slice(0, 50));
+          });
+        }
+        if (promptReset) {
+          promptReset.addEventListener('click', () => {
+            promptTA.value = TS.DEFAULT_SUMMARY_PROMPT;
+            TS.saveSummaryCfg({ prompt: TS.DEFAULT_SUMMARY_PROMPT });
+            console.log('[TsukiSummary] 提示词已恢复默认');
+          });
+        }
+
+        // ── ② 自动总结开关 & 楼层设置 ──
+        const autoSwitch = document.getElementById('autoSumSwitch');
+        const autoCountNum = document.getElementById('ssAutoCountNum');
+        const autoCountDec = document.getElementById('ssAutoCountDec');
+        const autoCountInc = document.getElementById('ssAutoCountInc');
+
+        // 初始化 UI
+        let autoFloorCount = cfg.autoFloorCount || 15;
+        if (autoCountNum) autoCountNum.value = autoFloorCount;
+        if (cfg.autoEnabled) autoSwitch?.classList.add('on');
+
+        autoSwitch?.addEventListener('click', () => {
+          const isOn = autoSwitch.classList.toggle('on');
+          TS.saveSummaryCfg({ autoEnabled: isOn });
+          console.log(`%c🤖 [TsukiSummary] 自动总结: ${isOn ? 'ON' : 'OFF'}`, 'color:#d4ff4d;font-weight:bold');
+          if (isOn && S.theater) TS.startAutoWatch(S);
+          else TS.stopAutoWatch();
+        });
+
+        autoCountDec?.addEventListener('click', () => {
+          autoFloorCount = Math.max(1, autoFloorCount - 1);
+          if (autoCountNum) autoCountNum.value = autoFloorCount;
+          TS.saveSummaryCfg({ autoFloorCount });
+        });
+        autoCountInc?.addEventListener('click', () => {
+          autoFloorCount = Math.min(999, autoFloorCount + 1);
+          if (autoCountNum) autoCountNum.value = autoFloorCount;
+          TS.saveSummaryCfg({ autoFloorCount });
+        });
+        autoCountNum?.addEventListener('change', () => {
+          const v = Math.max(1, Math.min(999, parseInt(autoCountNum.value) || 1));
+          autoFloorCount = v;
+          autoCountNum.value = v;
+          TS.saveSummaryCfg({ autoFloorCount });
+        });
+
+        // ── ③ 手动总结 ──
+        const manualBtn = document.getElementById('sumManualBtn');
+        const manualInput = document.getElementById('tsukiManualFloorCount');
+
+        manualBtn?.addEventListener('click', async () => {
+          if (!S.theater) return;
+          const count = parseInt(manualInput?.value || 15);
+          if (!count || count <= 0) { alert('请输入有效的总结楼层数'); return; }
+
+          manualBtn.disabled = true;
+          manualBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 总结中…';
+
+          console.group('%c✂️ [TsukiSummary] 手动总结触发', 'color:#5b7cfa;font-weight:bold;font-size:14px');
+          console.log('总结楼层数:', count);
+
+          try {
+            const unsummarized = await TS.getUnsummarizedFloors(S.theater.id);
+            const actualCount = Math.min(count, unsummarized.length);
+            if (!actualCount) { alert('没有可总结的楼层'); return; }
+
+            const floors = unsummarized.slice(0, actualCount).map(m => m.floor);
+            console.log('实际总结楼层:', floors);
+            console.groupEnd();
+
+            const area = document.getElementById('sArea');
+
+            // 执行总结（返回 bubbleMsg，不用 callback）
+            const { bubbleMsg } = await TS.executeSummary(floors, S);
+
+            // 用 renderMessages() 完整重渲染，自动过滤 isSummarized 气泡、显示 summary_bubble 文件夹
+            if (typeof renderMessages === 'function') {
+              await renderMessages();
+            } else {
+              // 降级：手动 DOM 替换
+              const floorSet = new Set(floors);
+              area?.querySelectorAll('[data-floor]').forEach(el => {
+                if (floorSet.has(Number(el.dataset.floor))) el.remove();
+              });
+              area?.querySelector('.s-empty')?.remove();
+              const folderEl = TS.buildSummaryFolderBubble(bubbleMsg);
+              area?.appendChild(folderEl);
+            }
+            if (area) area.scrollTop = area.scrollHeight;
+
+            await TS.updateSummaryFloorStatus(S.theater.id);
+          } catch (e) {
+            console.error('[TsukiSummary] 手动总结失败:', e);
+            alert('总结失败：' + e.message);
+          } finally {
+            manualBtn.disabled = false;
+            manualBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> 立即总结';
+          }
+        });
+        // ── ③b 指定范围总结 ──
+        const rangeBtn = document.getElementById('sumRangeBtn');
+        const rangeFrom = document.getElementById('tsukiRangeFrom');
+        const rangeTo = document.getElementById('tsukiRangeTo');
+
+        rangeBtn?.addEventListener('click', async () => {
+          if (!S.theater) return;
+          const from = parseInt(rangeFrom?.value);
+          const to = parseInt(rangeTo?.value);
+          // 支持单楼层（from === to）和范围（from < to）
+          if (!from || !to || from > to) { alert('请输入有效的楼层范围（起 ≤ 止，单楼层起止相同）'); return; }
+
+          rangeBtn.disabled = true;
+          rangeBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 总结中…';
+
+          try {
+            const unsummarized = await TS.getUnsummarizedFloors(S.theater.id);
+            const floors = unsummarized.filter(m => m.floor >= from && m.floor <= to).map(m => m.floor);
+            if (!floors.length) { alert(`F·${from}${from === to ? '' : '–F·' + to} 范围内没有可总结的楼层`); return; }
+
+            console.log(`%c✂️ [TsukiSummary] 范围总结 F·${from}–F·${to}，共 ${floors.length} 条`, 'color:#fa5bd5;font-weight:bold;font-size:14px');
+            await TS.executeSummary(floors, S);
+            if (typeof renderMessages === 'function') await renderMessages();
+            document.getElementById('sArea').scrollTop = document.getElementById('sArea').scrollHeight;
+            await TS.updateSummaryFloorStatus(S.theater.id);
+          } catch (e) {
+            console.error('[TsukiSummary] 范围总结失败:', e);
+            alert('总结失败：' + e.message);
+          } finally {
+            rangeBtn.disabled = false;
+            rangeBtn.innerHTML = '<i class="fa-solid fa-arrows-left-right-to-line"></i> 范围总结';
+          }
+        });
+
+      } // end initSummaryPanel
+
+      // 在打开设置面板时刷新楼层状态（已在上面的 openSettings 函数中处理）
 
       function buildSummaryBubble(msg) {
         const el = document.createElement('div');
@@ -3944,8 +4401,9 @@
               <div class="ss-chat-check"><i class="fa-solid fa-check"></i></div>
               <div class="ss-chat-av" style="${avStyle}">${avIcon}</div>
               <div class="ss-chat-info">
-                <div class="ss-chat-name">${chat.name || chat.title || char.name || '聊天记录'}</div>
+                <div class="ss-chat-name">${chat.customName || chat.title || chat.name || char.name || '聊天记录'}</div>
                 <div class="ss-chat-meta">
+                  <span class="ss-chat-badge ${chat.type === 'group' ? 'type-group' : 'type-private'}">${chat.type === 'group' ? '群聊' : '私聊'}</span>
                   <span>F·${totalFloor} 共${msgs.length}条</span>
                   ${
                     syncedFloor > 0
@@ -3979,7 +4437,155 @@
         document.getElementById('ssInsertBtn').disabled = n === 0;
       }
 
-      // ── insert history bubble ──
+      // ── helpers: get all theater_messages for a theater sorted by floor ──
+      async function getAllTheaterMsgs(theaterId) {
+        const msgs = await dbGetByIndex('theater_messages', 'by_theater', theaterId);
+        return msgs.sort((a, b) => a.floor - b.floor);
+      }
+
+      // ── write offline record into online chat messages ──
+      async function writeOfflineRecord(chatId, offlineData) {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('messages', 'readwrite');
+          const store = tx.objectStore('messages');
+          const range = IDBKeyRange.bound([chatId, 0], [chatId, Infinity]);
+          const req = store.openCursor(range, 'prev');
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            const nextFloor = cursor ? cursor.value.floor + 1 : 1;
+            const record = {
+              ...offlineData,
+              chatId,
+              floor: nextFloor,
+              id: `${chatId}_${nextFloor}`,
+              senderRole: 'system',
+            };
+            const putReq = store.put(record);
+            putReq.onsuccess = () => resolve(record);
+            putReq.onerror = e2 => reject(e2.target.error);
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      }
+
+      // ── update stageFloorRange[1] of a previous offline record ──
+      async function updateOfflineRecordEnd(chatId, onlineFloor, newEnd) {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('messages', 'readwrite');
+          const store = tx.objectStore('messages');
+          const req = store.get([chatId, onlineFloor]);
+          req.onsuccess = () => {
+            const rec = req.result;
+            if (rec && rec.type === 'offline') {
+              const oldEnd = rec.stageFloorRange[1];
+              rec.stageFloorRange[1] = newEnd;
+              // also update content mirror
+              if (rec.content && typeof rec.content === 'object') {
+                rec.content.stageFloorRange[1] = newEnd;
+                const start = rec.stageFloorRange[0];
+                rec.content.displayRange = start === 'prologue'
+                  ? `开场白 → F·${newEnd}`
+                  : `F·${start} → F·${newEnd}`;
+              }
+              console.log('%c[offline更新] chatId=' + chatId + ' onlineFloor=' + onlineFloor + ' stageFloorRange[1]: ' + oldEnd + ' → ' + newEnd, 'color:#5b7cfa;font-weight:bold');
+              store.put(rec);
+            }
+            resolve();
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      }
+
+      // ── find previous history bubble for same chatId in theater ──
+      async function findPrevOfflineInsert(theaterId, chatId, beforeFloor) {
+        const allMsgs = await getAllTheaterMsgs(theaterId);
+        for (let i = allMsgs.length - 1; i >= 0; i--) {
+          const m = allMsgs[i];
+          if (m.floor >= beforeFloor) continue;
+          if (m.type === 'history' && m.linkedChatId === chatId) return m;
+        }
+        return null;
+      }
+
+      // ── delete offline record from online chat ──
+      // ── delete both theater history bubble AND online offline record ──
+      async function deleteHistoryLink(theaterId, theaterFloor, chatId, onlineFloor) {
+        const db = await openDb();
+
+        // 1. 删线下 theater_messages 里的 history bubble
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction('theater_messages', 'readwrite');
+          const store = tx.objectStore('theater_messages');
+          store.delete([theaterId, theaterFloor]);
+          tx.oncomplete = resolve;
+          tx.onerror = e => reject(e.target.error);
+        });
+        console.log('%c[删除] 线下 theater_messages[' + theaterId + ',' + theaterFloor + '] ✓', 'color:#ff6b6b;font-weight:bold');
+
+        // 2. 删线上 messages 里的 offline 记录
+        if (chatId && !isNaN(onlineFloor)) {
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction('messages', 'readwrite');
+            const store = tx.objectStore('messages');
+            store.delete([chatId, onlineFloor]);
+            tx.oncomplete = resolve;
+            tx.onerror = e => reject(e.target.error);
+          });
+          console.log('%c[删除] 线上 messages[' + chatId + ',' + onlineFloor + '] ✓', 'color:#ff6b6b;font-weight:bold');
+        }
+      }
+
+      function buildHistoryBubble(msg) {
+        const el = document.createElement('div');
+        el.className = 'history-bubble';
+        el.dataset.theaterId = msg.theaterId;
+        el.dataset.floor = msg.floor;
+        el.innerHTML = `<div class="history-bubble-inner">${msg.content}</div>`;
+
+        // bind delete button — 线下主控，同时删线下bubble和线上offline记录
+        const delBtn = el.querySelector('.offline-del-btn');
+        if (delBtn) {
+          delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const foot = delBtn.closest('.history-foot');
+            const chatId = foot?.dataset?.offlineChat || null;
+            const onlineFloor = parseInt(foot?.dataset?.onlineFloor);
+            const theaterId = msg.theaterId;
+            const theaterFloor = msg.floor;
+
+            if (!confirm('确定同时删除线下剧场的关联记录和线上聊天的离线卡片？')) return;
+
+            try {
+              console.log('%c[offline删除] 线下 floor=' + theaterFloor + ' 线上 chatId=' + chatId + ' floor=' + onlineFloor, 'color:#ff6b6b;font-weight:bold;font-size:12px');
+              await deleteHistoryLink(theaterId, theaterFloor, chatId, onlineFloor);
+
+              // 从DOM移除这个bubble
+              el.style.transition = 'opacity 0.25s, transform 0.25s';
+              el.style.opacity = '0';
+              el.style.transform = 'scale(0.95)';
+              setTimeout(() => el.remove(), 260);
+
+              // 更新theater的linkedChats（移除或降低同步楼层记录）
+              if (S.theater && chatId) {
+                const linkedInfo = S.theater.linkedChats || {};
+                // 找到这个chatId上一次的linkedFloor，重置为上一次插入的floor
+                // 简单处理：直接删掉这个chatId的同步记录，让它下次重新读取
+                delete linkedInfo[chatId];
+                S.theater.linkedChats = linkedInfo;
+                S.theater.updatedAt = Date.now();
+                await dbPut('theaters', S.theater);
+                console.log('%c[offline删除] linkedChats[' + chatId + '] 已重置', 'color:#ff9f43;font-weight:bold');
+              }
+            } catch (err) {
+              console.error('删除失败', err);
+              alert('删除失败: ' + err.message);
+            }
+          });
+        }
+        return el;
+      }
       document.getElementById('ssInsertBtn').addEventListener('click', async () => {
         if (!S.theater || !SS.selectedChats.size) return;
         const btn = document.getElementById('ssInsertBtn');
@@ -3993,75 +4599,239 @@
 
           for (const item of items) {
             const { chat, msgs, char, chatUser, syncedFloor } = item._chatData;
-            // only messages after last synced floor
             const toInsert = msgs
-              .filter(m => (m.floor || 0) > syncedFloor)
+              .filter(m => (m.floor || 0) > syncedFloor && m.type !== 'offline')
               .sort((a, b) => (a.floor || 0) - (b.floor || 0));
             if (!toInsert.length) continue;
 
+            const insertedChatFloorStart = toInsert[0].floor || syncedFloor + 1;
             const lastFloor = Math.max(...toInsert.map(m => m.floor || 0));
+            const chatLabel = chat.customName || chat.title || chat.name || char?.name || '聊天';
 
-            // tsukiphone1_1: field is `senderRole` ('user'|'char'), no per-msg charId
             const entries = toInsert
-              .slice(-30)
               .map(m => {
                 const role = m.senderRole || m.sender || 'char';
                 const isUserMsg = role === 'user';
                 const senderName = isUserMsg ? chatUser?.name || 'User' : char?.name || '—';
-                const text =
-                  typeof m.content === 'string'
-                    ? m.content
-                    : m.content?.text || m.content?.body || JSON.stringify(m.content);
+
+                // ── 格式化消息内容（对齐 PromptHelper 的各类型处理）──
+                let text = '';
+                const msgType = m.type || 'text';
+                let rawContent = m.content;
+
+                // 解析 JSON 字符串形式的对象
+                if (typeof rawContent === 'string') {
+                  try {
+                    const parsed = JSON.parse(rawContent);
+                    if (parsed && typeof parsed === 'object') rawContent = parsed;
+                  } catch (_) {}
+                }
+
+                if (rawContent && typeof rawContent === 'object') {
+                  if (msgType === 'sticker' || rawContent.url) {
+                    // 表情包：取 name（截断 URL 部分），格式：表情包名称.jpg
+                    let stickerName = (rawContent.name || '表情包')
+                      .split(/http/i)[0]
+                      .replace(/[:：|]\s*$/, '')
+                      .replace(/\.(jpg|jpeg|gif|png|webp)$/i, '')
+                      .trim();
+                    text = `[表情包] ${stickerName}`;
+                  } else if (msgType === 'call' || rawContent.callType) {
+                    const callType = rawContent.callType === 'video' ? '视频通话' : '语音通话';
+                    const callState = rawContent.callState || 'ended';
+                    const duration = rawContent.duration || 0;
+                    function _fmtDur(sec) {
+                      const mm = Math.floor(sec / 60), ss = sec % 60;
+                      return String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+                    }
+                    if (callState === 'ended') {
+                      text = duration > 0
+                        ? `[${callType}] 通话已结束（通话时长 ${_fmtDur(duration)}）`
+                        : `[${callType}] 通话已结束`;
+                    } else if (callState === 'canceled') {
+                      text = `[${callType}] 已取消`;
+                    } else if (callState === 'missed') {
+                      text = `[${callType}] 未接听`;
+                    } else {
+                      text = `[${callType}] 呼叫中`;
+                    }
+                  } else if (msgType === 'transfer' || rawContent.amount != null) {
+                    const amount = rawContent.amount ?? '';
+                    const note = rawContent.note || rawContent.remark || '';
+                    text = note ? `[转账] ${amount}元 备注：${note}` : `[转账] ${amount}元`;
+                  } else if (msgType === 'voice' || rawContent.transcript != null) {
+                    text = rawContent.transcript
+                      ? `[语音] ${rawContent.transcript}`
+                      : `[语音消息]`;
+                  } else if (rawContent.text || rawContent.body) {
+                    text = rawContent.text || rawContent.body;
+                  } else {
+                    text = JSON.stringify(rawContent);
+                  }
+                } else {
+                  text = String(rawContent || '');
+                }
+
                 return `<div class="history-entry">
                 <span class="history-entry-name">${senderName}</span>
-                <span>${text.slice(0, 100)}${text.length > 100 ? '…' : ''}</span>
+                <span>${text.slice(0, 120)}${text.length > 120 ? '…' : ''}</span>
               </div>`;
               })
               .join('');
 
-            const chatLabel = chat.name || chat.title || char?.name || '聊天';
+            // ── Determine insertion position ──
+            const allTheaterMsgs = await getAllTheaterMsgs(S.theater.id);
+            const prologueMsg = allTheaterMsgs.find(m => m.type === 'prologue');
+            const nonPrologueMsgs = allTheaterMsgs.filter(m => m.type !== 'prologue');
+            const insertBeforePrologue = !!(prologueMsg && nonPrologueMsgs.length === 0);
+
+            // Current next theater floor (before this insert)
+            const currentNextFloor = await getNextFloor(S.theater.id);
+            const insertStageFloor = currentNextFloor; // floor this history bubble will occupy
+
+            // stageFloorRange start
+            const stageFloorStart = insertBeforePrologue ? 'prologue' : insertStageFloor + 1;
+            const insertOnlineFloorInOffline = stageFloorStart === 'prologue' ? 1 : insertStageFloor;
+
+            // ── Find and update previous offline record for same chatId ──
+            const prevInsert = await findPrevOfflineInsert(S.theater.id, chat.id, insertStageFloor);
+            if (prevInsert && prevInsert.offlineRecordFloor != null) {
+              const newEnd = insertStageFloor - 1;
+              await updateOfflineRecordEnd(chat.id, prevInsert.offlineRecordFloor, newEnd);
+              console.log('%c[offline] 更新 chatId=' + chat.id + ' 上一条offline记录(onlineFloor=' + prevInsert.offlineRecordFloor + ') stageFloorRange[1] → ' + newEnd, 'color:#43d9a0;font-weight:bold');
+            }
+
+            // ── Write offline record into online chat ──
+            const floorRangeLabel = stageFloorStart === 'prologue'
+              ? `开场白 → ∞`
+              : `F·${stageFloorStart} → ∞`;
+            const offlineData = {
+              type: 'offline',
+              senderRole: 'system',
+              stageId: S.theater.id,
+              stageTitle: S.theater.title || chatLabel,
+              stageFloorRange: [stageFloorStart, null],
+              insertedChatFloors: [insertedChatFloorStart, lastFloor],
+              insertOnlineFloorInOffline,
+              content: {
+                text: `【线下剧场】${S.theater.title || chatLabel} · 起始楼层 F·${insertedChatFloorStart} · 共置入 ${toInsert.length} 条`,
+                stageId: S.theater.id,
+                stageTitle: S.theater.title || chatLabel,
+                stageFloorRange: [stageFloorStart, null],
+                insertedChatFloors: [insertedChatFloorStart, lastFloor],
+                insertOnlineFloorInOffline,
+                displayTitle: S.theater.title || chatLabel,
+                displayRange: floorRangeLabel,
+                insertCount: toInsert.length,
+              },
+              timestamp: Date.now(),
+            };
+            const writtenRecord = await writeOfflineRecord(chat.id, offlineData);
+
+            // ── 同步更新线上聊天列表的 lastMessage ──
+            const chatRecord = await new Promise((res, rej) => {
+              const db2 = openDb().then(db => {
+                const tx = db.transaction('chats', 'readwrite');
+                const req = tx.objectStore('chats').get(chat.id);
+                req.onsuccess = () => {
+                  const rec = req.result;
+                  if (rec) {
+                    rec.lastMessage = `[线下剧场] ${offlineData.stageTitle}`;
+                    rec.updatedAt = Date.now();
+                    tx.objectStore('chats').put(rec);
+                  }
+                  tx.oncomplete = () => res(rec);
+                  tx.onerror = e => rej(e.target.error);
+                };
+                req.onerror = e => rej(e.target.error);
+              });
+            }).catch(() => null);
+
+            console.log('%c[offline写入] 线上聊天 ' + chat.id + ' (' + chatLabel + ')', 'color:#fa5bd5;font-weight:bold;font-size:12px');
+            console.log({
+              stageId: S.theater.id,
+              stageTitle: offlineData.stageTitle,
+              chatId: chat.id,
+              stageFloorRange: offlineData.stageFloorRange,
+              insertedChatFloors: offlineData.insertedChatFloors,
+              insertOnlineFloorInOffline,
+              onlineChatFloor: writtenRecord.floor,
+              insertBeforePrologue,
+            });
+
+            // ── Build history bubble content ──
             const historyContent = `
               <div class="history-tag">
                 <i class="fa-solid fa-link" style="font-size:8px"></i>
-                前置剧情 · ${chatLabel} · F·${syncedFloor + 1}→F·${lastFloor}
+                前置剧情 · ${chatLabel} · F·${insertedChatFloorStart}→F·${lastFloor}
               </div>
               <div class="history-entries">${entries}</div>
-              <div class="history-foot">— 共置入 ${toInsert.length} 条 · 截至 F·${lastFloor}</div>`;
+              <div class="history-foot" data-offline-chat="${chat.id}" data-online-floor="${writtenRecord.floor}">— 共置入 ${toInsert.length} 条 · 截至 F·${lastFloor} <button class="offline-del-btn" title="删除线上聊天记录">删除</button></div>`;
 
-            // create theater message for history bubble
-            const floor = await getNextFloor(S.theater.id);
-            const histMsg = {
-              theaterId: S.theater.id,
-              floor,
-              type: 'history',
-              sender: 'system',
-              charId: null,
-              content: historyContent,
-              linkedChatId: chat.id,
-              linkedFloor: lastFloor,
-              timestamp: Date.now(),
-            };
-            await dbPut('theater_messages', histMsg);
+            let histMsg;
 
-            // update theater's linkedChats
+            if (insertBeforePrologue && prologueMsg) {
+              // Shift prologue floor up and insert before it
+              const pFloor = prologueMsg.floor;
+              const db2 = await openDb();
+              await new Promise((res, rej) => {
+                const tx = db2.transaction('theater_messages', 'readwrite');
+                const store = tx.objectStore('theater_messages');
+                store.delete([S.theater.id, pFloor]);
+                tx.oncomplete = res;
+                tx.onerror = e => rej(e.target.error);
+              });
+              const newPrologue = { ...prologueMsg, floor: pFloor + 1 };
+              await dbPut('theater_messages', newPrologue);
+
+              histMsg = {
+                theaterId: S.theater.id,
+                floor: pFloor,
+                type: 'history',
+                sender: 'system',
+                charId: null,
+                content: historyContent,
+                linkedChatId: chat.id,
+                linkedFloor: lastFloor,
+                offlineRecordFloor: writtenRecord.floor,
+                insertedKey: 'hist_' + chat.id + '_' + Date.now(),
+                timestamp: Date.now(),
+              };
+              await dbPut('theater_messages', histMsg);
+              updateFloor(newPrologue.floor);
+              await renderMessages();
+            } else {
+              const histFloor = await getNextFloor(S.theater.id);
+              histMsg = {
+                theaterId: S.theater.id,
+                floor: histFloor,
+                type: 'history',
+                sender: 'system',
+                charId: null,
+                content: historyContent,
+                linkedChatId: chat.id,
+                linkedFloor: lastFloor,
+                offlineRecordFloor: writtenRecord.floor,
+                insertedKey: 'hist_' + chat.id + '_' + Date.now(),
+                timestamp: Date.now(),
+              };
+              await dbPut('theater_messages', histMsg);
+
+              const area = document.getElementById('sArea');
+              area.querySelector('.s-empty')?.remove();
+              const el = buildHistoryBubble(histMsg);
+              area.appendChild(el);
+              area.scrollTop = area.scrollHeight;
+              updateFloor(histFloor);
+            }
+
             linkedInfo[chat.id] = lastFloor;
-
-            // render in area (append at current position in timeline)
-            const area = document.getElementById('sArea');
-            area.querySelector('.s-empty')?.remove();
-            const el = buildHistoryBubble(histMsg);
-            area.appendChild(el);
-            area.scrollTop = area.scrollHeight;
-
-            updateFloor(floor);
           }
 
-          // save linkedChats state
           S.theater.linkedChats = linkedInfo;
           S.theater.updatedAt = Date.now();
           await dbPut('theaters', S.theater);
 
-          // refresh list
           await loadChatLinks();
           SS.selectedChats.clear();
           syncInsertBar();
@@ -4074,18 +4844,14 @@
         }
       });
 
-      function buildHistoryBubble(msg) {
-        const el = document.createElement('div');
-        el.className = 'history-bubble';
-        el.innerHTML = `<div class="history-bubble-inner">${msg.content}</div>`;
-        return el;
-      }
-
       /* ══════════════════════════════════════════════════════════
        10. INIT
     ══════════════════════════════════════════════════════════ */
       (async () => {
         try {
+          // 等待 db-schema.js 完成所有 store 的创建/升级，再开始读取数据
+          // 避免 openDb() 和 ensureSchema() 同时竞争 indexedDB.open 导致时序问题
+          if (window.tsukiDbReady) await window.tsukiDbReady;
           await loadChars();
           await loadTheaterList();
           console.log('[Stage] 线下剧场初始化完成');
@@ -4162,6 +4928,11 @@
       const tsukiChannel = new BroadcastChannel('tsuki_channel');
       tsukiChannel.onmessage = e => {
         if (e.data === 'update_theme') applyGlobalTheme();
+        // 🌟 char.html 修改角色后实时刷新角色选择列表
+        if (e.data === 'update_chars') {
+          console.log('[Stage] 收到 update_chars，刷新角色列表');
+          loadChars();
+        }
       };
 
       // 初始化执行
@@ -4181,8 +4952,11 @@
       window.getNextFloor = getNextFloor;
       window.updateFloor = updateFloor;
       window.sendMsg = sendMsg; // 借用这个可以实现本地自己打字时的入库操作
+      window.renderMessages = renderMessages; // 供 TsukiSummary 在总结后重渲染
+      window._stageClearDb = function () { _db = null; }; // 供 TsukiSummary 升级 DB 时清缓存
     </script>
     <script src="StageSend.js"></script>
+    <script src="TsukiSummary.js"></script>
     <script src="TsukiBridge.js"></script>
   </body>
 </html>
