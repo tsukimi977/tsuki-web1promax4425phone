@@ -2545,7 +2545,7 @@ select cron.schedule(
        <div class="hb-step"><div class="hb-num">2</div><div class="hb-txt"><strong>确认是真正的 PWA（WebAPK）</strong><br>长按桌面图标 → <span class="hb-hl">应用信息</span><br>如果看到"版本：1"或有独立的存储/权限信息 = 真正的 PWA ✓<br>如果显示"Chrome 快捷方式"= 只是书签，收不到离线通知</div></div>`,
       `<div class="hb-step"><div class="hb-num">3</div><div class="hb-txt"><strong>从 PWA 桌面图标打开后，按顺序操作：</strong><br>① 先确认"VAPID 密钥"区域状态是绿色"已存云端 ✓"<br>② 点 <span class="hb-hl green">申请通知权限</span> → 系统弹窗选"允许"<br>③ 点 <span class="hb-hl green">订阅 Push</span> → 等待状态更新<br>④ 三行状态（系统通知权限 / Push 订阅 / 云端同步）全变绿</div></div>
        <div class="hb-step"><div class="hb-num">4</div><div class="hb-txt"><strong>重新订阅</strong><br>如果换了 VAPID 密钥，或者 Push 收不到，先点：<br><span class="hb-hl red">清除订阅</span> 按钮<br>再重新点"申请通知权限"→"订阅 Push"</div></div>
-       <div class="hb-warn"><i class="fa-solid fa-triangle-exclamation"></i>安卓国产 ROM（小米/OPPO/华为/vivo）需要手动开权限：自启动 + 省电策略无限制 + 锁后台。这是离线通知收不到最常见的原因！</div>`
+       <div class="hb-warn"><i class="fa-solid fa-triangle-exclamation"></i>安卓国产 ROM（小米/OPPO/华为/vivo等等）需要手动开权限：自启动 + 省电策略无限制 + 锁后台。这是离线通知收不到最常见的原因！</div>`
     ]},
     edgeFunction:{title:'Edge Function 部署指南',pages:[
       `<div class="hb-step"><div class="hb-num">!</div><div class="hb-txt"><strong>这步是干什么？</strong><br>把一段运行在 Supabase 服务器上的 TypeScript 代码部署上去。它负责：读取角色信息 → 写入离线收件箱 → 调用 Web Push 推送通知到你的手机。<br>你的手机关了它也在云端跑。</div></div>
