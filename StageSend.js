@@ -1003,64 +1003,100 @@ try {
      5. 初始化 UI 与手势
   ═══════════════════════════════════════════════════════════ */
   function init() {
-    initConfigUI();
-    const btn = document.getElementById('sSend');
-    if (!btn) return setTimeout(init, 500);
+  initConfigUI();
+  const btn = document.getElementById('sSend');
+  if (!btn) return setTimeout(init, 500);
 
-    let startY = 0,
-      currentDY = 0,
-      isDragging = false;
-    const getY = e => (e.type.includes('mouse') ? e.clientY : e.touches[0].clientY);
+  // 拦截 tsukistage.html 中原有的 click → sendMsg 绑定
+  // 用 capture 阶段的 stopImmediatePropagation 阻断，防止上滑后 click 事件穿透
+  let _swipeJustFired = false;
 
-    btn.addEventListener('mousedown', e => {
+  btn.addEventListener('click', e => {
+    if (_swipeJustFired) {
+      _swipeJustFired = false;
+      e.stopImmediatePropagation();
+      return;
+    }
+    // 普通点击：只存用户消息，不调 API
+    if (typeof window.sendMsg === 'function') {
+      window.sendMsg();
+    }
+  }, true); // capture = true，比 tsukistage.html 里的 click 监听先执行
+
+  let startY = 0,
+    currentDY = 0,
+    isDragging = false;
+  const getY = e => (e.type.includes('mouse') ? e.clientY : e.touches[0].clientY);
+
+  btn.addEventListener('mousedown', e => {
+    startY = getY(e);
+    currentDY = 0;
+    isDragging = true;
+    btn.style.transition = 'none';
+  });
+  btn.addEventListener(
+    'touchstart',
+    e => {
       startY = getY(e);
+      currentDY = 0;
       isDragging = true;
       btn.style.transition = 'none';
-    });
-    btn.addEventListener(
-      'touchstart',
-      e => {
-        startY = getY(e);
-        isDragging = true;
-        btn.style.transition = 'none';
-      },
-      { passive: false },
-    );
+    },
+    { passive: false },
+  );
 
-    document.addEventListener('mousemove', e => {
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dy = getY(e) - startY;
+    currentDY = dy;
+    if (dy < -5) btn.style.transform = `translateY(${Math.max(dy, -80)}px)`;
+  });
+
+  document.addEventListener(
+    'touchmove',
+    e => {
       if (!isDragging) return;
       const dy = getY(e) - startY;
       currentDY = dy;
-      if (dy < -5) btn.style.transform = `translateY(${Math.max(dy, -80)}px)`;
-    });
-
-    document.addEventListener(
-      'touchmove',
-      e => {
-        if (!isDragging) return;
-        const dy = getY(e) - startY;
-        currentDY = dy;
-        if (dy < -5) {
-          if (e.cancelable) e.preventDefault();
-          btn.style.transform = `translateY(${Math.max(dy, -80)}px)`;
-        }
-      },
-      { passive: false },
-    );
-
-    const end = async () => {
-      if (!isDragging) return;
-      isDragging = false;
-      btn.style.transition = '0.4s cubic-bezier(0.22,1,0.36,1)';
-      if (currentDY < -SWIPE_THRESHOLD) {
-        btn.style.transform = 'translateY(-100px)';
-        await triggerStageSwipeSend();
+      if (dy < -5) {
+        if (e.cancelable) e.preventDefault();
+        btn.style.transform = `translateY(${Math.max(dy, -80)}px)`;
       }
-      btn.style.transform = 'translateY(0)';
-    };
-    document.addEventListener('mouseup', end);
-    document.addEventListener('touchend', end);
-  }
+    },
+    { passive: false },
+  );
+
+  const endMouse = async () => {
+    if (!isDragging) return;
+    isDragging = false;
+    btn.style.transition = '0.4s cubic-bezier(0.22,1,0.36,1)';
+    if (currentDY < -SWIPE_THRESHOLD) {
+      _swipeJustFired = true;
+      btn.style.transform = 'translateY(-100px)';
+      await triggerStageSwipeSend();
+    }
+    btn.style.transform = 'translateY(0)';
+    currentDY = 0;
+  };
+
+  const endTouch = async e => {
+    if (!isDragging) return;
+    isDragging = false;
+    btn.style.transition = '0.4s cubic-bezier(0.22,1,0.36,1)';
+    if (currentDY < -SWIPE_THRESHOLD) {
+      _swipeJustFired = true;
+      // 阻止 touchend 之后浏览器自动触发的 click 事件
+      e.preventDefault();
+      btn.style.transform = 'translateY(-100px)';
+      await triggerStageSwipeSend();
+    }
+    btn.style.transform = 'translateY(0)';
+    currentDY = 0;
+  };
+
+  document.addEventListener('mouseup', endMouse);
+  document.addEventListener('touchend', endTouch, { passive: false });
+}
 
   init();
 
