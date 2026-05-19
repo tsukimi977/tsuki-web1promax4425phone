@@ -109,7 +109,7 @@ Rules:
       apiKey: '',
       baseUrl: '',
       model: 'gpt-4o',
-      maxTokens: 99999999,
+      maxTokens: null,
       temperature: 0.7,
       historyCount: 0,
     };
@@ -117,7 +117,6 @@ Rules:
     try {
       const idb = await initTsukiDB();
 
-      // 1. 读取 main_config (获取 API 相关配置)
       const mainConfig = await new Promise((res, rej) => {
         const tx = idb.transaction('config', 'readonly');
         const req = tx.objectStore('config').get('main_config');
@@ -125,7 +124,6 @@ Rules:
         req.onerror = e => rej(e.target.error);
       });
 
-      // 2. 读取 chat_settings (获取上下文记忆条数)
       const chatSettings = await new Promise((res, rej) => {
         const tx = idb.transaction('config', 'readonly');
         const req = tx.objectStore('config').get('chat_settings');
@@ -133,7 +131,6 @@ Rules:
         req.onerror = e => rej(e.target.error);
       });
 
-      // --- 独立处理历史记录条数 (historyCount) ---
       let finalHistoryCount = defaults.historyCount;
       if (chatSettings && chatSettings.historyCount !== undefined) {
         finalHistoryCount = parseInt(chatSettings.historyCount, 10);
@@ -142,14 +139,12 @@ Rules:
         console.log(`[TsukiSend Monitor] 未找到自定义 'chat_settings'，使用默认 historyCount: ${finalHistoryCount}`);
       }
 
-      // 如果没有主配置，直接返回默认值，但要把我们刚读到的 historyCount 带上
       if (!mainConfig) {
         console.log('[TsukiSend Monitor] 未找到主 API 配置 (main_config)，将返回默认设置');
         defaults.historyCount = finalHistoryCount;
         return defaults;
       }
 
-      // --- 处理 API 预设逻辑 ---
       const apiData = mainConfig.api || {};
       let cfg = apiData.temp || {};
       const presetName = apiData.activePreset;
@@ -161,13 +156,14 @@ Rules:
         console.log('[TsukiSend Monitor] 未使用预设，加载 API 临时配置');
       }
 
+      const rawMaxTokens = parseInt(cfg.maxTokens, 10);
+
       return {
         apiKey: cfg.key || defaults.apiKey,
         baseUrl: cfg.url || defaults.baseUrl,
         model: cfg.model || defaults.model,
         temperature: parseFloat(cfg.temp || defaults.temperature),
-        maxTokens: parseInt(cfg.maxTokens || defaults.maxTokens, 10),
-        // 这里的 historyCount 不再读取 cfg，而是强制使用我们刚从 chat_settings 读出来的值
+        maxTokens: (rawMaxTokens > 0) ? rawMaxTokens : null,
         historyCount: finalHistoryCount,
       };
     } catch (e) {
@@ -385,12 +381,12 @@ Rules:
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
       body: JSON.stringify({
-        model: config.model,
-        max_tokens: config.maxTokens,
-        temperature: config.temperature,
-        messages,
-        stream: false,
-      }),
+  model: config.model,
+  ...(config.maxTokens ? { max_tokens: config.maxTokens } : {}),
+  temperature: config.temperature,
+  messages,
+  stream: false,
+}),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(`API 请求失败 ${res.status}: ${data.error?.message || data.detail || '未知错误'}`);
