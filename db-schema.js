@@ -29,6 +29,8 @@
  *   写卡工作室：card_sessions（cardstudio.html 写卡对话会话）
  *   记忆宫殿：memories（memory-palace.html 记忆条目，含增量楼层标记）
  *   记忆宫殿：mem_favorites（memory-palace.html 收藏的对话片段与记忆）
+ *   聊天总结：chat_summaries（chat-summary.html AI 事件总结归档）
+ *   羁绊档案：milestone_relations（milestone.html AI 关系总结）
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -539,6 +541,64 @@
         { name: 'by_chat', keyPath: 'chatId' },
         { name: 'by_folder', keyPath: 'folder' },
         { name: 'by_char_chat', keyPath: ['charId', 'chatId'], unique: false },
+      ],
+    },
+
+    // ── 聊天总结：AI 事件归档（chat-summary.html）────────────────────────
+    // 每次 AI 总结生成一条记录，包含多个结构化事件节点
+    // record 结构：
+    // {
+    //   id:          string,          // `csum_${charId}_${chatId}_${ts}`  主键
+    //   charId:      string,          // 关联角色 id（chars 表）
+    //   chatId:      string,          // 关联聊天 id（chats 表）
+    //   charName:    string,          // 角色名（冗余，便于展示）
+    //   chatName:    string,          // 聊天名（冗余）
+    //   floorFrom:   number,          // 总结起始楼层
+    //   floorTo:     number,          // 总结结束楼层
+    //   totalFloors: number,          // 聊天室总楼层数（生成时快照）
+    //   style:       string,          // 总结风格：'concise'|'detailed'|'narrative'
+    //   events:      Array,           // AI 返回的事件数组，每项结构：
+    //     // {
+    //     //   id:          string,   // 'evt_N'
+    //     //   title:       string,   // 事件标题（20字内）
+    //     //   summary:     string,   // 详细描述（不省略细节）
+    //     //   importance:  number,   // 重要程度 0~1（步进 0.1）
+    //     //   emotion:     string,   // 情感标签：sweet/warm/tense/angry/complex/neutral
+    //     //   floorFrom:   number,   // 本事件覆盖起始楼层
+    //     //   floorTo:     number,   // 本事件覆盖结束楼层
+    //     //   tags:        string[], // 自定义标签（如"关键转折"、"日常互动"）
+    //     //   storyTime:   string,   // 故事内时间（可选，AI 判断填写）
+    //     // }
+    //   rawPrompt:   string,          // 发送给 AI 的完整提示词（调试用）
+    //   rawResponse: string,          // AI 原始响应文本（调试用）
+    //   createdAt:   number,          // Date.now()
+    // }
+    chat_summaries: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
+        { name: 'by_created', keyPath: 'createdAt' },
+        { name: 'by_char_chat', keyPath: ['charId', 'chatId'], unique: false },
+      ],
+    },
+
+    // ── 羁绊档案：AI 关系总结（milestone.html / milestonesend.js）─────────
+    // 每次 AI 关系分析生成一条记录
+    // record 结构：
+    // {
+    //   id:        string,   // `mrel_${charId}_${chatId}_${ts}`  主键
+    //   charId:    string,   // 关联角色 id
+    //   chatId:    string,   // 关联聊天 id
+    //   result:    object,   // AI 返回的完整 JSON 结构
+    //   createdAt: number,   // Date.now()
+    // }
+    milestone_relations: {
+      keyPath: 'id',
+      indexes: [
+        { name: 'by_char', keyPath: 'charId' },
+        { name: 'by_chat', keyPath: 'chatId' },
+        { name: 'by_created', keyPath: 'createdAt' },
       ],
     },
   };
