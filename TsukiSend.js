@@ -260,9 +260,8 @@ Rules:
       // 这样它可以进入消息队列，严格按顺序分配楼层存库，彻底杜绝楼层冲突导致的消息丢失
       const charName = window.currentChatChar ? window.currentChatChar.name : '角色';
       const sysMsg = `\n[system|system] ${charName} 将状态切换为「${newText}」\n`;
-const replaced = rawText.replace(statusRegex, '\n[system|system] ' + charName + ' 将状态切换为「' + newText + '」\n');
-// 把所有 tag 前确保有换行，防止粘连
-return replaced.replace(/([^\n])(\[[^\]|]+\|[^\]]+\])/g, '$1\n$2');
+const cleaned = rawText.replace(statusRegex, '').replace(/[ \t]+/g, ' ').trim();
+return sysMsg.trim() + '\n' + cleaned;
     }
     return rawText;
   }
