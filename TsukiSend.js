@@ -261,7 +261,7 @@ Rules:
       const charName = window.currentChatChar ? window.currentChatChar.name : '角色';
       const sysMsg = `\n[system|system] ${charName} 将状态切换为「${newText}」\n`;
 
-      return rawText.replace(statusRegex, sysMsg).trim();
+      return rawText.replace(statusRegex, '\n' + sysMsg.trim() + '\n');
     }
     return rawText;
   }

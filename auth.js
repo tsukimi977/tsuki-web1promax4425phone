@@ -9,7 +9,7 @@
   const SB_KEY    = 'sb_publishable_2ZJJB1buKLoLWLPZ3sHOug_mhmsvd8s';
   const IDB_NAME  = 'tsukiphonepromax';
   const CS        = 'config';
-  const K = { dur:'auth_play_duration', code:'auth_browser_code', qq:'auth_logged_in_qq' };
+  const K = { dur:'auth_play_duration', code:'auth_browser_code', qq:'auth_logged_in_qq', last_dur:'auth_last_play_duration' };
 
   let timer=null, idle=null, counting=false, me=null;
 
@@ -174,6 +174,10 @@
         if(durEl) durEl.textContent=fmtSec(dur);
         if(remEl) remEl.textContent=user.expire_at?fmtRem(user.expire_at):'---';
       });
+      iGet(K.last_dur).then(v=>{
+        const el=document.getElementById('_orb_last');
+        if(el) el.textContent=v!=null?fmtSec(v):'---';
+      });
     }
 
     btn.addEventListener('click',async(e)=>{
@@ -190,6 +194,10 @@
               <span id="_orb_dur" style="font-size:13px;font-weight:700;color:#fff;">${fmtSec(d)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);">
+              <span style="font-size:8px;color:rgba(255,255,255,.4);letter-spacing:.12em;">上次续期时长</span>
+              <span id="_orb_last" style="font-size:13px;font-weight:700;color:#fbcfe8;">···</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);">
               <span style="font-size:8px;color:rgba(255,255,255,.4);letter-spacing:.12em;">剩余有效期</span>
               <span id="_orb_rem" style="font-size:13px;font-weight:700;color:#f9a8d4;">${user.expire_at?fmtRem(user.expire_at):'---'}</span>
             </div>
@@ -202,6 +210,11 @@
         /* 逐秒刷新 */
         clearInterval(_orbTick);
         _orbTick=setInterval(_renderOrbPanel,1000);
+        /* 立即读取上次续期时长 */
+        iGet(K.last_dur).then(v=>{
+          const el=document.getElementById('_orb_last');
+          if(el) el.textContent=v!=null?fmtSec(v):'---';
+        });
       } else {
         panel.classList.remove('open');
         clearInterval(_orbTick);_orbTick=null;
@@ -796,9 +809,9 @@
         const exp=new Date(Date.now()+3*86400*1000).toISOString();
         await sb(`users?qq=eq.${encodeURIComponent(qq)}`,'PATCH',{expire_at:exp,last_play_duration:ld,current_play_duration:ld},{'Prefer':'return=minimal'});
         user.expire_at=exp;user.last_play_duration=ld;
-        await iSet(K.qq,qq);await iSet('auth_saved_pwd',pw);me=user;_rmAuth();
+        await iSet(K.qq,qq);await iSet('auth_saved_pwd',pw);await iSet('auth_last_play_duration',ld);me=user;_rmAuth();
         toast('✔ 续期成功！已自动延长 3 天','success',4000);enterIndex(user);
-      } else {toast(`⚠ 游玩时长不足 2 小时，还需 ${fmtSec(5400-diff)}`,'error',6000);}
+      } else {toast(`⚠ 游玩时长不足 2 小时，还需 ${fmtSec(7200-diff)}`,'error',6000);}
       return;
     }
     await iSet(K.qq,qq);await iSet('auth_saved_pwd',pw);me=user;_rmAuth();
