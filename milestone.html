@@ -1,0 +1,3017 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+  <title>Chronicle · 羁绊档案</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..900;1,9..144,200..900&family=Geist:wght@200;300;400;500;600;700&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <!-- TsukiTheme 注入目标 -->
+  <style id="tsuki-dynamic-style"></style>
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   CHRONICLE · 羁绊档案  — WHITE + MULTI-ACCENT SYSTEM
+   Design DNA: Tsukimi系 · 白底·彩色accent·多色系cards
+   每个模块色系独立 / 偏移阴影 / 点阵背景 / 胶片条
+   Fraunces斜体大数字 / Geist Mono正文
+═══════════════════════════════════════════════════════════ */
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  /* 白底主色 */
+  --bg:#f8f7f5;
+  --bg2:#f0ede8;
+  --card:#ffffff;
+  --bk:#111111;
+  --bk2:#1a1a1a;
+  --ink:rgba(17,17,17,1);
+  --ink2:rgba(17,17,17,.72);
+  --muted:rgba(17,17,17,.32);
+  --line:rgba(17,17,17,.12);
+  --line2:rgba(17,17,17,.06);
+
+  /* 多accent色系 */
+  --ac-blue:#93c5fd;      /* 线上聊天 · 蓝 */
+  --ac-blue2:#bfdbfe;
+  --ac-blue3:rgba(147,197,253,.12);
+  --ac-violet:#c4b5fd;    /* 线下剧场 · 紫 */
+  --ac-violet2:#ddd6fe;
+  --ac-violet3:rgba(196,181,253,.12);
+  --ac-rose:#fda4af;      /* 总览 · 玫瑰 */
+  --ac-rose2:#fecdd3;
+  --ac-rose3:rgba(253,164,175,.12);
+  --ac-amber:#fcd34d;     /* 统计 · 琥珀 */
+  --ac-amber2:#fde68a;
+  --ac-teal:#5eead4;      /* 时间线 · 青 */
+  --ac-teal2:#99f6e4;
+
+  /* 功能色 */
+  --ok:#22c55e;
+  --warn:#f59e0b;
+
+  /* 阴影 */
+  --sh-blue:3px 3px 0 var(--ac-blue);
+  --sh-violet:3px 3px 0 var(--ac-violet);
+  --sh-rose:3px 3px 0 var(--ac-rose);
+  --sh-bk:3px 3px 0 var(--bk);
+}
+
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  background:var(--bg);
+  font-family:'Geist Mono','PingFang SC',monospace;
+  color:var(--bk);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 点阵背景 */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(17,17,17,.065) 1px,transparent 1px);
+  background-size:18px 18px;
+}
+/* 噪点叠层 */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.97 0 0 0 0 0.96 0 0 0 0 0.94 0 0 0 0.015 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+#app{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;z-index:1;}
+
+/* ═══ VIEW STACK ═══ */
+.view{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  transition:opacity .28s ease,transform .28s cubic-bezier(.22,1,.36,1);
+  will-change:transform,opacity;
+}
+.view.hidden{opacity:0;pointer-events:none;transform:translateX(28px);}
+.view.back-hidden{opacity:0;pointer-events:none;transform:translateX(-18px);}
+
+/* ═══════════════════════════════════════════════
+   OVERVIEW — 总览页面
+   顶部：全局仪表板大卡片 + 左右滑动角色卡
+   底部：快捷头像条
+═══════════════════════════════════════════════ */
+#vOverview{z-index:10;background:var(--bg);}
+
+/* 顶部状态栏 */
+.ov-topbar{
+  flex-shrink:0;height:44px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:var(--bk);
+  position:relative;overflow:hidden;
+}
+.ov-topbar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--ac-rose),var(--ac-blue),var(--ac-violet));
+}
+.ov-tb-left{display:flex;align-items:center;gap:8px;}
+.ov-tb-logo{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:16px;color:#fff;letter-spacing:-.02em;
+}
+.ov-tb-tag{
+  font-size:6.5px;letter-spacing:.2em;color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.2);padding:2px 6px;
+}
+.ov-tb-right{display:flex;align-items:center;gap:6px;}
+.ov-tb-sync{
+  width:28px;height:28px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.4);font-size:9px;cursor:pointer;
+  transition:all .18s;
+}
+.ov-tb-sync:active{border-color:var(--ac-rose);color:var(--ac-rose);}
+.ov-tb-dot{width:5px;height:5px;background:var(--ok);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+/* 主滚动区域 */
+.ov-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:0;}
+.ov-scroll::-webkit-scrollbar{display:none;}
+
+/* ─── 全局统计仪表板 ─── */
+.ov-dashboard{
+  margin:12px 12px 0;
+  background:var(--bk);
+  border:1.5px solid rgba(255,255,255,.08);
+  position:relative;overflow:hidden;
+}
+/* 左侧玫瑰竖条 */
+.ov-dashboard::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--ac-rose),var(--ac-blue) 50%,var(--ac-violet));
+}
+/* 胶片条顶部 */
+.ov-film{
+  height:18px;display:flex;align-items:center;overflow:hidden;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.ov-film-holes{display:flex;align-items:center;gap:5px;padding:0 8px;flex-shrink:0;}
+.ov-film-hole{width:8px;height:6px;border-radius:1.5px;background:var(--bg);flex-shrink:0;}
+.ov-film-text{
+  flex:1;overflow:hidden;white-space:nowrap;
+  font-size:6px;letter-spacing:.14em;color:rgba(255,255,255,.15);
+  animation:filmscroll 24s linear infinite;
+}
+@keyframes filmscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.ov-dash-inner{padding:14px 14px 14px 18px;}
+.ov-dash-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.ov-dash-title-block{}
+.ov-dash-eyebrow{font-size:6.5px;letter-spacing:.22em;color:var(--ac-rose);margin-bottom:4px;font-weight:600;}
+.ov-dash-title{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:22px;color:#fff;letter-spacing:-.02em;line-height:1.1;
+}
+.ov-dash-sub{font-size:7.5px;color:rgba(255,255,255,.55);margin-top:3px;letter-spacing:.06em;}
+/* 扫描线动画点 */
+.ov-dash-live{
+  display:flex;align-items:center;gap:5px;
+  border:1px solid rgba(253,164,175,.2);padding:4px 8px;
+  background:rgba(253,164,175,.05);
+}
+.ov-dash-live-dot{width:4px;height:4px;background:var(--ac-rose);animation:pulse 1.6s ease infinite;}
+.ov-dash-live-txt{font-size:6.5px;color:var(--ac-rose);letter-spacing:.12em;}
+
+/* 主数字三格 */
+.ov-big-nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;margin-bottom:12px;border:1px solid rgba(255,255,255,.07);}
+.ov-big-num{
+  padding:10px 10px 8px;display:flex;flex-direction:column;gap:2px;
+  border-right:1px solid rgba(255,255,255,.07);
+  position:relative;overflow:hidden;
+}
+.ov-big-num:last-child{border-right:none;}
+.ov-big-num-val{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:26px;line-height:1;color:#fff;
+}
+.ov-big-num-unit{font-size:7px;color:rgba(255,255,255,.25);margin-left:2px;}
+.ov-big-num-lbl{font-size:6.5px;letter-spacing:.1em;color:rgba(255,255,255,.5);}
+.ov-big-num-acc{position:absolute;right:4px;bottom:2px;font-size:28px;font-weight:700;color:rgba(255,255,255,.03);}
+
+/* 数据行 */
+.ov-data-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.ov-data-chip{
+  display:flex;align-items:center;gap:4px;
+  border:1px solid rgba(255,255,255,.1);padding:4px 8px;
+  background:rgba(255,255,255,.04);flex:1;min-width:0;
+}
+.ov-data-chip-icon{font-size:7px;color:rgba(255,255,255,.3);flex-shrink:0;}
+.ov-data-chip-val{font-size:8.5px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ov-data-chip-lbl{font-size:6px;color:rgba(255,255,255,.45);white-space:nowrap;}
+
+/* 最活跃时段迷你热力 */
+.ov-heatrow-wrap{margin-bottom:8px;}
+.ov-heatrow-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:4px;
+}
+.ov-heatrow-title-txt{font-size:6px;letter-spacing:.16em;color:rgba(255,255,255,.5);font-weight:600;}
+.ov-heatrow-time-lbls{display:flex;justify-content:space-between;margin-top:2px;padding:0 2px;}
+.ov-heatrow-time-lbl{font-size:5.5px;color:rgba(255,255,255,.45);letter-spacing:.04em;}
+.ov-heatrow{
+  display:flex;gap:2px;align-items:flex-end;height:22px;
+  padding:0 2px;
+}
+.ov-heatrow-bar{
+  flex:1;background:rgba(147,197,253,.15);
+  transition:height .3s ease;
+  min-height:2px;
+}
+.ov-heatrow-bar.hi{background:var(--ac-blue);}
+.ov-heatrow-bar.md{background:rgba(147,197,253,.5);}
+
+/* 底部标签 */
+.ov-dash-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:8px;border-top:1px solid rgba(255,255,255,.07);
+}
+.ov-dash-foot-txt{font-size:6.5px;color:rgba(255,255,255,.45);letter-spacing:.1em;}
+.ov-dash-more{
+  font-size:7px;color:var(--ac-blue);letter-spacing:.08em;
+  display:flex;align-items:center;gap:4px;cursor:pointer;
+}
+
+/* ─── 角色卡片横向滑动区 ─── */
+.ov-section-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 14px 10px;
+}
+.ov-section-lbl{font-size:7px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;}
+.ov-section-cnt{font-size:7px;color:rgba(147,197,253,.7);}
+
+/* 横向滑动卡区 */
+.ov-cards-track{
+  display:flex;gap:8px;
+  overflow-x:auto;padding:0 14px 14px;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+}
+.ov-cards-track::-webkit-scrollbar{display:none;}
+
+/* ─── 角色大卡 (横滑) ─── */
+.char-card{
+  flex-shrink:0;width:calc(100vw - 50px);max-width:340px;
+  scroll-snap-align:start;
+  background:var(--card);border:1.5px solid var(--bk);
+  position:relative;overflow:hidden;cursor:pointer;
+  transition:transform .18s;
+}
+.char-card:active{transform:scale(.983);}
+
+/* 顶部色条 */
+.char-card-topbar{height:4px;width:100%;}
+.char-card-topbar.blue{background:linear-gradient(90deg,var(--ac-blue),var(--ac-blue2));}
+.char-card-topbar.violet{background:linear-gradient(90deg,var(--ac-violet),var(--ac-violet2));}
+.char-card-topbar.rose{background:linear-gradient(90deg,var(--ac-rose),var(--ac-rose2));}
+.char-card-topbar.teal{background:linear-gradient(90deg,var(--ac-teal),var(--ac-teal2));}
+.char-card-topbar.amber{background:linear-gradient(90deg,var(--ac-amber),var(--ac-amber2));}
+
+/* 头部：头像 + 名字 + 标签 */
+.char-card-head{
+  padding:12px 12px 10px;
+  display:flex;align-items:flex-start;gap:10px;
+  border-bottom:1px solid var(--line2);
+}
+.char-card-av{
+  width:52px;height:52px;flex-shrink:0;
+  border:1.5px solid var(--bk);overflow:hidden;
+  background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--muted);
+  position:relative;
+}
+.char-card-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.char-card-av::after{
+  content:'CHAR';position:absolute;bottom:0;left:0;right:0;
+  font-size:4.5px;letter-spacing:.1em;font-weight:700;
+  background:rgba(17,17,17,.55);color:rgba(255,255,255,.6);
+  text-align:center;padding:1px 0;line-height:1.5;
+}
+.char-card-info{flex:1;min-width:0;}
+.char-card-name{
+  font-size:15px;font-weight:700;color:var(--bk);
+  letter-spacing:.02em;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.char-card-remark{
+  font-size:8px;color:var(--muted);letter-spacing:.06em;margin-bottom:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.char-card-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.char-tag{
+  font-size:6px;padding:2px 6px;letter-spacing:.1em;font-weight:600;
+  border:1px solid currentColor;flex-shrink:0;
+}
+.char-tag.blue{color:var(--ac-blue);}
+.char-tag.violet{color:var(--ac-violet);}
+
+/* 数字格 */
+.char-card-nums{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-bottom:1px solid var(--line2);
+}
+.char-num-cell{
+  padding:10px 8px;display:flex;flex-direction:column;gap:2px;
+  border-right:1px solid var(--line2);position:relative;overflow:hidden;
+}
+.char-num-cell:last-child{border-right:none;}
+.char-num-val{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:22px;line-height:1;color:var(--bk);
+}
+.char-num-lbl{font-size:6px;letter-spacing:.1em;color:var(--muted);}
+.char-num-acc{position:absolute;right:3px;bottom:0;font-size:24px;font-weight:700;color:rgba(17,17,17,.04);}
+
+/* 底部双模块统计条 */
+.char-card-modules{display:flex;border-top:none;}
+.char-mod{
+  flex:1;padding:8px 10px;display:flex;flex-direction:column;gap:3px;
+  position:relative;
+}
+.char-mod:first-child{border-right:1px solid var(--line2);}
+.char-mod-eyebrow{
+  font-size:6px;letter-spacing:.16em;font-weight:700;
+  display:flex;align-items:center;gap:4px;
+}
+.char-mod-eyebrow.blue{color:var(--ac-blue);}
+.char-mod-eyebrow.violet{color:var(--ac-violet);}
+.char-mod-row{display:flex;align-items:baseline;gap:4px;}
+.char-mod-big{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:18px;color:var(--bk);line-height:1;
+}
+.char-mod-sub{font-size:7px;color:var(--muted);}
+/* 右下角标 */
+.char-card-arrow{
+  position:absolute;right:10px;bottom:8px;
+  font-size:8px;color:var(--muted);
+}
+
+/* ─── 底部快捷头像条 ─── */
+.ov-avatar-strip{
+  flex-shrink:0;
+  border-top:1.5px solid var(--bk);
+  background:var(--card);
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.ov-avatar-strip-inner{
+  display:flex;gap:8px;
+  overflow-x:auto;padding:0 12px;
+  -webkit-overflow-scrolling:touch;
+}
+.ov-avatar-strip-inner::-webkit-scrollbar{display:none;}
+
+.av-strip-item{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;
+}
+.av-strip-av{
+  width:40px;height:40px;
+  border:1.5px solid var(--bk);overflow:hidden;
+  background:var(--bg2);position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--muted);
+  transition:all .15s;
+}
+.av-strip-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.av-strip-av.active-blue{border-color:var(--ac-blue);box-shadow:2px 2px 0 var(--ac-blue);}
+.av-strip-av.active-violet{border-color:var(--ac-violet);box-shadow:2px 2px 0 var(--ac-violet);}
+.av-strip-av.active-rose{border-color:var(--ac-rose);box-shadow:2px 2px 0 var(--ac-rose);}
+.av-strip-name{font-size:6.5px;color:var(--muted);letter-spacing:.04em;max-width:44px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* 全局 item */
+.av-strip-item.global .av-strip-av{
+  background:var(--bk);border-color:var(--bk);
+}
+.av-strip-item.global .av-strip-av i{color:rgba(255,255,255,.5);font-size:13px;}
+
+
+/* ═══════════════════════════════════════════════
+   CHAR DETAIL — 角色详情页
+   顶部：设计感强的poster header
+   内容：线上模块 + 线下模块 分Tab
+═══════════════════════════════════════════════ */
+#vCharDetail{z-index:20;background:var(--bg);}
+
+/* ─── 详情顶部 POSTER HEADER ─── */
+.cd-header{
+  flex-shrink:0;position:relative;overflow:hidden;
+  background:var(--bk);
+}
+/* 胶片条 */
+.cd-film{height:16px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.06);}
+.cd-film-holes{display:flex;gap:5px;padding:0 7px;flex-shrink:0;}
+.cd-film-hole{width:7px;height:5px;border-radius:1px;background:var(--bg);flex-shrink:0;}
+.cd-film-txt{flex:1;overflow:hidden;white-space:nowrap;font-size:5.5px;letter-spacing:.16em;color:rgba(255,255,255,.12);animation:filmscroll 20s linear infinite;}
+
+/* 主内容区 */
+.cd-h-inner{
+  display:grid;grid-template-columns:1fr auto;
+  align-items:stretch;padding:12px 12px 0 14px;gap:10px;
+}
+.cd-h-left{display:flex;flex-direction:column;justify-content:space-between;padding-bottom:12px;}
+/* 返回按钮 */
+.cd-back{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,255,255,.12);padding:5px 9px;
+  color:rgba(255,255,255,.5);font-size:8px;letter-spacing:.08em;
+  cursor:pointer;background:rgba(255,255,255,.04);
+  transition:all .16s;width:fit-content;margin-bottom:8px;
+}
+.cd-back:active{border-color:var(--ac-rose);color:var(--ac-rose);}
+.cd-back i{font-size:7px;}
+.cd-h-eyebrow{font-size:6px;letter-spacing:.2em;margin-bottom:4px;font-weight:700;}
+.cd-h-name{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:28px;color:#fff;letter-spacing:-.03em;line-height:1.05;margin-bottom:3px;
+}
+.cd-h-remark{font-size:8.5px;color:rgba(255,255,255,.3);letter-spacing:.06em;margin-bottom:10px;}
+/* 统计chips行 */
+.cd-h-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.cd-h-chip{
+  display:flex;align-items:center;gap:4px;
+  border:1px solid rgba(255,255,255,.12);padding:4px 8px;
+  background:rgba(255,255,255,.05);
+}
+.cd-h-chip i{font-size:7px;color:rgba(255,255,255,.3);}
+.cd-h-chip-val{font-size:8px;color:rgba(255,255,255,.7);}
+.cd-h-chip-lbl{font-size:6px;color:rgba(255,255,255,.28);}
+
+/* 右侧头像 + 标记 */
+.cd-h-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  padding-bottom:12px;
+}
+.cd-h-av{
+  width:72px;height:72px;border:1.5px solid rgba(255,255,255,.15);
+  overflow:hidden;background:#1a1a1a;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:rgba(255,255,255,.2);
+  position:relative;
+}
+.cd-h-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.cd-h-badge{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
+  padding:3px 8px;font-size:6.5px;color:rgba(255,255,255,.35);letter-spacing:.1em;
+}
+/* 扫描线 */
+.cd-scanbar{
+  display:flex;border-top:1px solid rgba(255,255,255,.07);height:22px;
+  overflow:hidden;position:relative;
+}
+.cd-scanbar::before{
+  content:'';position:absolute;top:0;bottom:0;width:50px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);
+  animation:scan 3s linear infinite;
+}
+@keyframes scan{from{left:-50px}to{left:100%}}
+.cd-scan-cell{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:4px;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.cd-scan-cell:last-child{border-right:none;}
+.cd-scan-lbl{font-size:5.5px;letter-spacing:.12em;color:rgba(255,255,255,.5);}
+.cd-scan-val{font-size:8px;color:rgba(255,255,255,.6);font-family:'Fraunces',serif;font-style:italic;}
+
+/* ─── Tab bar ─── */
+.cd-tabs{
+  flex-shrink:0;display:flex;height:38px;
+  background:var(--bk);border-bottom:1.5px solid var(--bk);
+}
+.cd-tab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  font-size:8.5px;letter-spacing:.1em;color:rgba(255,255,255,.28);
+  cursor:pointer;transition:all .18s;position:relative;
+  border:none;background:transparent;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.cd-tab:last-child{border-right:none;}
+.cd-tab i{font-size:8px;}
+.cd-tab.active{background:var(--bg);color:var(--bk);}
+.cd-tab.active.blue::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:var(--ac-blue);}
+.cd-tab.active.violet::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:var(--ac-violet);}
+.cd-tab .tab-badge{
+  font-size:6.5px;padding:1px 5px;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.4);
+}
+.cd-tab.active .tab-badge{background:var(--ac-blue3);color:var(--ac-blue);}
+.cd-tab.active.violet .tab-badge{background:var(--ac-violet3);color:var(--ac-violet);}
+
+/* ─── Tab 内容滚动体 ─── */
+.cd-body{flex:1;overflow:hidden;position:relative;}
+.cd-tab-content{
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  padding:14px 12px 90px;
+  transition:opacity .2s,transform .2s;
+}
+.cd-tab-content::-webkit-scrollbar{display:none;}
+.cd-tab-content.hidden{opacity:0;pointer-events:none;transform:translateX(12px);}
+
+/* ─── 线上聊天 Tab 内容 ─── */
+
+/* 汇总横条 — 蓝系 */
+.online-summary{
+  background:var(--bk);border:1.5px solid rgba(147,197,253,.25);
+  margin-bottom:12px;position:relative;overflow:hidden;
+  box-shadow:var(--sh-blue);
+}
+.online-summary::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac-blue);}
+.ons-inner{padding:12px 12px 12px 16px;}
+.ons-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ons-label{font-size:6.5px;letter-spacing:.2em;color:var(--ac-blue);font-weight:700;}
+.ons-total{font-size:7px;color:rgba(255,255,255,.3);letter-spacing:.06em;}
+.ons-nums{display:flex;gap:0;}
+.ons-num{
+  flex:1;padding:8px 10px;
+  border-right:1px solid rgba(255,255,255,.07);
+  display:flex;flex-direction:column;gap:2px;
+}
+.ons-num:last-child{border-right:none;}
+.ons-num-val{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:20px;line-height:1;color:#fff;
+}
+.ons-num-lbl{font-size:6px;letter-spacing:.1em;color:rgba(255,255,255,.52);}
+
+/* chat 小卡片 */
+.chat-cards{display:flex;flex-direction:column;gap:8px;}
+
+/* 收据风格 chat 卡 */
+.chat-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  position:relative;overflow:hidden;cursor:pointer;
+  transition:all .18s;
+}
+.chat-card:active{transform:translate(2px,2px);box-shadow:none!important;}
+.chat-card{box-shadow:2px 2px 0 var(--ac-blue);}
+
+/* 卡头 */
+.cc-head{
+  display:grid;grid-template-columns:auto 1fr auto;
+  align-items:center;gap:8px;
+  padding:10px 10px 8px;
+  border-bottom:1px dashed rgba(17,17,17,.1);
+}
+/* 双头像叠放 */
+.cc-avatars{position:relative;width:44px;height:36px;flex-shrink:0;}
+.cc-av-char{
+  position:absolute;right:0;bottom:0;width:30px;height:30px;
+  border:1.5px solid var(--bk);overflow:hidden;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;color:var(--muted);
+}
+.cc-av-char img{width:100%;height:100%;object-fit:cover;display:block;}
+.cc-av-user{
+  position:absolute;left:0;top:0;width:22px;height:22px;
+  border:1.5px solid var(--ac-blue);overflow:hidden;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:6px;color:var(--ac-blue);
+  z-index:1;
+}
+.cc-av-user img{width:100%;height:100%;object-fit:cover;display:block;}
+
+.cc-info{min-width:0;}
+.cc-name{font-size:11px;font-weight:700;letter-spacing:.02em;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-user-tag{font-size:7px;color:var(--ac-blue);letter-spacing:.06em;display:flex;align-items:center;gap:3px;}
+.cc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.cc-days{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:18px;color:var(--bk);line-height:1;
+}
+.cc-days-lbl{font-size:5.5px;color:var(--muted);letter-spacing:.1em;}
+
+/* 卡体数据 */
+.cc-body{
+  display:flex;gap:0;
+}
+.cc-stat{
+  flex:1;padding:7px 8px;display:flex;flex-direction:column;gap:2px;
+  border-right:1px dashed rgba(17,17,17,.08);
+}
+.cc-stat:last-child{border-right:none;}
+.cc-stat-val{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:16px;line-height:1;color:var(--bk);
+}
+.cc-stat-lbl{font-size:6px;letter-spacing:.08em;color:var(--muted);}
+
+/* 第一句话 */
+.cc-first{
+  padding:7px 10px;border-top:1px dashed rgba(17,17,17,.08);
+  display:flex;align-items:flex-start;gap:6px;
+}
+.cc-first-tag{
+  font-size:5.5px;letter-spacing:.12em;font-weight:700;
+  color:var(--ac-blue);border:1px solid var(--ac-blue);
+  padding:2px 5px;flex-shrink:0;margin-top:1px;
+  white-space:nowrap;
+}
+.cc-first-txt{font-size:9px;color:var(--ink2);line-height:1.5;flex:1;}
+
+/* 类型图标行 */
+.cc-types{
+  display:flex;gap:3px;padding:6px 10px 8px;
+  border-top:1px solid rgba(17,17,17,.06);
+  flex-wrap:wrap;align-items:center;
+}
+.cc-type-pill{
+  font-size:6px;padding:2px 6px;
+  background:var(--bg2);border:1px solid var(--line);
+  letter-spacing:.08em;color:var(--muted);
+  display:flex;align-items:center;gap:3px;
+}
+.cc-type-pill i{font-size:6px;}
+/* 收据锯齿 */
+.chat-card::after{
+  content:'';display:block;height:5px;
+  background:repeating-linear-gradient(-45deg,transparent,transparent 3px,var(--bg) 3px,var(--bg) 4px);
+  position:absolute;bottom:-1px;left:0;right:0;
+}
+
+/* ─── 线下剧场 Tab 内容 ─── */
+
+/* 汇总横条 — 紫系 */
+.offline-summary{
+  background:var(--bk);border:1.5px solid rgba(196,181,253,.25);
+  margin-bottom:12px;position:relative;overflow:hidden;
+  box-shadow:var(--sh-violet);
+}
+.offline-summary::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac-violet);}
+.ofs-inner{padding:12px 12px 12px 16px;}
+.ofs-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ofs-label{font-size:6.5px;letter-spacing:.2em;color:var(--ac-violet);font-weight:700;}
+.ofs-nums{display:flex;gap:0;}
+.ofs-num{
+  flex:1;padding:8px 10px;
+  border-right:1px solid rgba(255,255,255,.07);
+  display:flex;flex-direction:column;gap:2px;
+}
+.ofs-num:last-child{border-right:none;}
+.ofs-num-val{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:20px;line-height:1;color:#fff;
+}
+.ofs-num-lbl{font-size:6px;letter-spacing:.1em;color:rgba(255,255,255,.52);}
+
+/* theater 卡片 */
+.theater-cards{display:flex;flex-direction:column;gap:8px;}
+
+/* 横版 theater 卡 — 斜纹底 + 旗帜 */
+.theater-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  position:relative;overflow:hidden;cursor:pointer;
+  box-shadow:2px 2px 0 var(--ac-violet);
+  transition:all .18s;
+}
+.theater-card:active{transform:translate(2px,2px);box-shadow:none;}
+.tc-words-watermark{
+  position:absolute;right:10px;bottom:8px;
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:24px;line-height:1;
+  color:rgba(17,17,17,.36);
+  pointer-events:none;
+}
+/* 旗帜角标 */
+.tc-flag{
+  position:absolute;top:0;right:0;
+  width:0;height:0;border-style:solid;
+  border-width:0 36px 36px 0;
+  border-color:transparent var(--bk) transparent transparent;
+}
+.tc-flag-txt{
+  position:absolute;top:4px;right:3px;
+  font-size:6px;font-weight:700;color:#fff;
+  letter-spacing:.04em;transform:rotate(45deg);transform-origin:center;
+}
+
+/* 卡头 */
+.tc-head{
+  padding:10px 42px 8px 10px;
+  border-bottom:1px solid var(--line2);
+}
+.tc-title{font-size:12px;font-weight:700;margin-bottom:4px;letter-spacing:.02em;}
+.tc-chars{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.tc-char-av{
+  width:20px;height:20px;border:1px solid var(--bk);
+  overflow:hidden;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:6px;color:var(--muted);
+}
+.tc-char-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.tc-user-av{
+  width:16px;height:16px;border:1px solid var(--ac-violet);
+  overflow:hidden;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:5px;color:var(--ac-violet);
+}
+.tc-user-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.tc-sep{font-size:7px;color:var(--muted);}
+.tc-char-name{font-size:7.5px;color:var(--muted);letter-spacing:.04em;}
+
+/* 卡体 */
+.tc-body{
+  display:grid;grid-template-columns:auto 1fr;gap:0;
+}
+/* 左侧黑竖栏 */
+.tc-side{
+  background:var(--bk);padding:10px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  min-width:52px;
+}
+.tc-side-floor{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:28px;color:#fff;line-height:1;
+}
+.tc-side-lbl{font-size:5px;letter-spacing:.14em;color:rgba(255,255,255,.3);writing-mode:vertical-rl;}
+.tc-side-icon{font-size:9px;color:var(--ac-violet);margin-top:4px;}
+
+/* 右侧内容 */
+.tc-main{padding:8px 10px;}
+.tc-prologue{
+  font-size:9px;color:var(--ink2);line-height:1.55;margin-bottom:7px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.tc-stats{display:flex;gap:6px;flex-wrap:wrap;}
+.tc-stat{display:flex;align-items:center;gap:3px;}
+.tc-stat i{font-size:7px;color:var(--muted);}
+.tc-stat-txt{font-size:7.5px;color:var(--muted);}
+.tc-has-voice{
+  display:inline-flex;align-items:center;gap:3px;
+  background:var(--ac-violet3);border:1px solid var(--ac-violet);
+  padding:2px 6px;font-size:6px;color:var(--ac-violet);letter-spacing:.08em;
+}
+
+/* ═══════════════════════════════════════════════
+   GLOBAL STATS — 全局详细统计页
+   从overview的仪表板展开
+═══════════════════════════════════════════════ */
+#vGlobalStats{z-index:20;background:var(--bg);}
+
+/* 顶部bar — 渐变多色 */
+.gs-header{
+  flex-shrink:0;background:var(--bk);position:relative;overflow:hidden;
+}
+.gs-header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--ac-rose),var(--ac-amber),var(--ac-blue),var(--ac-violet));
+}
+.gs-header-inner{
+  padding:10px 14px 14px;display:flex;align-items:center;gap:10px;
+}
+.gs-back{
+  width:30px;height:30px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.5);font-size:10px;cursor:pointer;flex-shrink:0;
+  transition:all .16s;
+}
+.gs-back:active{border-color:var(--ac-rose);color:var(--ac-rose);}
+.gs-header-title{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:20px;color:#fff;letter-spacing:-.02em;flex:1;
+}
+.gs-header-sub{font-size:7px;color:rgba(255,255,255,.3);letter-spacing:.1em;}
+
+.gs-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px 90px;}
+.gs-scroll::-webkit-scrollbar{display:none;}
+
+/* 热力图区 — 完整版 */
+.heatmap-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  margin-bottom:10px;position:relative;overflow:hidden;
+}
+.heatmap-card-head{
+  padding:10px 12px 8px;border-bottom:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.heatmap-card-lbl{font-size:7px;letter-spacing:.18em;color:var(--muted);font-weight:700;}
+.heatmap-card-sub{font-size:7px;color:var(--muted);}
+.heatmap-grid{
+  display:grid;grid-template-columns:repeat(24,1fr);
+  gap:2px;padding:10px 12px 12px;
+}
+.hm-cell{
+  aspect-ratio:1;
+  background:rgba(17,17,17,.05);
+  transition:background .2s;
+}
+.hm-cell.lv1{background:rgba(147,197,253,.2);}
+.hm-cell.lv2{background:rgba(147,197,253,.45);}
+.hm-cell.lv3{background:rgba(147,197,253,.7);}
+.hm-cell.lv4{background:var(--ac-blue);}
+.heatmap-hours{
+  display:flex;justify-content:space-between;
+  padding:0 12px 10px;
+}
+.hm-hour{font-size:5.5px;color:rgba(17,17,17,.25);letter-spacing:.04em;}
+
+/* 月活折线图 */
+.monthly-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  margin-bottom:10px;box-shadow:var(--sh-rose);
+}
+.monthly-card-head{
+  padding:10px 12px 8px;border-bottom:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.monthly-card-lbl{font-size:7px;letter-spacing:.18em;color:var(--muted);font-weight:700;}
+.monthly-svg-wrap{padding:8px 12px 4px;height:80px;}
+#monthlySvg{width:100%;height:100%;overflow:visible;display:block;}
+.monthly-months{
+  display:flex;justify-content:space-between;padding:0 12px 10px;
+}
+.monthly-month-lbl{font-size:5.5px;color:rgba(17,17,17,.25);}
+
+/* 周活图 — 紫色系 斜切风格 */
+.weekly-card{
+  background:var(--bk);border:1.5px solid rgba(196,181,253,.3);
+  margin-bottom:10px;box-shadow:var(--sh-violet);
+  overflow:hidden;
+}
+.weekly-card-head{
+  padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.weekly-card-lbl{font-size:7px;letter-spacing:.18em;color:var(--ac-violet);font-weight:700;}
+.weekly-range{font-size:7px;color:rgba(255,255,255,.35);}
+/* 图表容器 — 留足顶部空间给数字标签 */
+.weekly-wrap{
+  padding:24px 12px 0;
+  display:flex;align-items:flex-end;gap:4px;
+  height:100px;/* 24px数字区 + 56px柱 + 20px底部label */
+}
+.weekly-col{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:0;height:100%;
+}
+/* 数字区 固定高度 24px，不让柱子溢出 */
+.weekly-val-row{
+  height:20px;display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:3px;flex-shrink:0;
+}
+.weekly-bar-num{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:10px;color:rgba(255,255,255,.6);line-height:1;white-space:nowrap;
+}
+.weekly-bar-num.peak-num{color:var(--ac-violet);font-size:11px;}
+.weekly-bar-num.zero-num{color:rgba(255,255,255,.18);font-size:9px;}
+/* 柱体区 */
+.weekly-bar-area{
+  flex:1;width:100%;display:flex;align-items:flex-end;
+}
+.weekly-bar{
+  width:100%;
+  background:rgba(196,181,253,.3);
+  border-top:2px solid rgba(196,181,253,.5);
+  transition:height .4s cubic-bezier(.22,1,.36,1);
+  min-height:2px;position:relative;
+}
+.weekly-bar.peak{
+  background:var(--ac-violet);
+  border-top-color:var(--ac-violet2);
+  box-shadow:0 -2px 8px rgba(196,181,253,.4);
+}
+.weekly-bar.zero{
+  background:rgba(255,255,255,.04);
+  border-top:1px dashed rgba(255,255,255,.1);
+}
+/* 日标签 */
+.weekly-day-lbl{
+  font-size:6.5px;color:rgba(255,255,255,.3);letter-spacing:.06em;
+  padding:5px 0 8px;flex-shrink:0;
+}
+.weekly-day-lbl.peak-day{color:var(--ac-violet);font-weight:600;}
+
+/* 关系热度榜 */
+.rank-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  margin-bottom:10px;
+}
+.rank-card-head{
+  padding:10px 12px 8px;border-bottom:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.rank-card-lbl{font-size:7px;letter-spacing:.18em;color:var(--muted);font-weight:700;}
+.rank-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-bottom:1px solid var(--line2);
+  cursor:pointer;transition:background .15s;
+}
+.rank-item:last-child{border-bottom:none;}
+.rank-item:active{background:var(--bg2);}
+.rank-num{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:20px;color:rgba(17,17,17,.12);line-height:1;width:24px;flex-shrink:0;
+}
+.rank-num.top{color:var(--ac-rose);opacity:1;}
+.rank-av{
+  width:32px;height:32px;border:1.5px solid var(--bk);
+  overflow:hidden;background:var(--bg2);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--muted);
+}
+.rank-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.rank-info{flex:1;min-width:0;}
+.rank-name{font-size:11px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rank-sub{font-size:7px;color:var(--muted);}
+.rank-bar-wrap{width:60px;flex-shrink:0;}
+.rank-bar{
+  height:3px;background:var(--ac-rose);
+  margin-bottom:3px;
+}
+.rank-bar-val{font-size:7px;color:var(--muted);text-align:right;}
+
+/* 消息类型分布 */
+.type-dist-card{
+  background:var(--bk);border:1.5px solid rgba(252,211,77,.25);
+  margin-bottom:10px;box-shadow:3px 3px 0 var(--ac-amber);
+}
+.type-dist-head{
+  padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.type-dist-lbl{font-size:7px;letter-spacing:.18em;color:var(--ac-amber);font-weight:700;}
+.type-dist-items{padding:10px 12px 12px;display:flex;flex-direction:column;gap:7px;}
+.td-item{display:flex;align-items:center;gap:8px;}
+.td-icon{
+  width:22px;height:22px;border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:rgba(255,255,255,.5);flex-shrink:0;
+}
+.td-name{font-size:8.5px;color:rgba(255,255,255,.6);width:76px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.td-bar-track{flex:1;height:5px;background:rgba(255,255,255,.06);}
+.td-bar-fill{height:100%;background:var(--ac-amber);transition:width .4s ease;}
+.td-count{font-size:7.5px;color:rgba(255,255,255,.4);text-align:right;min-width:28px;}
+
+/* ═══ SECTION LABEL (通用) ═══ */
+.sec-lbl{
+  display:flex;align-items:center;gap:8px;
+  padding:0 0 10px;
+}
+.sec-lbl-text{font-size:6.5px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;}
+.sec-lbl-line{flex:1;height:1px;background:var(--line);}
+.sec-lbl-num{font-size:6.5px;color:rgba(147,197,253,.6);}
+.sec-lbl-num.violet{color:rgba(196,181,253,.6);}
+
+/* ═══ API PLACEHOLDER ═══ */
+.api-slot{
+  border:1px dashed var(--line);padding:12px;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(17,17,17,.02);margin-bottom:10px;
+  cursor:pointer;transition:all .18s;
+}
+.api-slot:active{border-color:var(--ac-blue);background:var(--ac-blue3);}
+.api-slot i{font-size:11px;color:var(--muted);}
+.api-slot-txt{flex:1;}
+.api-slot-title{font-size:9px;color:var(--muted);margin-bottom:2px;}
+.api-slot-sub{font-size:7px;color:rgba(17,17,17,.25);letter-spacing:.06em;}
+.api-slot-arr{font-size:8px;color:var(--muted);}
+
+/* ═══ LOADING / EMPTY ═══ */
+.loading-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 20px;gap:10px;
+}
+.loading-spinner{
+  width:20px;height:20px;border:1.5px solid var(--line);
+  border-top-color:var(--ac-blue);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:8px;color:var(--muted);letter-spacing:.12em;}
+
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 20px;gap:8px;
+}
+.empty-icon{font-size:20px;color:rgba(17,17,17,.12);}
+.empty-txt{font-size:8px;color:var(--muted);letter-spacing:.1em;}
+
+/* ═══ UTILITY ═══ */
+.hidden-sec{display:none!important;}
+.hidden{display:none!important;}
+button{border:none;outline:none;font-family:inherit;}
+
+/* ═══════════════════════════════════════════════
+   GLOBAL STATS — 统计页面 Tab 条
+═══════════════════════════════════════════════ */
+.gs-tabs{
+  flex-shrink:0;display:flex;
+  background:var(--bk);
+  border-bottom:2px solid rgba(255,255,255,.06);
+  position:relative;
+}
+.gs-tabs::before{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--ac-blue),var(--ac-violet));
+  opacity:.4;
+}
+.gs-tab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  height:38px;font-size:8.5px;letter-spacing:.1em;
+  color:rgba(255,255,255,.3);cursor:pointer;
+  background:transparent;border:none;outline:none;
+  font-family:inherit;position:relative;
+  transition:color .2s;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.gs-tab:last-child{border-right:none;}
+.gs-tab i{font-size:8px;}
+.gs-tab-indicator{
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:transparent;transition:background .2s;
+}
+.gs-tab.active{color:rgba(255,255,255,.8);}
+#gsTabOnline.active .gs-tab-indicator{background:var(--ac-blue);}
+#gsTabOffline.active .gs-tab-indicator{background:var(--ac-violet);}
+#gsTabOffline.active{color:var(--ac-violet);}
+#gsTabOnline.active{color:var(--ac-blue);}
+
+/* gs-scroll is reused for online, offline gets its own id */
+#gsScrollOnline,#gsScrollOffline{
+  flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px 90px;
+}
+#gsScrollOnline::-webkit-scrollbar,#gsScrollOffline::-webkit-scrollbar{display:none;}
+/* Fix: vGlobalStats needs flex-direction:column */
+#vGlobalStats{display:flex;flex-direction:column;}
+
+/* ─── 线下统计专属 UI ─── */
+
+/* section label 线下版 */
+.of-section-label{
+  display:flex;align-items:center;gap:7px;
+  padding:0 0 10px;margin-top:4px;
+}
+.of-section-dot{
+  width:6px;height:6px;background:var(--ac-violet);
+  flex-shrink:0;
+  box-shadow:0 0 6px rgba(196,181,253,.6);
+}
+.of-section-label span{
+  font-size:6.5px;letter-spacing:.22em;
+  color:rgba(196,181,253,.7);text-transform:uppercase;
+}
+.of-section-line{flex:1;height:1px;background:rgba(196,181,253,.12);}
+
+/* 消息类别分布卡 */
+.of-role-dist-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  margin-bottom:12px;overflow:hidden;
+  position:relative;
+}
+.of-role-dist-card::after{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--ac-violet),var(--ac-blue) 50%,var(--ac-rose));
+}
+.of-role-dist-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px 10px 12px;border-bottom:1px solid var(--line2);
+}
+.of-role-header-left{}
+.of-role-title{font-size:7px;letter-spacing:.2em;color:var(--muted);font-weight:700;margin-bottom:2px;}
+.of-role-subtitle{font-size:6px;color:rgba(17,17,17,.3);letter-spacing:.08em;}
+.of-role-total{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:28px;color:var(--bk);line-height:1;
+}
+.of-role-bars{padding:12px 12px 8px;display:flex;flex-direction:column;gap:8px;}
+.of-role-row{display:flex;align-items:center;gap:8px;}
+.of-role-name{
+  font-size:7px;letter-spacing:.1em;
+  width:68px;flex-shrink:0;font-weight:600;
+}
+.of-role-bar-track{
+  flex:1;height:8px;background:var(--bg2);
+  position:relative;overflow:hidden;
+}
+.of-role-bar-fill{
+  height:100%;transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.of-role-count{font-size:7.5px;color:var(--muted);min-width:30px;text-align:right;}
+.of-role-legend{
+  display:flex;gap:10px;padding:6px 12px 10px;
+  border-top:1px solid var(--line2);
+  flex-wrap:wrap;
+}
+.of-legend-item{display:flex;align-items:center;gap:4px;}
+.of-legend-dot{width:6px;height:6px;flex-shrink:0;}
+.of-legend-item span{font-size:6.5px;color:var(--muted);letter-spacing:.06em;}
+
+/* 时段热力图 — 线下版 */
+.of-heatmap-card{
+  background:var(--bk);border:1.5px solid rgba(196,181,253,.2);
+  margin-bottom:12px;overflow:hidden;
+}
+.of-heatmap-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.06);
+}
+.of-heatmap-title{font-size:7px;letter-spacing:.18em;color:var(--ac-violet);font-weight:700;}
+.of-heatmap-sub{font-size:6.5px;color:rgba(255,255,255,.5);}
+.of-heatmap-strip{
+  display:flex;gap:2px;align-items:flex-end;
+  height:48px;padding:8px 12px 0;
+}
+.of-heatmap-bar{
+  flex:1;min-height:2px;
+  background:rgba(196,181,253,.1);
+  transition:height .3s ease;
+  position:relative;
+}
+.of-heatmap-bar.lv1{background:rgba(196,181,253,.2);}
+.of-heatmap-bar.lv2{background:rgba(196,181,253,.45);}
+.of-heatmap-bar.lv3{background:rgba(196,181,253,.7);}
+.of-heatmap-bar.lv4{background:var(--ac-violet);}
+.of-heatmap-hlabels{
+  display:flex;justify-content:space-between;
+  padding:4px 12px 10px;
+}
+.of-heatmap-hlabels span{font-size:5.5px;color:rgba(255,255,255,.5);letter-spacing:.04em;}
+
+/* 近7天 — 线下版 */
+.of-weekly-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  margin-bottom:12px;overflow:visible;
+  box-shadow:2px 2px 0 var(--ac-violet);
+}
+.of-weekly-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px 8px;border-bottom:1px solid var(--line2);
+}
+.of-weekly-title{font-size:7px;letter-spacing:.18em;color:var(--muted);font-weight:700;}
+.of-weekly-range{font-size:7px;color:var(--muted);}
+.of-weekly-bars{
+  display:flex;gap:4px;padding:28px 12px 10px;
+  align-items:flex-end;height:80px;
+  overflow:visible;
+}
+.of-weekly-col{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:0;
+  position:relative;
+}
+.of-weekly-val{
+  font-size:11px;color:var(--muted);
+  font-family:'Fraunces',serif;font-style:italic;
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;
+}
+.of-weekly-val.peak{color:var(--ac-violet);font-size:13px;}
+.of-weekly-bar{
+  width:100%;min-height:2px;
+  background:rgba(196,181,253,.2);
+  border-top:2px solid rgba(196,181,253,.4);
+  transition:height .4s cubic-bezier(.22,1,.36,1);
+}
+.of-weekly-bar.peak{
+  background:rgba(196,181,253,.5);
+  border-top-color:var(--ac-violet);
+}
+.of-weekly-bar.zero{
+  background:var(--bg2);
+  border-top:1px dashed var(--line);
+}
+.of-weekly-day{
+  font-size:6.5px;color:var(--muted);
+  padding-top:4px;letter-spacing:.04em;
+}
+.of-weekly-day.peak{color:var(--ac-violet);}
+
+/* 月度折线 — 线下版 */
+.of-monthly-card{
+  background:var(--card);border:1.5px solid var(--bk);
+  margin-bottom:12px;overflow:hidden;
+  box-shadow:2px 2px 0 rgba(196,181,253,.4);
+}
+.of-monthly-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px 8px;border-bottom:1px solid var(--line2);
+}
+.of-monthly-title{font-size:7px;letter-spacing:.18em;color:var(--muted);font-weight:700;}
+.of-monthly-range{font-size:7px;color:var(--muted);}
+.of-monthly-svg-wrap{padding:8px 12px 4px;height:80px;}
+#ofMonthlySvg{width:100%;height:100%;overflow:visible;display:block;}
+.of-monthly-labels{
+  display:flex;justify-content:space-between;
+  padding:0 12px 10px;
+}
+.of-monthly-lbl{font-size:5.5px;color:rgba(17,17,17,.25);}
+
+/* 剧场排行 — 线下版 */
+.of-rank-card{
+  background:var(--bk);border:1.5px solid rgba(196,181,253,.25);
+  margin-bottom:12px;overflow:hidden;
+  box-shadow:3px 3px 0 var(--ac-violet);
+}
+.of-rank-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.07);
+}
+.of-rank-title{font-size:7px;letter-spacing:.18em;color:var(--ac-violet);font-weight:700;}
+.of-rank-sub{font-size:6.5px;color:rgba(255,255,255,.3);}
+.of-rank-item{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.06);
+  cursor:pointer;transition:background .15s;
+}
+.of-rank-item:last-child{border-bottom:none;}
+.of-rank-item:active{background:rgba(196,181,253,.06);}
+.of-rank-pos{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:200;
+  font-size:20px;color:rgba(255,255,255,.12);line-height:1;width:24px;flex-shrink:0;
+}
+.of-rank-pos.top{color:var(--ac-violet);}
+.of-rank-av{
+  width:32px;height:32px;border:1.5px solid rgba(255,255,255,.15);
+  overflow:hidden;background:#1a1a1a;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:rgba(255,255,255,.2);
+}
+.of-rank-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.of-rank-info{flex:1;min-width:0;}
+.of-rank-name{font-size:11px;font-weight:700;margin-bottom:2px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.of-rank-sub-txt{font-size:7px;color:rgba(255,255,255,.35);}
+.of-rank-bar-wrap{width:60px;flex-shrink:0;}
+.of-rank-bar{height:3px;background:var(--ac-violet);margin-bottom:3px;}
+.of-rank-bar-val{font-size:7px;color:rgba(255,255,255,.35);text-align:right;}
+
+.of-weekly-bar-wrap{
+  flex:1;width:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;
+  position:relative;
+}
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ════════════════════════════════════
+       VIEW 1: OVERVIEW 总览
+  ════════════════════════════════════ -->
+  <div class="view" id="vOverview">
+
+    <!-- 顶部状态栏 -->
+    <div class="ov-topbar">
+      <div class="ov-tb-left">
+        <div class="ov-tb-logo">Chronicle</div>
+        <div class="ov-tb-tag">羁绊档案</div>
+      </div>
+      <div class="ov-tb-right">
+        <div class="ov-tb-dot"></div>
+        <button class="ov-tb-sync" onclick="refreshAll()" title="重新读取数据">
+          <i class="fa fa-rotate-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 主滚动 -->
+    <div class="ov-scroll">
+
+      <!-- 全局仪表板 -->
+      <div class="ov-dashboard" style="cursor:pointer" onclick="showGlobalStats()">
+        <div class="ov-film">
+          <div class="ov-film-holes">
+            <div class="ov-film-hole"></div><div class="ov-film-hole"></div>
+            <div class="ov-film-hole"></div><div class="ov-film-hole"></div>
+          </div>
+          <div class="ov-film-text">CHRONICLE · 羁绊档案 · TSUKIMI SYSTEM · ALL RECORDS · CHRONICLE · 羁绊档案 · TSUKIMI SYSTEM · ALL RECORDS · CHRONICLE · 羁绊档案 · TSUKIMI SYSTEM · ALL RECORDS · </div>
+        </div>
+        <div class="ov-dash-inner">
+          <div class="ov-dash-head">
+            <div class="ov-dash-title-block">
+              <div class="ov-dash-eyebrow">GLOBAL OVERVIEW</div>
+              <div class="ov-dash-title" id="dashTitle">所有角色</div>
+              <div class="ov-dash-sub" id="dashSub">载入中...</div>
+            </div>
+            <div class="ov-dash-live">
+              <div class="ov-dash-live-dot"></div>
+              <div class="ov-dash-live-txt">LIVE</div>
+            </div>
+          </div>
+          <div class="ov-big-nums">
+            <div class="ov-big-num">
+              <div><span class="ov-big-num-val" id="gTotalMsg">—</span></div>
+              <div class="ov-big-num-lbl">总消息数</div>
+              <div class="ov-big-num-acc">M</div>
+            </div>
+            <div class="ov-big-num">
+              <div><span class="ov-big-num-val" id="gTotalWords">—</span></div>
+              <div class="ov-big-num-lbl">历史字数</div>
+              <div class="ov-big-num-acc">W</div>
+            </div>
+            <div class="ov-big-num">
+              <div><span class="ov-big-num-val" id="gTotalDays">—</span></div>
+              <div class="ov-big-num-lbl">相遇天数</div>
+              <div class="ov-big-num-acc">D</div>
+            </div>
+          </div>
+          <div class="ov-data-row">
+            <div class="ov-data-chip">
+              <i class="fa fa-comments ov-data-chip-icon"></i>
+              <span class="ov-data-chip-val" id="gTotalChats">—</span>
+              <span class="ov-data-chip-lbl">&nbsp;聊天</span>
+            </div>
+            <div class="ov-data-chip">
+              <i class="fa fa-masks-theater ov-data-chip-icon"></i>
+              <span class="ov-data-chip-val" id="gTotalTheaters">—</span>
+              <span class="ov-data-chip-lbl">&nbsp;剧场</span>
+            </div>
+            <div class="ov-data-chip">
+              <i class="fa fa-user ov-data-chip-icon"></i>
+              <span class="ov-data-chip-val" id="gTotalChars">—</span>
+              <span class="ov-data-chip-lbl">&nbsp;角色</span>
+            </div>
+          </div>
+          <!-- 迷你热力图 -->
+          <div class="ov-heatrow-wrap">
+            <div class="ov-heatrow-title">
+              <span class="ov-heatrow-title-txt">每日活跃时段</span>
+              <span class="ov-heatrow-time-lbl" style="font-size:5.5px;color:rgba(255,255,255,.22);">00 — 23h</span>
+            </div>
+            <div class="ov-heatrow" id="miniHeatmap">
+              <!-- JS 填充 -->
+            </div>
+            <div class="ov-heatrow-time-lbls">
+              <span class="ov-heatrow-time-lbl">00</span>
+              <span class="ov-heatrow-time-lbl">06</span>
+              <span class="ov-heatrow-time-lbl">12</span>
+              <span class="ov-heatrow-time-lbl">18</span>
+              <span class="ov-heatrow-time-lbl">23</span>
+            </div>
+          </div>
+          <div class="ov-dash-foot">
+            <div class="ov-dash-foot-txt" id="dashFootTxt">点击查看详细统计</div>
+            <div class="ov-dash-more">
+              <span>详细统计</span>
+              <i class="fa fa-chevron-right" style="font-size:7px"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 角色卡片横滑区 -->
+      <div class="ov-section-hd">
+        <div class="ov-section-lbl">角色列表</div>
+        <div class="ov-section-cnt" id="charCount">0 个角色</div>
+      </div>
+
+      <div class="ov-cards-track" id="charCardsTrack">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-txt">读取角色数据...</div>
+        </div>
+      </div>
+
+      <div style="height:8px;"></div>
+    </div><!-- /ov-scroll -->
+
+    <!-- 底部快捷头像条 -->
+    <div class="ov-avatar-strip">
+      <div class="ov-avatar-strip-inner" id="avatarStrip">
+        <!-- JS 填充 -->
+      </div>
+    </div>
+
+  </div><!-- /vOverview -->
+
+
+  <!-- ════════════════════════════════════
+       VIEW 2: CHAR DETAIL 角色详情
+  ════════════════════════════════════ -->
+  <div class="view hidden" id="vCharDetail">
+
+    <!-- Poster Header -->
+    <div class="cd-header" id="cdHeader">
+      <div class="cd-film">
+        <div class="cd-film-holes">
+          <div class="cd-film-hole"></div><div class="cd-film-hole"></div>
+          <div class="cd-film-hole"></div><div class="cd-film-hole"></div>
+        </div>
+        <div class="cd-film-txt" id="cdFilmTxt">CHRONICLE · CHARACTER FILE · </div>
+      </div>
+      <div class="cd-h-inner">
+        <div class="cd-h-left">
+          <button class="cd-back" onclick="backToOverview()">
+            <i class="fa fa-chevron-left"></i>
+            <span>返回</span>
+          </button>
+          <div>
+            <div class="cd-h-eyebrow" id="cdEyebrow">CHARACTER FILE</div>
+            <div class="cd-h-name" id="cdName">—</div>
+            <div class="cd-h-remark" id="cdRemark">—</div>
+            <div class="cd-h-chips" id="cdChips">
+              <!-- JS 填充 -->
+            </div>
+          </div>
+        </div>
+        <div class="cd-h-right">
+          <div class="cd-h-av" id="cdAvatar">
+            <i class="fa fa-user"></i>
+          </div>
+          <div class="cd-h-badge" id="cdBadge">CHAR·001</div>
+        </div>
+      </div>
+      <!-- 扫描线数据条 -->
+      <div class="cd-scanbar" id="cdScanbar">
+        <div class="cd-scan-cell">
+          <span class="cd-scan-lbl">MSG</span>
+          <span class="cd-scan-val" id="cdScanMsg">—</span>
+        </div>
+        <div class="cd-scan-cell">
+          <span class="cd-scan-lbl">WORDS</span>
+          <span class="cd-scan-val" id="cdScanWords">—</span>
+        </div>
+        <div class="cd-scan-cell">
+          <span class="cd-scan-lbl">DAYS</span>
+          <span class="cd-scan-val" id="cdScanDays">—</span>
+        </div>
+        <div class="cd-scan-cell">
+          <span class="cd-scan-lbl">STAGE</span>
+          <span class="cd-scan-val" id="cdScanStage">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="cd-tabs">
+      <button class="cd-tab active blue" id="tabOnline" onclick="switchTab('online')">
+        <i class="fa fa-comments"></i>
+        <span>线上聊天</span>
+        <span class="tab-badge" id="tabOnlineCnt">0</span>
+      </button>
+      <button class="cd-tab violet" id="tabOffline" onclick="switchTab('offline')">
+        <i class="fa fa-masks-theater"></i>
+        <span>线下剧场</span>
+        <span class="tab-badge" id="tabOfflineCnt">0</span>
+      </button>
+    </div>
+
+    <!-- Tab 内容 -->
+    <div class="cd-body">
+
+      <!-- 线上 Tab -->
+      <div class="cd-tab-content" id="tabContentOnline">
+        <!-- 汇总 -->
+        <div class="online-summary" id="onlineSummary">
+          <div class="ons-inner">
+            <div class="ons-row1">
+              <div class="ons-label">ONLINE · 线上聊天汇总</div>
+              <div class="ons-total" id="onlineSummaryDate">—</div>
+            </div>
+            <div class="ons-nums" id="onlineNums">
+              <!-- JS 填充 -->
+            </div>
+          </div>
+        </div>
+        <!-- API 槽 -->
+        <div class="api-slot" id="apiOnlineSlot">
+          <i class="fa fa-sparkles"></i>
+          <div class="api-slot-txt">
+            <div class="api-slot-title">AI 关系总结</div>
+            <div class="api-slot-sub">接入 API 后，基于聊天记录生成关系印象</div>
+          </div>
+          <i class="fa fa-chevron-right api-slot-arr"></i>
+        </div>
+        <div class="sec-lbl">
+          <div class="sec-lbl-text">聊天列表</div>
+          <div class="sec-lbl-line"></div>
+          <div class="sec-lbl-num" id="chatListCount">—</div>
+        </div>
+        <div class="chat-cards" id="chatCardsList">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- 线下 Tab -->
+      <div class="cd-tab-content hidden" id="tabContentOffline">
+        <!-- 汇总 -->
+        <div class="offline-summary" id="offlineSummary">
+          <div class="ofs-inner">
+            <div class="ofs-row1">
+              <div class="ofs-label">OFFLINE · 线下剧场汇总</div>
+            </div>
+            <div class="ofs-nums" id="offlineNums">
+              <!-- JS 填充 -->
+            </div>
+          </div>
+        </div>
+        <!-- API 槽 -->
+        <div class="api-slot">
+          <i class="fa fa-wand-magic-sparkles"></i>
+          <div class="api-slot-txt">
+            <div class="api-slot-title">AI 剧情回顾</div>
+            <div class="api-slot-sub">接入 API 后，基于剧场记录生成故事梗概</div>
+          </div>
+          <i class="fa fa-chevron-right api-slot-arr"></i>
+        </div>
+        <div class="sec-lbl">
+          <div class="sec-lbl-text">剧场列表</div>
+          <div class="sec-lbl-line"></div>
+          <div class="sec-lbl-num violet" id="theaterListCount">—</div>
+        </div>
+        <div class="theater-cards" id="theaterCardsList">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+    </div><!-- /cd-body -->
+  </div><!-- /vCharDetail -->
+
+
+  <!-- ════════════════════════════════════
+       VIEW 3: GLOBAL STATS 全局统计
+  ════════════════════════════════════ -->
+  <div class="view hidden" id="vGlobalStats">
+
+    <div class="gs-header">
+      <div class="gs-header-inner">
+        <button class="gs-back" onclick="backFromStats()">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <div>
+          <div class="gs-header-title">全局统计</div>
+          <div class="gs-header-sub">GLOBAL ANALYTICS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 统计 Tab 切换条 -->
+    <div class="gs-tabs">
+      <button class="gs-tab active" id="gsTabOnline" onclick="switchStatsTab('online')">
+        <i class="fa fa-comments"></i>
+        <span>线上聊天</span>
+        <div class="gs-tab-indicator"></div>
+      </button>
+      <button class="gs-tab" id="gsTabOffline" onclick="switchStatsTab('offline')">
+        <i class="fa fa-masks-theater"></i>
+        <span>线下剧场</span>
+        <div class="gs-tab-indicator"></div>
+      </button>
+    </div>
+
+    <!-- ══ 线上统计面板 ══ -->
+    <div class="gs-scroll" id="gsScrollOnline">
+
+      <!-- 消息类型分布 -->
+      <div class="sec-lbl">
+        <div class="sec-lbl-text">消息类型分布</div>
+        <div class="sec-lbl-line"></div>
+      </div>
+      <div class="type-dist-card">
+        <div class="type-dist-head">
+          <div class="type-dist-lbl">MSG TYPE DIST</div>
+          <div style="font-size:7px;color:rgba(255,255,255,.28);">全部聊天合计</div>
+        </div>
+        <div class="type-dist-items" id="typeDistItems">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- 活跃时段热力图 -->
+      <div class="sec-lbl">
+        <div class="sec-lbl-text">每日活跃时段</div>
+        <div class="sec-lbl-line"></div>
+      </div>
+      <div class="heatmap-card">
+        <div class="heatmap-card-head">
+          <div class="heatmap-card-lbl">HOUR HEATMAP</div>
+          <div class="heatmap-card-sub">24小时分布</div>
+        </div>
+        <div class="heatmap-grid" id="heatmapGrid">
+          <!-- JS 填充 24格 -->
+        </div>
+        <div class="heatmap-hours">
+          <span class="hm-hour">00</span><span class="hm-hour">06</span>
+          <span class="hm-hour">12</span><span class="hm-hour">18</span>
+          <span class="hm-hour">23</span>
+        </div>
+      </div>
+
+      <!-- 周活消息柱状图 -->
+      <div class="sec-lbl">
+        <div class="sec-lbl-text">近7天活跃趋势</div>
+        <div class="sec-lbl-line"></div>
+      </div>
+      <div class="weekly-card">
+        <div class="weekly-card-head">
+          <div class="weekly-card-lbl">WEEKLY ACTIVITY</div>
+          <div class="weekly-range" id="weeklyRange">—</div>
+        </div>
+        <div class="weekly-wrap" id="weeklyWrap">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- 月度消息折线 -->
+      <div class="sec-lbl">
+        <div class="sec-lbl-text">月度消息趋势</div>
+        <div class="sec-lbl-line"></div>
+      </div>
+      <div class="monthly-card">
+        <div class="monthly-card-head">
+          <div class="monthly-card-lbl">MONTHLY TREND</div>
+          <div style="font-size:7px;color:var(--muted);" id="monthlyRange">—</div>
+        </div>
+        <div class="monthly-svg-wrap">
+          <svg id="monthlySvg" viewBox="0 0 300 70" preserveAspectRatio="none">
+            <!-- JS 填充 -->
+          </svg>
+        </div>
+        <div class="monthly-months" id="monthlyLabels">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- 关系热度排行 -->
+      <div class="sec-lbl">
+        <div class="sec-lbl-text">关系热度排行</div>
+        <div class="sec-lbl-line"></div>
+      </div>
+      <div class="rank-card">
+        <div class="rank-card-head">
+          <div class="rank-card-lbl">BOND RANKING</div>
+          <div style="font-size:7px;color:var(--muted);">综合消息数 + 字数</div>
+        </div>
+        <div id="rankList">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- API 全局总结槽 -->
+      <div class="sec-lbl">
+        <div class="sec-lbl-text">AI 功能</div>
+        <div class="sec-lbl-line"></div>
+      </div>
+      <div class="api-slot">
+        <i class="fa fa-brain"></i>
+        <div class="api-slot-txt">
+          <div class="api-slot-title">年度回顾叙事</div>
+          <div class="api-slot-sub">接入 API 后，基于全部数据生成年度故事回顾</div>
+        </div>
+        <i class="fa fa-chevron-right api-slot-arr"></i>
+      </div>
+
+    </div>
+
+    <!-- ══ 线下统计面板 ══ -->
+<!-- 改后 -->
+<div class="gs-scroll" id="gsScrollOffline" style="display:none">
+
+      <!-- 消息类别分布 (旁白/角色/用户) -->
+      <div class="of-section-label">
+        <div class="of-section-dot"></div>
+        <span>消息类别分布</span>
+        <div class="of-section-line"></div>
+      </div>
+      <div class="of-role-dist-card">
+        <div class="of-role-dist-header">
+          <div class="of-role-header-left">
+            <div class="of-role-title">ROLE DIST</div>
+            <div class="of-role-subtitle">全部剧场合计</div>
+          </div>
+          <div class="of-role-total" id="ofRoleTotal">0</div>
+        </div>
+        <div class="of-role-bars" id="ofRoleBars">
+          <!-- JS 填充 -->
+        </div>
+        <div class="of-role-legend">
+          <div class="of-legend-item"><div class="of-legend-dot" style="background:var(--ac-violet)"></div><span>Narration 旁白</span></div>
+          <div class="of-legend-item"><div class="of-legend-dot" style="background:var(--ac-blue)"></div><span>Char 角色</span></div>
+          <div class="of-legend-item"><div class="of-legend-dot" style="background:var(--ac-rose)"></div><span>User 用户</span></div>
+        </div>
+      </div>
+
+      <!-- 活跃时段 — 线下版 -->
+      <div class="of-section-label">
+        <div class="of-section-dot"></div>
+        <span>创作时段分布</span>
+        <div class="of-section-line"></div>
+      </div>
+      <div class="of-heatmap-card">
+        <div class="of-heatmap-header">
+          <span class="of-heatmap-title">HOUR HEATMAP</span>
+          <span class="of-heatmap-sub">24小时创作热度</span>
+        </div>
+        <div class="of-heatmap-strip" id="ofHeatmapStrip">
+          <!-- JS 填充 -->
+        </div>
+        <div class="of-heatmap-hlabels">
+          <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
+        </div>
+      </div>
+
+      <!-- 近7天线下活跃 -->
+      <div class="of-section-label">
+        <div class="of-section-dot"></div>
+        <span>近7天剧场活跃</span>
+        <div class="of-section-line"></div>
+      </div>
+      <div class="of-weekly-card">
+        <div class="of-weekly-header">
+          <span class="of-weekly-title">WEEKLY STAGE</span>
+          <span class="of-weekly-range" id="ofWeeklyRange">—</span>
+        </div>
+        <div class="of-weekly-bars" id="ofWeeklyBars">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- 月度折线 — 线下版 -->
+      <div class="of-section-label">
+        <div class="of-section-dot"></div>
+        <span>月度剧场趋势</span>
+        <div class="of-section-line"></div>
+      </div>
+      <div class="of-monthly-card">
+        <div class="of-monthly-header">
+          <span class="of-monthly-title">MONTHLY STAGE</span>
+          <span class="of-monthly-range" id="ofMonthlyRange">—</span>
+        </div>
+        <div class="of-monthly-svg-wrap">
+          <svg id="ofMonthlySvg" viewBox="0 0 300 70" preserveAspectRatio="none">
+          </svg>
+        </div>
+        <div class="of-monthly-labels" id="ofMonthlyLabels"></div>
+      </div>
+
+      <!-- 剧场热度排行 -->
+      <div class="of-section-label">
+        <div class="of-section-dot"></div>
+        <span>剧场热度排行</span>
+        <div class="of-section-line"></div>
+      </div>
+      <div class="of-rank-card">
+        <div class="of-rank-header">
+          <span class="of-rank-title">STAGE RANKING</span>
+          <span class="of-rank-sub">综合楼层数 + 字数</span>
+        </div>
+        <div id="ofRankList">
+          <!-- JS 填充 -->
+        </div>
+      </div>
+
+      <!-- API 槽 -->
+      <div class="of-section-label">
+        <div class="of-section-dot"></div>
+        <span>AI 功能</span>
+        <div class="of-section-line"></div>
+      </div>
+      <div class="api-slot" style="border-color:rgba(196,181,253,.2);background:rgba(196,181,253,.04);">
+        <i class="fa fa-scroll" style="color:var(--ac-violet)"></i>
+        <div class="api-slot-txt">
+          <div class="api-slot-title">剧场叙事回顾</div>
+          <div class="api-slot-sub">接入 API 后，基于剧场数据生成故事回顾</div>
+        </div>
+        <i class="fa fa-chevron-right api-slot-arr"></i>
+      </div>
+
+    </div>
+  </div><!-- /vGlobalStats -->
+
+</div><!-- /app -->
+
+<script>
+/* ════════════════════════════════════════════════════════
+   CHRONICLE · DATA ENGINE
+   读取 IndexedDB: tsukiphonepromax
+   表: chars / users / chats / messages / theaters / theater_messages
+════════════════════════════════════════════════════════ */
+
+const IDB_NAME = 'tsukiphonepromax';
+const SCHEMA = {
+  config:{keyPath:'id'}, chars:{keyPath:'id'}, users:{keyPath:'id'},
+  worldbook:null, chats:{keyPath:'id'},
+  messages:{keyPath:['chatId','floor']},
+};
+const STAGE_SCHEMA = {
+  theaters:{keyPath:'id'},
+  theater_messages:{keyPath:['theaterId','floor']},
+  theater_summaries:{keyPath:'id'},
+};
+
+let _idb = null;
+
+/* ─── 打开数据库 ───
+   优先使用 db-schema.js 挂载的 window.__tsukiDb / window.openDb
+   若脚本未加载（本地直接打开）则降级使用内置逻辑
+*/
+function openDb(){
+  // 优先使用 db-schema.js 管理的连接（它会自动处理 versionchange）
+  if(window.__tsukiDb && window.__tsukiDb.objectStoreNames.length > 0){
+    return Promise.resolve(window.__tsukiDb);
+  }
+  if(window.tsukiDbReady){
+    return window.tsukiDbReady.then(db => {
+      _idb = db;
+      return db;
+    });
+  }
+  // 本地缓存，检查连接是否还活着
+  if(_idb){
+    try{ _idb.transaction('chars','readonly').abort(); return Promise.resolve(_idb); }
+    catch(e){ _idb = null; }
+  }
+  return _localOpen((db)=>{ _idb=db; }, (e)=>{ throw e; });
+}
+
+function _localOpen(resolve,reject){
+  const probe = indexedDB.open(IDB_NAME);
+  probe.onsuccess = e=>{
+    const db = e.target.result;
+    const allSchema = {...SCHEMA,...STAGE_SCHEMA};
+    const missing = Object.keys(allSchema).filter(s=>!db.objectStoreNames.contains(s));
+    if(missing.length===0){
+      _idb=db; _idb.onversionchange=()=>{_idb.close();_idb=null;};
+      resolve(_idb);
+    } else {
+      const v = db.version; db.close();
+      const up = indexedDB.open(IDB_NAME, v+1);
+      up.onupgradeneeded = ev=>{
+        const udb = ev.target.result;
+        Object.entries(allSchema).forEach(([n,opt])=>{
+          if(!udb.objectStoreNames.contains(n)){
+            if(opt) udb.createObjectStore(n,opt);
+            else udb.createObjectStore(n);
+          }
+        });
+      };
+      up.onsuccess = ev=>{
+  _idb=ev.target.result;
+  _idb.onversionchange=()=>{_idb.close();_idb=null;};
+  resolve(_idb);
+};
+      up.onerror = ev=>reject(ev.target.error);
+    }
+  };
+  probe.onerror = e=>reject(e.target.error);
+}
+
+function dbGetAll(store){
+  return openDb().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    const req=tx.objectStore(store).getAll();
+    req.onsuccess=()=>res(req.result||[]);
+    req.onerror=()=>rej(req.error);
+  }));
+}
+
+function dbGet(store,key){
+  return openDb().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    const req=tx.objectStore(store).get(key);
+    req.onsuccess=()=>res(req.result||null);
+    req.onerror=()=>rej(req.error);
+  }));
+}
+
+function dbGetByIndex(store,idx,val){
+  return openDb().then(db=>new Promise((res,rej)=>{
+    if(!db.objectStoreNames.contains(store)){res([]);return;}
+    const tx=db.transaction(store,'readonly');
+    const s=tx.objectStore(store);
+    if(!s.indexNames.contains(idx)){
+      // fallback: getAll then filter
+      const req=s.getAll();
+      req.onsuccess=()=>{
+        const field = idx.replace('by_','');
+        res((req.result||[]).filter(r=>r[field]===val));
+      };
+      req.onerror=()=>res([]);
+      return;
+    }
+    const req=s.index(idx).getAll(IDBKeyRange.only(val));
+    req.onsuccess=()=>res(req.result||[]);
+    req.onerror=()=>rej(req.error);
+  }));
+}
+
+/* ─── 获取聊天室所有消息（Cursor 倒序） ─── */
+function getAllMsgByChatId(chatId){
+  return openDb().then(db=>new Promise(res=>{
+    const tx=db.transaction('messages','readonly');
+    const s=tx.objectStore('messages');
+    const range=IDBKeyRange.bound([chatId,0],[chatId,Infinity]);
+    const req=s.openCursor(range,'next');
+    const arr=[];
+    req.onsuccess=e=>{
+      const cur=e.target.result;
+      if(cur){arr.push(cur.value);cur.continue();}
+      else res(arr);
+    };
+    req.onerror=()=>res([]);
+  }));
+}
+
+function getAllTheaterMsgByTheaterId(theaterId){
+  return dbGetByIndex('theater_messages','by_theater',theaterId)
+    .then(msgs=>msgs.sort((a,b)=>a.floor-b.floor));
+}
+
+/* ════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════ */
+let state = {
+  chars:[], users:[], chats:[], theaters:[],
+  // 聚合: { charId: { char, chatItems:[{chat,msgs,user}], theaterItems:[{theater,msgs}] } }
+  charData:{},
+  globalMsgCount:0, globalWordCount:0, globalEarliestMs:0,
+  globalHourMap:{}, globalMonthMap:{}, globalTypeDist:{},
+  loaded:false
+};
+
+let currentCharId = null;
+let currentTab = 'online';
+
+const ACCENT_COLORS = ['blue','violet','rose','teal','amber'];
+const MSG_TYPE_ICONS = {
+  text:'fa-comment',system:'fa-bell',image:'fa-image',camera:'fa-camera',
+  voice:'fa-microphone',file:'fa-file',location:'fa-location-dot',
+  transfer:'fa-money-bill-wave',gift:'fa-gift',sticker:'fa-face-smile',
+  call:'fa-phone',recalled:'fa-rotate-left',blocked:'fa-ban',
+};
+
+/* ════════════════════════════════════════════════════════
+   LOAD ALL DATA
+════════════════════════════════════════════════════════ */
+async function loadAllData(){
+  try{
+    const [chars,users,chats,theaters] = await Promise.all([
+      dbGetAll('chars'), dbGetAll('users'), dbGetAll('chats'),
+      openDb().then(db=>db.objectStoreNames.contains('theaters')?dbGetAll('theaters'):Promise.resolve([]))
+    ]);
+    state.chars=chars; state.users=users; state.chats=chats; state.theaters=theaters;
+
+    const userMap = {};
+    users.forEach(u=>userMap[u.id]=u);
+
+    // ─── 对每个角色：收集关联的 chats + theaters ───
+    for(const char of chars){
+      const charChats = chats.filter(c=>c.charIds&&c.charIds.includes(char.id));
+      const charTheaters = theaters.filter(t=>t.charIds&&t.charIds.includes(char.id));
+
+      // 加载每个 chat 的 messages
+      const chatItems = [];
+      for(const chat of charChats){
+        const msgs = await getAllMsgByChatId(chat.id);
+        const user = chat.userId ? userMap[chat.userId] : null;
+        chatItems.push({chat,msgs,user});
+      }
+
+      // 加载每个 theater 的 messages
+      const theaterItems = [];
+      for(const theater of charTheaters){
+        const msgs = await getAllTheaterMsgByTheaterId(theater.id);
+        theaterItems.push({theater,msgs});
+      }
+
+      state.charData[char.id]={char,chatItems,theaterItems};
+    }
+
+    // ─── 全局聚合 ───
+    // totalMsg = 线上楼层总数 + 线下楼层总数; totalWords = 线上+线下字数
+    let totalMsg=0, totalWords=0, earliestMs=Infinity;
+    const hourMap={}, monthMap={}, typeDist={};
+    for(let i=0;i<24;i++) hourMap[i]=0;
+
+    for(const charId in state.charData){
+      const {chatItems, theaterItems} = state.charData[charId];
+      for(const {msgs} of chatItems){
+        for(const m of msgs){
+          totalMsg++;
+          if(m.type==='text'&&typeof m.content==='string') totalWords+=m.content.length;
+          typeDist[m.type]=(typeDist[m.type]||0)+1;
+          if(m.timestamp){
+            const d=new Date(m.timestamp);
+            hourMap[d.getHours()]=(hourMap[d.getHours()]||0)+1;
+            const mk=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+            monthMap[mk]=(monthMap[mk]||0)+1;
+            if(m.timestamp<earliestMs) earliestMs=m.timestamp;
+          }
+        }
+      }
+      for(const {theater, msgs} of theaterItems){
+  totalMsg += (theater.lastFloor||0);
+  for(const m of msgs){
+    if(typeof m.content==='string') totalWords+=m.content.length;
+  }
+}
+    }
+
+    state.globalMsgCount=totalMsg;
+    state.globalWordCount=totalWords;
+    state.globalEarliestMs=earliestMs===Infinity?null:earliestMs;
+    state.globalHourMap=hourMap;
+    state.globalMonthMap=monthMap;
+    state.globalTypeDist=typeDist;
+    state.loaded=true;
+
+    renderOverview();
+  } catch(err){
+    console.error('[Chronicle] loadAllData error:', err);
+    renderError(err);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════════ */
+function fmtNum(n){
+  if(n>=10000) return (n/10000).toFixed(1)+'w';
+  if(n>=1000) return (n/1000).toFixed(1)+'k';
+  return String(n);
+}
+function daysSince(ts){
+  if(!ts) return 0;
+  return Math.max(1, Math.floor((Date.now()-ts)/(1000*60*60*24)));
+}
+function fmtDate(ts){
+  if(!ts) return '—';
+  const d=new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+function getCharFirstMsgTs(charId){
+  const {chatItems} = state.charData[charId]||{};
+  if(!chatItems) return null;
+  let earliest=Infinity;
+  for(const {msgs} of chatItems){
+    for(const m of msgs){ if(m.timestamp&&m.timestamp<earliest) earliest=m.timestamp; }
+  }
+  return earliest===Infinity?null:earliest;
+}
+// 第2045-2049行，改成：
+function getCharTotalMsgs(charId){
+  const {chatItems, theaterItems} = state.charData[charId]||{};
+  const onlineMsgs = chatItems ? chatItems.reduce((s,{msgs})=>s+msgs.length,0) : 0;
+  const offlineFloors = theaterItems ? theaterItems.reduce((s,{theater})=>s+(theater.lastFloor||0),0) : 0;
+  return onlineMsgs + offlineFloors;
+}
+function getCharTotalWords(charId){
+  const {chatItems, theaterItems} = state.charData[charId]||{};
+  let w=0;
+  if(chatItems)
+    for(const {msgs} of chatItems)
+      for(const m of msgs)
+        if(m.type==='text'&&typeof m.content==='string') w+=m.content.length;
+  if(theaterItems)
+    for(const {msgs} of theaterItems)
+      for(const m of msgs)
+        if(typeof m.content==='string') w+=m.content.length;
+  return w;
+}
+function getCharTotalTheaterFloors(charId){
+  const {theaterItems} = state.charData[charId]||{};
+  if(!theaterItems) return 0;
+  return theaterItems.reduce((s,{theater})=>s+(theater.lastFloor||0),0);
+}
+function makeAvEl(avatar, fallbackIcon='fa-user'){
+  if(avatar && !avatar.startsWith('data:') && avatar.length>10){
+    return `<img src="${avatar}" alt="">`;
+  } else if(avatar && avatar.startsWith('data:')){
+    return `<img src="${avatar}" alt="">`;
+  }
+  return `<i class="fa ${fallbackIcon}"></i>`;
+}
+function getFirstTextMsg(msgs){
+  for(const m of msgs){
+    if(m.type==='text'&&typeof m.content==='string'&&m.content.trim().length>0){
+      return m.content.slice(0,40)+(m.content.length>40?'...':'');
+    }
+  }
+  return null;
+}
+function getMsgTypes(msgs){
+  const types=new Set();
+  for(const m of msgs) if(m.type&&m.type!=='recalled') types.add(m.type);
+  return [...types].slice(0,6);
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER OVERVIEW
+════════════════════════════════════════════════════════ */
+function renderOverview(){
+  const {chars, globalMsgCount, globalWordCount, globalEarliestMs,
+         globalHourMap, globalTypeDist} = state;
+
+  // 仪表板
+  document.getElementById('gTotalMsg').textContent = fmtNum(globalMsgCount);
+  document.getElementById('gTotalWords').textContent = fmtNum(globalWordCount);
+  document.getElementById('gTotalDays').textContent = daysSince(globalEarliestMs);
+  document.getElementById('gTotalChats').textContent = state.chats.length;
+  document.getElementById('gTotalTheaters').textContent = state.theaters.length;
+  document.getElementById('gTotalChars').textContent = chars.length;
+  document.getElementById('dashSub').textContent = globalEarliestMs
+    ? `相遇于 ${fmtDate(globalEarliestMs)}`
+    : '暂无数据';
+
+  // 迷你热力图
+  const hmax = Math.max(1,...Object.values(globalHourMap));
+  const miniHeat = document.getElementById('miniHeatmap');
+  miniHeat.innerHTML = '';
+  for(let h=0;h<24;h++){
+    const v=globalHourMap[h]||0;
+    const pct = v/hmax;
+    const bar=document.createElement('div');
+    bar.className='ov-heatrow-bar'+(pct>0.6?' hi':pct>0.3?' md':'');
+    bar.style.height=Math.max(4,pct*22)+'px';
+    miniHeat.appendChild(bar);
+  }
+
+  // 角色卡片
+  renderCharCards();
+  // 头像条
+  renderAvatarStrip();
+  // 计数
+  document.getElementById('charCount').textContent = `${chars.length} 个角色`;
+}
+
+/* ─── 角色大卡渲染 ─── */
+function renderCharCards(){
+  const track = document.getElementById('charCardsTrack');
+  track.innerHTML='';
+
+  if(state.chars.length===0){
+    track.innerHTML='<div class="empty-state"><i class="fa fa-user-xmark empty-icon"></i><div class="empty-txt">暂无角色数据</div></div>';
+    return;
+  }
+
+  state.chars.forEach((char, idx)=>{
+    const color = ACCENT_COLORS[idx % ACCENT_COLORS.length];
+    const totalMsg = getCharTotalMsgs(char.id);
+    const totalWords = getCharTotalWords(char.id);
+    const firstTs = getCharFirstMsgTs(char.id);
+    const days = daysSince(firstTs);
+    const {chatItems,theaterItems} = state.charData[char.id]||{chatItems:[],theaterItems:[]};
+    const totalFloors = getCharTotalTheaterFloors(char.id);
+
+    const card = document.createElement('div');
+    card.className='char-card';
+    card.onclick=()=>showCharDetail(char.id);
+    card.innerHTML=`
+      <div class="char-card-topbar ${color}"></div>
+      <div class="char-card-head">
+        <div class="char-card-av">${makeAvEl(char.avatar)}</div>
+        <div class="char-card-info">
+          <div class="char-card-name">${char.name||'未命名'}</div>
+          <div class="char-card-remark">${char.remark||char.name||'—'}</div>
+          <div class="char-card-tags">
+            <span class="char-tag blue">${chatItems.length} 个聊天</span>
+            ${theaterItems.length>0?`<span class="char-tag violet">${theaterItems.length} 个剧场</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="char-card-nums">
+        <div class="char-num-cell">
+          <div class="char-num-val">${fmtNum(totalMsg)}</div>
+          <div class="char-num-lbl">消息总数</div>
+          <div class="char-num-acc">M</div>
+        </div>
+        <div class="char-num-cell">
+          <div class="char-num-val">${fmtNum(totalWords)}</div>
+          <div class="char-num-lbl">历史字数</div>
+          <div class="char-num-acc">W</div>
+        </div>
+        <div class="char-num-cell">
+          <div class="char-num-val">${days}</div>
+          <div class="char-num-lbl">相遇天数</div>
+          <div class="char-num-acc">D</div>
+        </div>
+      </div>
+      <div class="char-card-modules">
+        <div class="char-mod">
+          <div class="char-mod-eyebrow blue"><i class="fa fa-comments" style="font-size:6px"></i>线上聊天</div>
+          <div class="char-mod-row">
+            <div class="char-mod-big">${chatItems.length}</div>
+            <div class="char-mod-sub">个对话</div>
+          </div>
+<div style="font-size:7px;color:var(--muted);">${fmtNum(chatItems.reduce((s,{msgs})=>s+msgs.length,0))} 条消息</div>
+        </div>
+        <div class="char-mod">
+          <div class="char-mod-eyebrow violet"><i class="fa fa-masks-theater" style="font-size:6px"></i>线下剧场</div>
+          <div class="char-mod-row">
+            <div class="char-mod-big">${theaterItems.length}</div>
+            <div class="char-mod-sub">个剧场</div>
+          </div>
+          <div style="font-size:7px;color:var(--muted);">${fmtNum(totalFloors)} 总楼层</div>
+        </div>
+      </div>
+      <div class="char-card-arrow"><i class="fa fa-arrow-right"></i></div>
+    `;
+    track.appendChild(card);
+  });
+}
+
+/* ─── 头像条渲染 ─── */
+function renderAvatarStrip(){
+  const strip = document.getElementById('avatarStrip');
+  strip.innerHTML='';
+
+  // 全局项
+  const globalItem = document.createElement('div');
+  globalItem.className='av-strip-item global';
+  globalItem.onclick=()=>showGlobalStats();
+  globalItem.innerHTML=`
+    <div class="av-strip-av"><i class="fa fa-chart-line"></i></div>
+    <div class="av-strip-name">全局</div>
+  `;
+  strip.appendChild(globalItem);
+
+  state.chars.forEach((char, idx)=>{
+    const color = ACCENT_COLORS[idx%ACCENT_COLORS.length];
+    const item = document.createElement('div');
+    item.className='av-strip-item';
+    item.onclick=()=>showCharDetail(char.id);
+    item.innerHTML=`
+      <div class="av-strip-av active-${color}">${makeAvEl(char.avatar)}</div>
+      <div class="av-strip-name">${char.name||'—'}</div>
+    `;
+    strip.appendChild(item);
+  });
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER CHAR DETAIL
+════════════════════════════════════════════════════════ */
+function renderCharDetail(charId){
+  const {char, chatItems, theaterItems} = state.charData[charId];
+  const idx = state.chars.findIndex(c=>c.id===charId);
+  const color = ACCENT_COLORS[idx%ACCENT_COLORS.length];
+
+  const totalMsg = getCharTotalMsgs(charId);
+  const totalWords = getCharTotalWords(charId);
+  const firstTs = getCharFirstMsgTs(charId);
+  const days = daysSince(firstTs);
+  const totalFloors = getCharTotalTheaterFloors(charId);
+
+  // 顶部色条
+  document.getElementById('cdHeader').style.setProperty('--cd-accent',`var(--ac-${color})`);
+
+  // 胶片文字
+  const filmRepeat = `${char.name||'CHARACTER'} · CHRONICLE · 羁绊档案 · `;
+  document.getElementById('cdFilmTxt').textContent = filmRepeat.repeat(6);
+
+  // eyebrow 颜色
+  const eyebrow = document.getElementById('cdEyebrow');
+  eyebrow.textContent = 'CHARACTER FILE';
+  eyebrow.style.color = `var(--ac-${color})`;
+
+  document.getElementById('cdName').textContent = char.name||'未命名';
+  document.getElementById('cdRemark').textContent = char.remark||'无备注';
+  document.getElementById('cdBadge').textContent = `CHAR · ${String(idx+1).padStart(3,'0')}`;
+
+  // 头像
+  const avEl = document.getElementById('cdAvatar');
+  avEl.innerHTML = makeAvEl(char.avatar,'fa-user');
+  avEl.style.borderColor = `rgba(255,255,255,.15)`;
+
+  // chips
+  const chips = document.getElementById('cdChips');
+  chips.innerHTML=`
+    <div class="cd-h-chip"><i class="fa fa-calendar"></i><span class="cd-h-chip-val">${fmtDate(firstTs)}</span><span class="cd-h-chip-lbl">&nbsp;相遇</span></div>
+    <div class="cd-h-chip"><i class="fa fa-clock"></i><span class="cd-h-chip-val">${days}</span><span class="cd-h-chip-lbl">&nbsp;天</span></div>
+  `;
+
+  // 扫描条 — WORDS: 线上+线下合计字数; STAGE: 总楼层数
+  const offlineWords = theaterItems.reduce((s,{msgs})=>s+msgs.reduce((w,m)=>w+(typeof m.content==='string'?m.content.length:0),0),0);
+  const totalWordsAll = totalWords + offlineWords;
+  document.getElementById('cdScanMsg').textContent = fmtNum(totalMsg);
+  document.getElementById('cdScanWords').textContent = fmtNum(totalWordsAll);
+  document.getElementById('cdScanDays').textContent = days;
+  document.getElementById('cdScanStage').textContent = fmtNum(totalFloors);
+
+  // Tab badge
+  document.getElementById('tabOnlineCnt').textContent = chatItems.length;
+  document.getElementById('tabOfflineCnt').textContent = theaterItems.length;
+
+  // Tab 颜色更新
+  document.getElementById('tabOnline').className=`cd-tab ${currentTab==='online'?'active':''} blue`;
+  document.getElementById('tabOffline').className=`cd-tab ${currentTab==='offline'?'active':''} violet`;
+
+  // ─── 线上聊天汇总 ───
+  const onlineTotalMsg = chatItems.reduce((s,{msgs})=>s+msgs.length,0);
+  const onlineTotalWords = chatItems.reduce((s,{msgs})=>s+msgs.reduce((w,m)=>w+(m.type==='text'&&typeof m.content==='string'?m.content.length:0),0),0);
+  document.getElementById('onlineSummaryDate').textContent = firstTs?`始于 ${fmtDate(firstTs)}`:'—';
+  document.getElementById('onlineNums').innerHTML=`
+    <div class="ons-num">
+      <div class="ons-num-val">${fmtNum(onlineTotalMsg)}</div>
+      <div class="ons-num-lbl">总消息数</div>
+    </div>
+    <div class="ons-num">
+      <div class="ons-num-val">${fmtNum(onlineTotalWords)}</div>
+      <div class="ons-num-lbl">总字数</div>
+    </div>
+    <div class="ons-num">
+      <div class="ons-num-val">${chatItems.length}</div>
+      <div class="ons-num-lbl">聊天数</div>
+    </div>
+    <div class="ons-num">
+      <div class="ons-num-val">${days}</div>
+      <div class="ons-num-lbl">相遇天数</div>
+    </div>
+  `;
+  document.getElementById('chatListCount').textContent = `${chatItems.length} 个`;
+
+  // ─── Chat 卡片列表 ───
+  const chatList = document.getElementById('chatCardsList');
+  chatList.innerHTML='';
+  if(chatItems.length===0){
+    chatList.innerHTML='<div class="empty-state"><i class="fa fa-comment-slash empty-icon"></i><div class="empty-txt">暂无聊天记录</div></div>';
+  } else {
+    chatItems.sort((a,b)=>(b.chat.updatedAt||0)-(a.chat.updatedAt||0));
+    chatItems.forEach(({chat,msgs,user})=>{
+      const el = buildChatCard(chat, msgs, user, char);
+      chatList.appendChild(el);
+    });
+  }
+
+  // ─── 线下汇总 ───
+  const totalTheaterFloors = theaterItems.reduce((s,{theater})=>s+(theater.lastFloor||0),0);
+  const totalTheaterMsgs = theaterItems.reduce((s,{msgs})=>s+msgs.length,0);
+  const totalTheaterWords = theaterItems.reduce((s,{msgs})=>s+msgs.reduce((w,m)=>w+(typeof m.content==='string'?m.content.length:0),0),0);
+  const earliestTheater = theaterItems.length>0
+    ? Math.min(...theaterItems.map(({theater})=>theater.createdAt||Infinity))
+    : null;
+  document.getElementById('offlineNums').innerHTML=`
+    <div class="ofs-num">
+      <div class="ofs-num-val">${theaterItems.length}</div>
+      <div class="ofs-num-lbl">剧场数</div>
+    </div>
+    <div class="ofs-num">
+      <div class="ofs-num-val">${fmtNum(totalTheaterFloors)}</div>
+      <div class="ofs-num-lbl">总楼层</div>
+    </div>
+    <div class="ofs-num">
+      <div class="ofs-num-val">${fmtNum(totalTheaterWords)}</div>
+      <div class="ofs-num-lbl">总字数</div>
+    </div>
+    <div class="ofs-num">
+      <div class="ofs-num-val">${earliestTheater?daysSince(earliestTheater):0}</div>
+      <div class="ofs-num-lbl">创建天数</div>
+    </div>
+  `;
+  document.getElementById('theaterListCount').textContent = `${theaterItems.length} 个`;
+
+  // ─── Theater 卡片列表 ───
+  const theaterList = document.getElementById('theaterCardsList');
+  theaterList.innerHTML='';
+  if(theaterItems.length===0){
+    theaterList.innerHTML='<div class="empty-state"><i class="fa fa-masks-theater empty-icon"></i><div class="empty-txt">暂无剧场记录</div></div>';
+  } else {
+    theaterItems.sort((a,b)=>(b.theater.updatedAt||0)-(a.theater.updatedAt||0));
+    theaterItems.forEach(({theater,msgs},ti)=>{
+      const users = state.users;
+      const user = theater.userId ? users.find(u=>u.id===theater.userId) : null;
+      // 收集该 theater 的多个 char 对象
+      const theaterChars = (theater.charIds||[]).map(cid=>state.chars.find(c=>c.id===cid)).filter(Boolean);
+      const el = buildTheaterCard(theater, msgs, theaterChars, user, ti);
+      theaterList.appendChild(el);
+    });
+  }
+}
+
+/* ─── Chat Card Builder ─── */
+function buildChatCard(chat, msgs, user, char){
+  const el = document.createElement('div');
+  el.className='chat-card';
+
+  const textMsgs = msgs.filter(m=>m.type==='text'&&typeof m.content==='string');
+  const totalWords = textMsgs.reduce((s,m)=>s+m.content.length,0);
+  const firstMsg = msgs.length>0 ? msgs.reduce((a,b)=>(a.timestamp||0)<(b.timestamp||0)?a:b) : null;
+  const lastMsg  = msgs.length>0 ? msgs.reduce((a,b)=>(a.timestamp||0)>(b.timestamp||0)?a:b) : null;
+  const firstText = getFirstTextMsg(msgs);
+  const msgTypes = getMsgTypes(msgs);
+  const days = firstMsg ? daysSince(firstMsg.timestamp) : 0;
+
+  const charAvHtml = makeAvEl(char?.avatar,'fa-user');
+  const userAvHtml = makeAvEl(user?.avatar,'fa-user-circle');
+
+  const typePills = msgTypes.map(t=>`
+    <span class="cc-type-pill">
+      <i class="fa ${MSG_TYPE_ICONS[t]||'fa-circle-dot'}"></i>${t}
+    </span>
+  `).join('');
+
+  el.innerHTML=`
+    <div class="cc-head">
+      <div class="cc-avatars">
+        <div class="cc-av-char">${charAvHtml}</div>
+        <div class="cc-av-user">${userAvHtml}</div>
+      </div>
+      <div class="cc-info">
+        <div class="cc-name">${chat.name||char?.name||'未命名对话'}</div>
+        <div class="cc-user-tag">
+          <i class="fa fa-user" style="font-size:6px"></i>
+          ${user?.name||'未绑定用户'}
+        </div>
+      </div>
+      <div class="cc-meta">
+        <div class="cc-days">${days}</div>
+        <div class="cc-days-lbl">DAYS</div>
+      </div>
+    </div>
+    <div class="cc-body">
+      <div class="cc-stat">
+        <div class="cc-stat-val">${fmtNum(msgs.length)}</div>
+        <div class="cc-stat-lbl">消息数</div>
+      </div>
+      <div class="cc-stat">
+        <div class="cc-stat-val">${fmtNum(totalWords)}</div>
+        <div class="cc-stat-lbl">字数</div>
+      </div>
+      <div class="cc-stat">
+        <div class="cc-stat-val">${firstMsg?fmtDate(firstMsg.timestamp):'—'}</div>
+        <div class="cc-stat-lbl">首次消息</div>
+      </div>
+      <div class="cc-stat">
+        <div class="cc-stat-val">${lastMsg?fmtDate(lastMsg.timestamp):'—'}</div>
+        <div class="cc-stat-lbl">最近消息</div>
+      </div>
+    </div>
+    ${firstText?`
+    <div class="cc-first">
+      <span class="cc-first-tag">FIRST</span>
+      <div class="cc-first-txt">${firstText}</div>
+    </div>`:''}
+    <div class="cc-types">${typePills||'<span class="cc-type-pill">暂无消息</span>'}</div>
+  `;
+  return el;
+}
+
+/* ─── Theater Card Builder ─── */
+function buildTheaterCard(theater, msgs, theaterChars, user, idx){
+  const el = document.createElement('div');
+  el.className='theater-card';
+
+  const hasVoice = msgs.some(m=>m.type==='call');
+  const days = daysSince(theater.createdAt);
+const title = theater.title || theaterChars.map(c=>c.name).join(' / ') || '未命名剧场';
+// 加这一行↓
+const theaterWords = msgs.reduce((s,m)=>s+(typeof m.content==='string'?m.content.length:0),0);
+
+  const charsAvsHtml = theaterChars.map(c=>`
+    <div class="tc-char-av">${makeAvEl(c.avatar,'fa-user')}</div>
+  `).join('');
+  const charsNamesHtml = theaterChars.map(c=>c.name).join(' & ');
+  const userAvHtml = user ? `<div class="tc-user-av">${makeAvEl(user.avatar,'fa-user-circle')}</div>` : '';
+
+  // 旗帜标签
+  const flagLabel = `F·${theater.lastFloor||0}`;
+
+  el.innerHTML=`
+    <div class="tc-flag"></div>
+    <div class="tc-flag-txt">${flagLabel}</div>
+    <div class="tc-head">
+      <div class="tc-title">${title}</div>
+      <div class="tc-chars">
+        ${charsAvsHtml}
+        ${userAvHtml}
+        <span class="tc-sep">·</span>
+        <span class="tc-char-name">${charsNamesHtml}</span>
+        ${user?`<span style="font-size:6.5px;color:var(--ac-violet)">x ${user.name}</span>`:''}
+      </div>
+    </div>
+    <div class="tc-body">
+      <div class="tc-side">
+        <div class="tc-side-floor">${fmtNum(theater.lastFloor||0)}</div>
+        <div class="tc-side-lbl">FLOOR</div>
+        <div class="tc-side-icon"><i class="fa fa-masks-theater"></i></div>
+      </div>
+      <div class="tc-main">
+        ${theater.prologue?`<div class="tc-prologue">${theater.prologue}</div>`:'<div class="tc-prologue" style="opacity:.4">暂无序幕</div>'}
+        <div class="tc-stats">
+          <div class="tc-stat"><i class="fa fa-calendar"></i><span class="tc-stat-txt">${fmtDate(theater.createdAt)}</span></div>
+          <div class="tc-stat"><i class="fa fa-clock"></i><span class="tc-stat-txt">${days}天前</span></div>
+          ${hasVoice?`<span class="tc-has-voice"><i class="fa fa-phone"></i>含通话</span>`:''}
+        </div>
+      </div>
+    </div>
+      <div class="tc-words-watermark">${fmtNum(theaterWords)}</div>
+  `;
+  return el;
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER GLOBAL STATS
+════════════════════════════════════════════════════════ */
+function renderGlobalStats(){
+  // 消息类型分布
+  const {globalTypeDist,globalHourMap,globalMonthMap} = state;
+  const totalTyped = Object.values(globalTypeDist).reduce((s,v)=>s+v,0)||1;
+  const sortedTypes = Object.entries(globalTypeDist).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const typeItems = document.getElementById('typeDistItems');
+  typeItems.innerHTML='';
+  sortedTypes.forEach(([t,cnt])=>{
+    const pct = Math.round(cnt/totalTyped*100);
+    const icon = MSG_TYPE_ICONS[t]||'fa-circle-dot';
+    const item = document.createElement('div');
+    item.className='td-item';
+    item.innerHTML=`
+      <div class="td-icon"><i class="fa ${icon}"></i></div>
+      <div class="td-name">${t}</div>
+      <div class="td-bar-track"><div class="td-bar-fill" style="width:${pct}%"></div></div>
+      <div class="td-count">${fmtNum(cnt)}</div>
+    `;
+    typeItems.appendChild(item);
+  });
+
+  // 热力图
+  const hmax = Math.max(1,...Object.values(globalHourMap));
+  const hgrid = document.getElementById('heatmapGrid');
+  hgrid.innerHTML='';
+  for(let h=0;h<24;h++){
+    const v=globalHourMap[h]||0;
+    const pct=v/hmax;
+    const cell=document.createElement('div');
+    cell.className='hm-cell'+(pct>.75?' lv4':pct>.5?' lv3':pct>.25?' lv2':pct>.05?' lv1':'');
+    hgrid.appendChild(cell);
+  }
+
+  // 周活柱状图 — 近7天，哪怕只有一天也渲染
+  const weeklyWrap = document.getElementById('weeklyWrap');
+  const weeklyRange = document.getElementById('weeklyRange');
+  const DAY_NAMES = ['日','一','二','三','四','五','六'];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekDays = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    weekDays.push(d);
+  }
+  // 统计每天消息数
+  const dayCountMap = {};
+  weekDays.forEach(d=>{ dayCountMap[d.toDateString()]=0; });
+  for(const charId in state.charData){
+    for(const {msgs} of state.charData[charId].chatItems){
+      for(const m of msgs){
+        if(m.timestamp){
+          const md = new Date(m.timestamp); md.setHours(0,0,0,0);
+          const key = md.toDateString();
+          if(key in dayCountMap) dayCountMap[key]++;
+        }
+      }
+    }
+  }
+  const wvals = weekDays.map(d=>dayCountMap[d.toDateString()]||0);
+  const wmax = Math.max(1,...wvals);
+  const peakIdx = wvals.indexOf(Math.max(...wvals));
+  weeklyWrap.innerHTML='';
+  const BAR_MAX_H = 56; // px, 柱体最大高度，数字区固定在外
+  weekDays.forEach((d,i)=>{
+    const v = wvals[i];
+    const pct = v/wmax;
+    const barH = v===0 ? 4 : Math.max(6, Math.round(pct*BAR_MAX_H));
+    const isPeak = i===peakIdx && v>0;
+    const isZero = v===0;
+    const col = document.createElement('div');
+    col.className='weekly-col';
+    col.innerHTML=`
+      <div class="weekly-val-row">
+        <span class="weekly-bar-num${isPeak?' peak-num':isZero?' zero-num':''}">${isZero?'—':v}</span>
+      </div>
+      <div class="weekly-bar-area">
+        <div class="weekly-bar${isPeak?' peak':isZero?' zero':''}" style="height:${barH}px"></div>
+      </div>
+      <div class="weekly-day-lbl${isPeak?' peak-day':''}">${DAY_NAMES[d.getDay()]}</div>
+    `;
+    weeklyWrap.appendChild(col);
+  });
+  const fmt = d=>`${d.getMonth()+1}/${d.getDate()}`;
+  weeklyRange.textContent = `${fmt(weekDays[0])} — ${fmt(weekDays[6])}`;
+
+
+  const months = Object.keys(globalMonthMap).sort();
+  const mvals = months.map(m=>globalMonthMap[m]);
+  const mvmax = Math.max(1,...mvals);
+  const svg = document.getElementById('monthlySvg');
+  if(months.length>=1){
+    const W=300, H=70, pad=4;
+    const pts = mvals.map((v,i)=>{
+      const x = months.length===1 ? W/2 : pad + i*(W-2*pad)/(months.length-1);
+      const y = H-pad - (v/mvmax)*(H-2*pad);
+      return `${x},${y}`;
+    });
+    const area = months.length===1
+      ? `M ${parseFloat(pts[0].split(',')[0])-10},${H} L ${pts[0]} L ${parseFloat(pts[0].split(',')[0])+10},${H} Z`
+      : `M ${pts[0]} L ${pts.join(' L ')} L ${pts[pts.length-1].split(',')[0]},${H} L ${pad},${H} Z`;
+    svg.innerHTML=`
+      <defs>
+        <linearGradient id="mgrd" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fda4af" stop-opacity=".4"/>
+          <stop offset="100%" stop-color="#fda4af" stop-opacity=".05"/>
+        </linearGradient>
+      </defs>
+      <path d="${area}" fill="url(#mgrd)"/>
+      ${months.length>1?`<polyline points="${pts.join(' ')}" fill="none" stroke="#fda4af" stroke-width="1.5" stroke-linejoin="round"/>`:''}
+      ${pts.map((p,i)=>`<circle cx="${p.split(',')[0]}" cy="${p.split(',')[1]}" r="${i===mvals.indexOf(mvmax)?3:1.5}" fill="#fda4af"/>`).join('')}
+    `;
+    document.getElementById('monthlyRange').textContent = months.length===1 ? months[0] : `${months[0]} — ${months[months.length-1]}`;
+    const lbls = document.getElementById('monthlyLabels');
+    lbls.innerHTML='';
+    const step = Math.max(1, Math.floor(months.length/5));
+    months.forEach((m,i)=>{
+      if(i%step===0||i===months.length-1){
+        const span=document.createElement('span');
+        span.className='monthly-month-lbl';
+        span.textContent=m.slice(2);
+        lbls.appendChild(span);
+      }
+    });
+  } else {
+    svg.innerHTML='<text x="150" y="40" text-anchor="middle" font-size="8" fill="rgba(17,17,17,.25)">暂无数据</text>';
+  }
+
+  // 关系热度榜
+  const rankings = state.chars.map(char=>{
+    const msgs = getCharTotalMsgs(char.id);
+    const words = getCharTotalWords(char.id);
+    const score = msgs + words*0.1;
+    return {char, msgs, words, score};
+  }).sort((a,b)=>b.score-a.score);
+  const rmaxScore = Math.max(1, rankings[0]?.score||1);
+
+  const rankList = document.getElementById('rankList');
+  rankList.innerHTML='';
+  rankings.forEach(({char,msgs,words,score},i)=>{
+    const pct = Math.round(score/rmaxScore*100);
+    const item=document.createElement('div');
+    item.className='rank-item';
+    item.onclick=()=>{showCharDetail(char.id);};
+    item.innerHTML=`
+      <div class="rank-num ${i<3?'top':''}">${i+1}</div>
+      <div class="rank-av">${makeAvEl(char.avatar,'fa-user')}</div>
+      <div class="rank-info">
+        <div class="rank-name">${char.name||'—'}</div>
+        <div class="rank-sub">${fmtNum(msgs)} 条消息 · ${fmtNum(words)} 字</div>
+      </div>
+      <div class="rank-bar-wrap">
+        <div class="rank-bar" style="width:${pct}%"></div>
+        <div class="rank-bar-val">${pct}%</div>
+      </div>
+    `;
+    rankList.appendChild(item);
+  });
+}
+
+/* ════════════════════════════════════════════════════════
+   VIEW NAVIGATION
+════════════════════════════════════════════════════════ */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>{
+    v.classList.remove('back-hidden');
+    v.classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function backView(from, to){
+  document.getElementById(from).classList.add('hidden');
+  const target = document.getElementById(to);
+  target.classList.remove('hidden');
+  target.classList.remove('back-hidden');
+}
+function showCharDetail(charId){
+  currentCharId = charId;
+  currentTab = 'online';
+  renderCharDetail(charId);
+
+  // ── 绑定 AI 关系总结槽 ──
+  const char = state.charData[charId]?.char;
+  const slot = document.getElementById('apiOnlineSlot');
+  let resultsEl = document.getElementById('mrel-results-container');
+  if (!resultsEl) {
+    resultsEl = document.createElement('div');
+    resultsEl.id = 'mrel-results-container';
+    slot?.parentNode?.insertBefore(resultsEl, slot.nextSibling);
+  } else {
+    resultsEl.innerHTML = ''; // 切换角色时清空上次结果
+  }
+  if (typeof MilestoneSend !== 'undefined' && slot) {
+    MilestoneSend.bindApiSlot(slot, char.id, char.name, char.avatar || null, resultsEl);
+    // ★ 进入角色详情时，自动加载该角色所有历史关系总结预览卡
+    MilestoneSend.loadAllRecords(char.id, resultsEl);
+  }
+
+  // Tab 状态
+  document.getElementById('tabContentOnline').classList.remove('hidden');
+  document.getElementById('tabContentOffline').classList.add('hidden');
+  document.getElementById('tabOnline').className='cd-tab active blue';
+  document.getElementById('tabOffline').className='cd-tab violet';
+  showView('vCharDetail');
+}
+
+function showGlobalStats(){
+  currentStatsTab = 'online';
+  document.getElementById('gsScrollOnline').style.display = 'block';
+  document.getElementById('gsScrollOffline').style.display = 'none';
+  document.getElementById('gsTabOnline').classList.add('active');
+  document.getElementById('gsTabOffline').classList.remove('active');
+  renderGlobalStats();
+  showView('vGlobalStats');
+}
+
+function backToOverview(){
+  document.getElementById('vCharDetail').classList.add('hidden');
+  document.getElementById('vOverview').classList.remove('hidden');
+}
+
+function backFromStats(){
+  document.getElementById('vGlobalStats').classList.add('hidden');
+  document.getElementById('vOverview').classList.remove('hidden');
+}
+
+let currentStatsTab = 'online';
+
+function switchStatsTab(tab){
+  currentStatsTab = tab;
+  const onPanel = document.getElementById('gsScrollOnline');
+  const offPanel = document.getElementById('gsScrollOffline');
+  const onBtn = document.getElementById('gsTabOnline');
+  const offBtn = document.getElementById('gsTabOffline');
+  if(tab === 'online'){
+    onPanel.style.display = 'block';
+    offPanel.style.display = 'none';
+    onBtn.classList.add('active');
+    offBtn.classList.remove('active');
+  } else {
+    offPanel.style.display = 'block';
+    onPanel.style.display = 'none';
+    offBtn.classList.add('active');
+    onBtn.classList.remove('active');
+    renderOfflineStats();
+  }
+}
+
+function renderOfflineStats(){
+  // 收集所有线下消息，区分旁白/角色/用户三类
+  let narrationCount=0, charCount=0, userCount=0;
+  const hourMap={};
+  const monthMap={};
+  for(let i=0;i<24;i++) hourMap[i]=0;
+
+  for(const charId in state.charData){
+    for(const {theater,msgs} of state.charData[charId].theaterItems){
+      for(const m of msgs){
+        if(m.isNarrator || m.type==='narration') narrationCount++;
+        else if(m.isUser || m.senderRole==='user') userCount++;
+        else charCount++;
+        if(m.timestamp){
+          const d=new Date(m.timestamp);
+          hourMap[d.getHours()]=(hourMap[d.getHours()]||0)+1;
+          const mk=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+          monthMap[mk]=(monthMap[mk]||0)+1;
+        }
+      }
+    }
+  }
+
+  const total = narrationCount+charCount+userCount||1;
+  document.getElementById('ofRoleTotal').textContent = fmtNum(total);
+
+  // 三类横条
+  const barsEl = document.getElementById('ofRoleBars');
+  const roles = [
+    {label:'Narration', name:'旁白', count:narrationCount, color:'var(--ac-violet)', bg:'rgba(196,181,253,.12)'},
+    {label:'Char', name:'角色', count:charCount, color:'var(--ac-blue)', bg:'rgba(147,197,253,.12)'},
+    {label:'User', name:'用户', count:userCount, color:'var(--ac-rose)', bg:'rgba(253,164,175,.12)'},
+  ];
+  barsEl.innerHTML='';
+  roles.forEach(r=>{
+    const pct=Math.round(r.count/total*100);
+    const row=document.createElement('div');
+    row.className='of-role-row';
+    row.innerHTML=`
+      <div class="of-role-name" style="color:${r.color}">${r.label} <span style="font-size:6px;opacity:.6;">${r.name}</span></div>
+      <div class="of-role-bar-track" style="background:${r.bg}">
+        <div class="of-role-bar-fill" style="width:${pct}%;background:${r.color}"></div>
+      </div>
+      <div class="of-role-count">${fmtNum(r.count)}</div>
+    `;
+    barsEl.appendChild(row);
+  });
+
+  // 热力图
+  const hmax=Math.max(1,...Object.values(hourMap));
+  const strip=document.getElementById('ofHeatmapStrip');
+  strip.innerHTML='';
+  for(let h=0;h<24;h++){
+    const v=hourMap[h]||0;
+    const pct=v/hmax;
+    const barH=Math.max(2,Math.round(pct*36));
+    const bar=document.createElement('div');
+    bar.className='of-heatmap-bar'+(pct>.75?' lv4':pct>.5?' lv3':pct>.25?' lv2':pct>.05?' lv1':'');
+    bar.style.height=barH+'px';
+    strip.appendChild(bar);
+  }
+
+  // 近7天
+  const DAY_NAMES=['日','一','二','三','四','五','六'];
+  const today=new Date(); today.setHours(0,0,0,0);
+  const weekDays=[];
+  for(let i=6;i>=0;i--){ const d=new Date(today); d.setDate(d.getDate()-i); weekDays.push(d); }
+  const dayMap={};
+  weekDays.forEach(d=>{dayMap[d.toDateString()]=0;});
+  for(const charId in state.charData){
+    for(const {msgs} of state.charData[charId].theaterItems){
+      for(const m of msgs){
+        if(m.timestamp){
+          const md=new Date(m.timestamp); md.setHours(0,0,0,0);
+          const k=md.toDateString();
+          if(k in dayMap) dayMap[k]++;
+        }
+      }
+    }
+  }
+  const wvals=weekDays.map(d=>dayMap[d.toDateString()]||0);
+  const wmax=Math.max(1,...wvals);
+  const peakIdx=wvals.indexOf(Math.max(...wvals));
+  const barsWrap=document.getElementById('ofWeeklyBars');
+  barsWrap.innerHTML='';
+  weekDays.forEach((d,i)=>{
+    const v=wvals[i];
+    const isPeak=i===peakIdx&&v>0;
+    const isZero=v===0;
+    const barH=isZero?2:Math.max(4,Math.round(v/wmax*48));
+    const col=document.createElement('div');
+    col.className='of-weekly-col';
+    col.innerHTML=`
+  <div class="of-weekly-bar-wrap">
+    <div class="of-weekly-val${isPeak?' peak':''}">${isZero?'—':v}</div>
+    <div class="of-weekly-bar${isPeak?' peak':isZero?' zero':''}" style="height:${barH}px"></div>
+  </div>
+  <div class="of-weekly-day${isPeak?' peak':''}">${DAY_NAMES[d.getDay()]}</div>
+`;
+    barsWrap.appendChild(col);
+  });
+  const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
+  document.getElementById('ofWeeklyRange').textContent=`${fmt(weekDays[0])} — ${fmt(weekDays[6])}`;
+
+  // 月度折线
+  const months=Object.keys(monthMap).sort();
+  const mvals=months.map(m=>monthMap[m]);
+  const mvmax=Math.max(1,...mvals);
+  const svg=document.getElementById('ofMonthlySvg');
+  if(months.length>=1){
+    const W=300,H=70,pad=4;
+    const pts=mvals.map((v,i)=>{
+      const x=months.length===1?W/2:pad+i*(W-2*pad)/(months.length-1);
+      const y=H-pad-(v/mvmax)*(H-2*pad);
+      return `${x},${y}`;
+    });
+    const area=months.length===1
+      ?`M ${parseFloat(pts[0].split(',')[0])-10},${H} L ${pts[0]} L ${parseFloat(pts[0].split(',')[0])+10},${H} Z`
+      :`M ${pts[0]} L ${pts.join(' L ')} L ${pts[pts.length-1].split(',')[0]},${H} L ${pad},${H} Z`;
+    svg.innerHTML=`
+      <defs>
+        <linearGradient id="ofmgrd" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c4b5fd" stop-opacity=".4"/>
+          <stop offset="100%" stop-color="#c4b5fd" stop-opacity=".05"/>
+        </linearGradient>
+      </defs>
+      <path d="${area}" fill="url(#ofmgrd)"/>
+      ${months.length>1?`<polyline points="${pts.join(' ')}" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-linejoin="round"/>`:''}
+      ${pts.map((p,i)=>`<circle cx="${p.split(',')[0]}" cy="${p.split(',')[1]}" r="${i===mvals.indexOf(mvmax)?3:1.5}" fill="#c4b5fd"/>`).join('')}
+    `;
+    document.getElementById('ofMonthlyRange').textContent=months.length===1?months[0]:`${months[0]} — ${months[months.length-1]}`;
+    const lbls=document.getElementById('ofMonthlyLabels');
+    lbls.innerHTML='';
+    const step=Math.max(1,Math.floor(months.length/5));
+    months.forEach((m,i)=>{
+      if(i%step===0||i===months.length-1){
+        const span=document.createElement('span');
+        span.className='of-monthly-lbl';
+        span.textContent=m.slice(2);
+        lbls.appendChild(span);
+      }
+    });
+  } else {
+    svg.innerHTML='<text x="150" y="40" text-anchor="middle" font-size="8" fill="rgba(17,17,17,.25)">暂无数据</text>';
+  }
+
+  // 剧场热度排行
+  const rankings=state.chars.map(char=>{
+    const {theaterItems}=state.charData[char.id]||{theaterItems:[]};
+    const floors=theaterItems.reduce((s,{theater})=>s+(theater.lastFloor||0),0);
+    const words=theaterItems.reduce((s,{msgs})=>s+msgs.reduce((w,m)=>w+(typeof m.content==='string'?m.content.length:0),0),0);
+    const score=floors+words*0.1;
+    return {char,floors,words,score};
+  }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+  const rmaxScore=Math.max(1,rankings[0]?.score||1);
+  const rankList=document.getElementById('ofRankList');
+  rankList.innerHTML='';
+  if(rankings.length===0){
+    rankList.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-txt" style="color:rgba(255,255,255,.25)">暂无剧场数据</div></div>';
+    return;
+  }
+  rankings.forEach(({char,floors,words,score},i)=>{
+    const pct=Math.round(score/rmaxScore*100);
+    const item=document.createElement('div');
+    item.className='of-rank-item';
+    item.onclick=()=>showCharDetail(char.id);
+    item.innerHTML=`
+      <div class="of-rank-pos ${i<3?'top':''}">${i+1}</div>
+      <div class="of-rank-av">${makeAvEl(char.avatar,'fa-user')}</div>
+      <div class="of-rank-info">
+        <div class="of-rank-name">${char.name||'—'}</div>
+        <div class="of-rank-sub-txt">${fmtNum(floors)} 楼层 · ${fmtNum(words)} 字</div>
+      </div>
+      <div class="of-rank-bar-wrap">
+        <div class="of-rank-bar" style="width:${pct}%"></div>
+        <div class="of-rank-bar-val">${pct}%</div>
+      </div>
+    `;
+    rankList.appendChild(item);
+  });
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  if(tab==='online'){
+    document.getElementById('tabContentOnline').classList.remove('hidden');
+    document.getElementById('tabContentOffline').classList.add('hidden');
+    document.getElementById('tabOnline').className='cd-tab active blue';
+    document.getElementById('tabOffline').className='cd-tab violet';
+  } else {
+    document.getElementById('tabContentOffline').classList.remove('hidden');
+    document.getElementById('tabContentOnline').classList.add('hidden');
+    document.getElementById('tabOnline').className='cd-tab blue';
+    document.getElementById('tabOffline').className='cd-tab active violet';
+  }
+}
+
+function renderError(err){
+  document.getElementById('charCardsTrack').innerHTML=`
+    <div class="empty-state">
+      <i class="fa fa-triangle-exclamation empty-icon"></i>
+      <div class="empty-txt">数据库读取失败</div>
+      <div style="font-size:7px;color:var(--muted);margin-top:4px;">${err?.message||err}</div>
+    </div>
+  `;
+  document.getElementById('dashSub').textContent='读取失败，请刷新';
+}
+
+function refreshAll(){
+  // 清掉本地连接缓存；openDb() 会重新从 window.__tsukiDb / tsukiDbReady 获取
+  if(window.__tsukiDb){ try{ window.__tsukiDb.close(); }catch(e){} window.__tsukiDb = null; }
+  _idb = null;
+  // 重建 tsukiDbReady，让后续 openDb() 能拿到新鲜连接
+  window.tsukiDbReady = new Promise((res, rej)=>{
+    const r = indexedDB.open('tsukiphonepromax');
+    r.onsuccess = e=>{ window.__tsukiDb = e.target.result;
+      window.__tsukiDb.onversionchange = ()=>{ window.__tsukiDb.close(); window.__tsukiDb = null; };
+      res(window.__tsukiDb); };
+    r.onerror = e=>rej(e.target.error);
+  });
+  state = {chars:[],users:[],chats:[],theaters:[],charData:{},
+    globalMsgCount:0,globalWordCount:0,globalEarliestMs:0,
+    globalHourMap:{},globalMonthMap:{},globalTypeDist:{},loaded:false};
+  document.getElementById('gTotalMsg').textContent='—';
+  document.getElementById('gTotalWords').textContent='—';
+  document.getElementById('gTotalDays').textContent='—';
+  document.getElementById('dashSub').textContent='重新载入...';
+  document.getElementById('charCardsTrack').innerHTML='<div class="loading-state"><div class="loading-spinner"></div><div class="loading-txt">读取角色数据...</div></div>';
+  window.tsukiDbReady.then(db=>{ _idb=db; loadAllData(); }).catch(()=>loadAllData());
+}
+
+/* ════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════ */
+// db-schema.js 在本 <script> 块之后加载，须等 DOMContentLoaded 后才能访问 tsukiDbReady
+document.addEventListener('DOMContentLoaded', function() {
+  if(window.tsukiDbReady){
+    window.tsukiDbReady.then(db=>{ _idb=db; loadAllData(); }).catch(()=>loadAllData());
+  } else {
+    loadAllData();
+  }
+});
+</script>
+<!-- ① 验证守卫 —— 必须最先 -->
+  <script src="milestone-guard.js"></script>
+  
+<!-- ① DB Schema 同步（保证所有 store 存在） -->
+<script src="db-schema.js"></script>
+<!-- ② getDbAsync 桥接（TsukiTheme 依赖） -->
+<script>
+  window.getDbAsync = async function() {
+    try {
+      const db = await (window.tsukiDbReady || Promise.reject('db-schema not loaded'));
+      return new Promise(res => {
+        try {
+          const tx = db.transaction('config', 'readonly');
+          const req = tx.objectStore('config').get('main_config');
+          req.onsuccess = () => res(req.result || {});
+          req.onerror = () => res({});
+        } catch(e) { res({}); }
+      });
+    } catch(e) { return {}; }
+  };
+</script>
+<!-- ③ TsukiTheme（壁纸 + CSS 注入） -->
+<script src="TsukiTheme.js"></script>
+<!-- ④ TsukiBridge（日志转发） -->
+<script src="TsukiBridge.js"></script>
+<script src="PromptHelper.js"></script>
+<script src="milestonesend.js"></script>
+</body>
+</html>
