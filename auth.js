@@ -176,7 +176,7 @@
       });
       iGet(K.last_dur).then(v=>{
         const el=document.getElementById('_orb_last');
-        if(el) el.textContent=v!=null?fmtSec(v):'---';
+        if(el) el.textContent=v!==null?fmtSec(v):'---';
       });
     }
 
@@ -213,7 +213,7 @@
         /* 立即读取上次续期时长 */
         iGet(K.last_dur).then(v=>{
           const el=document.getElementById('_orb_last');
-          if(el) el.textContent=v!=null?fmtSec(v):'---';
+          if(el) el.textContent=v!==null?fmtSec(v):'---';
         });
       } else {
         panel.classList.remove('open');
@@ -798,6 +798,7 @@
       const exp=new Date(Date.now()+3*86400*1000).toISOString();
       await sb(`users?qq=eq.${encodeURIComponent(qq)}`,'PATCH',{expire_at:exp,last_play_duration:0,current_play_duration:0},{'Prefer':'return=minimal'});
       await iSet(K.dur,0);user.expire_at=exp;user.last_play_duration=0;
+      await iSet(K.last_dur,0);
       await iSet(K.qq,qq);await iSet('auth_saved_pwd',pw);me=user;_rmAuth();
       toast('✔ 首次登录成功♡已赠送 3 天免费时长，欢迎使用','success',5000);
       enterIndex(user);return;
@@ -814,7 +815,9 @@
       } else {toast(`⚠ 游玩时长不足 2 小时，还需 ${fmtSec(7200-diff)}`,'error',6000);}
       return;
     }
-    await iSet(K.qq,qq);await iSet('auth_saved_pwd',pw);me=user;_rmAuth();
+    await iSet(K.qq,qq);await iSet('auth_saved_pwd',pw);
+    await iSet(K.last_dur, user.last_play_duration||0);
+    me=user;_rmAuth();
     toast(`✔ 登录成功，浏览器码：${user.browser_code}`,'success',3000);
     enterIndex(user);
   }
