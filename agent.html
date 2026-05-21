@@ -1242,7 +1242,7 @@ select cron.schedule(
       try{reg=await navigator.serviceWorker.register('sw.js');}
       catch(swErr){
         log('[PUSH] sw.js 加载失败，使用内联 SW','warn');
-        const swCode=`self.addEventListener('push',e=>{const d=e.data?e.data.json():{title:'TSUKIMI',body:'新消息'};e.waitUntil(self.registration.showNotification(d.title||'TSUKIMI',{body:d.body||'',icon:'./icon-192.png',tag:'tsukimi-push',renotify:true,data:d}));});self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window'}).then(cs=>{if(cs.length)cs[0].focus();else self.clients.openWindow('./');}))}); self.addEventListener('fetch',()=>{});`;
+        const swCode=`self.addEventListener('push',e=>{const d=e.data?e.data.json():{title:'TSUKIMI',body:'新消息'};const tag='tsukimi-'+Date.now();e.waitUntil(self.registration.showNotification(d.title||'TSUKIMI',{body:d.body||'',icon:'./icon-192.png',tag:tag,data:d}));});self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window'}).then(cs=>{if(cs.length)cs[0].focus();else self.clients.openWindow('./');}))}); self.addEventListener('fetch',()=>{});`;
         const blob=new Blob([swCode],{type:'application/javascript'});
         reg=await navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'./'});
       }
@@ -1531,14 +1531,11 @@ select cron.schedule(
     const reg=await navigator.serviceWorker?.ready.catch(()=>null);
     if(reg){
       try{
-        await reg.showNotification(title||'TSUKIMI',{
-          body:body||'',
-          icon:iconUrl||'./icon-192.png',
-          badge:'./icon-192.png',
-          tag,
-          renotify:false,
-          vibrate:[200,80,200],
-        });
+        // iOS PWA 只支持最小参数集，badge/vibrate/renotify 会导致静默丢弃
+        const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent);
+        const notifOpts={body:body||'',icon:iconUrl||'./icon-192.png',tag};
+        if(!isIOS){notifOpts.vibrate=[200,80,200];}
+        await reg.showNotification(title||'TSUKIMI',notifOpts);
         return;
       }catch(e){console.warn('[NOTIF] SW 通知失败，降级:',e.message);}
     }
@@ -2695,7 +2692,7 @@ select cron.schedule(
         log(`[SW·DIAG] Push 订阅: ${sub?'✅ 已订阅 endpoint=…'+sub.endpoint.slice(-12):'❌ 未订阅'}`,'info');
       }catch(e){log('[SW·DIAG] 诊断失败: '+e.message,'warn');}
     })();
-
+    
     // 启动时拉一次收件箱
     // 若 TsukiBridge（index页面）在 15s 内已处理，跳过避免双写
     const _bridgeTs=parseInt(localStorage.getItem('__tsuki_bridge_inbox_done__')||'0',10);
